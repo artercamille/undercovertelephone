@@ -9,6 +9,7 @@ Des jeux de soirée dans une seule appli, avec **un seul téléphone** pour tout
 | **L'Intrus** | Trouve qui n'a pas le même mot que toi | 3 à 12 |
 | **L'Espion** | Tout le monde connaît le lieu, sauf l'espion | 3 à 12 |
 | **Juste Milieu** | Un indice, un cadran : trouvez où il pense | 4 et plus |
+| **Nom de Code** | Un mot pour faire deviner plusieurs cartes | 4 et plus |
 | **Trois Manches** | Décris, un seul mot, puis mime, en équipes | 4 et plus |
 | **Sur le Front** | Le téléphone sur le front, les autres font deviner | 2 et plus |
 | **Les Loups** | Le Loup-Garou, avec le téléphone comme narrateur | 5 à 18 |
