@@ -1,6 +1,6 @@
 // Garde Aura Tête sur le téléphone pour qu'il marche sans connexion.
 // Changer VERSION à chaque mise à jour pour que les téléphones récupèrent la nouvelle version.
-const VERSION = "aura-tete-v1";
+const VERSION = "aura-tete-v2";
 const FILES = ["./", "index.html", "manifest.webmanifest", "../Fredoka.ttf",
   "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-512.png", "icons/apple-touch-icon.png", "icons/favicon-64.png"];
 

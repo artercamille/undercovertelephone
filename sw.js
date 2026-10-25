@@ -1,6 +1,6 @@
 // Garde le jeu sur le téléphone pour qu'il marche sans connexion.
 // Changer VERSION à chaque mise à jour pour que les téléphones récupèrent la nouvelle version.
-const VERSION = "aura-cover-v4";
+const VERSION = "aura-cover-v5";
 const FILES = ["./", "index.html", "manifest.webmanifest", "Fredoka.ttf",
   "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-512.png", "icons/apple-touch-icon.png", "icons/favicon-64.png"];
 

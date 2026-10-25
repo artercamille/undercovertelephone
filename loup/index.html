@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f59e0b">
+<meta name="description" content="Loup-Garou avec le téléphone comme narrateur.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Aura Loup">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Aura Loup</title>
+<style>
+
+/* Même mise en page qu'Aura Cover : un écran = un titre, une consigne, un bouton ; ici en or de lune. */
+:root {
+  --bg: #ffffff;
+  --surface: #f3f3f5;
+  --surface-2: #e9e9ed;
+  --ink: #111114;
+  --muted: #6e6e76;
+  --accent: #ff5a1f;
+  --accent-ink: #ffffff;
+  --civil: #16a34a;
+  --under: #e11d48;
+  --white: #71717a;
+  --font: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-weight: 500; font-size: 17px; line-height: 1.35;
+  -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+input { -webkit-user-select: text; user-select: text; }
+.app { max-width: 440px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; gap: 20px;
+  padding-block: 26px 28px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.logo { text-align: center; font-size: 2.6rem; font-weight: 700; line-height: 1; }
+.logo i { font-style: normal; color: var(--accent); }
+h2 { margin: 0; font-size: 1.8rem; font-weight: 700; line-height: 1.12; text-align: center; text-wrap: balance; }
+.sub { text-align: center; color: var(--muted); margin-top: -10px; text-wrap: balance; }
+.label { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.spacer { flex: 1; }
+.pop { animation: pop .3s ease-out backwards; }
+@keyframes pop { from { transform: translateY(8px); opacity: 0 } }
+
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
+.btn { width: 100%; min-height: 60px; border-radius: 16px; background: var(--accent); color: var(--accent-ink); font-size: 1.2rem; font-weight: 600; transition: transform .08s, opacity .15s; }
+.btn:active { transform: scale(.98); }
+.btn.alt, .btn.soft { background: var(--surface); color: var(--ink); }
+.btn:disabled { opacity: .35; }
+.link { color: var(--muted); font-weight: 500; font-size: .95rem; padding: 10px; }
+.links { display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 12px; }
+
+.box { background: var(--surface); border-radius: 18px; padding: 2px 16px; }
+.line { display: flex; align-items: center; gap: 12px; min-height: 62px; }
+.line + .line { border-top: 1px solid var(--surface-2); }
+.line .name { flex: 1; font-weight: 600; }
+.line .name small { display: block; color: var(--muted); font-size: .82rem; font-weight: 500; }
+.step { display: flex; align-items: center; gap: 4px; }
+.step button { width: 40px; height: 40px; border-radius: 50%; background: var(--bg); font-size: 1.3rem; font-weight: 600; }
+.step button:active { transform: scale(.9); }
+.step span { min-width: 54px; text-align: center; font-weight: 600; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.big { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.big .step { gap: 20px; }
+.big .step button { width: 56px; height: 56px; font-size: 1.7rem; background: var(--surface); }
+.big .step span.count { font-size: 4.2rem; font-weight: 700; min-width: 90px; line-height: 1; }
+.chips { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-top: -6px; }
+.chip { font-size: .88rem; font-weight: 600; padding: 4px 12px; border-radius: 99px; background: var(--surface); }
+.chip.civil { color: var(--civil); } .chip.undercover { color: var(--under); } .chip.white { color: var(--white); }
+
+/* cartes */
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.card { aspect-ratio: 3 / 4; border-radius: 16px; background: var(--accent); color: var(--accent-ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px;
+  animation: pop .3s ease-out backwards; transition: transform .1s; }
+.card .q { font-size: 2.4rem; font-weight: 700; line-height: 1; }
+.card .num { font-size: .8rem; font-weight: 600; opacity: .8; }
+.card:active { transform: scale(.95); }
+.card.taken { background: var(--surface); color: var(--muted); pointer-events: none; font-weight: 600; font-size: .95rem; text-align: center; overflow-wrap: anywhere; gap: 8px; }
+
+/* qui es-tu */
+input[type=text] { width: 100%; min-height: 58px; border-radius: 16px; border: 2px solid var(--surface-2); background: var(--bg); color: var(--ink);
+  font: inherit; font-size: 1.2rem; font-weight: 600; padding: 0 18px; }
+input[type=text]:focus { border-color: var(--accent); outline: none; }
+input::placeholder { color: var(--muted); font-weight: 500; }
+.list { display: flex; flex-direction: column; background: var(--surface); border-radius: 18px; overflow: hidden; }
+.list:empty { display: none; }
+.who { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 8px 14px; text-align: left; }
+.who + .who { border-top: 1px solid var(--surface-2); }
+.who:active { background: var(--surface-2); }
+.who .t { flex: 1; min-width: 0; font-weight: 600; font-size: 1.1rem; overflow-wrap: anywhere; }
+.who .t small { display: block; color: var(--muted); font-weight: 500; font-size: .82rem; }
+.who .go { color: var(--muted); font-size: 1.3rem; }
+.who.new { background: var(--accent); color: var(--accent-ink); }
+.who.new .t small, .who.new .go { color: var(--accent-ink); opacity: .85; }
+.who.sel { background: var(--ink); color: var(--bg); }
+.who.sel .t small, .who.sel .n { color: var(--bg); opacity: .7; }
+.who .n { width: 20px; text-align: center; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.av { --c: var(--accent); width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  background: var(--c); color: #fff; font-weight: 700; font-size: 1.05rem; }
+.av.dead { filter: grayscale(1); opacity: .5; }
+.av.xl { width: 84px; height: 84px; font-size: 2.2rem; }
+.empty { text-align: center; color: var(--muted); padding: 14px; font-size: .95rem; text-wrap: balance; }
+
+/* révélations */
+.reveal { background: var(--surface); border-radius: 24px; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  animation: pop .3s ease-out backwards; }
+.word { font-size: 2.9rem; font-weight: 700; line-height: 1.05; text-wrap: balance; max-width: 100%; }
+.role { font-size: 2.9rem; font-weight: 700; line-height: 1; }
+.role.civil { color: var(--civil); } .role.undercover { color: var(--under); } .role.white { color: var(--white); }
+.hint { color: var(--muted); font-size: .98rem; text-wrap: balance; }
+.reveal input[type=text] { text-align: center; }
+
+/* fin + stats */
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pair > div { background: var(--surface); border-radius: 18px; padding: 14px 10px; text-align: center; }
+.pair b { display: block; font-size: 1.15rem; font-weight: 700; overflow-wrap: anywhere; margin-top: 2px; }
+.res { display: flex; align-items: center; gap: 10px; min-height: 60px; font-variant-numeric: tabular-nums; }
+.res + .res { border-top: 1px solid var(--surface-2); }
+.res .t { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.res .t small { display: block; font-size: .8rem; font-weight: 600; }
+.res.dead .t > span { color: var(--muted); }
+.res .g { font-weight: 700; color: var(--civil); min-width: 34px; text-align: right; }
+.res .win { font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--accent); color: var(--accent-ink); }
+.r.civil { color: var(--civil); } .r.undercover { color: var(--under); } .r.white { color: var(--white); }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tile { background: var(--surface); border-radius: 16px; padding: 12px 6px; text-align: center; }
+.tile b { display: block; font-size: 1.7rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tile span { font-size: .78rem; color: var(--muted); font-weight: 500; }
+.bars { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; }
+.bar { display: grid; grid-template-columns: 96px 1fr 44px; align-items: center; gap: 10px; font-size: .95rem; font-weight: 600; }
+.bar .tr { height: 10px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.bar .tr i { display: block; height: 100%; border-radius: 99px; }
+.bar em { font-style: normal; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; font-size: .85rem; }
+.rank { width: 22px; text-align: center; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rank.top { color: var(--accent); }
+.statcard { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+
+.sheet { position: fixed; inset: 0; z-index: 10; background: rgba(0,0,0,.4); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s; }
+@keyframes fade { from { opacity: 0 } }
+.sheet > div { width: min(100%, 440px); background: var(--bg); border-radius: 24px 24px 0 0; display: flex; flex-direction: column; gap: 14px; max-height: 90%; overflow-y: auto;
+  animation: up .25s ease-out;
+  padding: 24px max(20px, env(safe-area-inset-right, 0px)) max(22px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)); }
+@keyframes up { from { transform: translateY(40px) } }
+.rules p { margin: 0 0 10px; }
+.rules b { font-weight: 700; }
+/* ---- couche "juste milieu" : relief, dégradés, motif sur les cartes */
+:root { --accent-2: #ff2e63; --glow: rgba(255, 90, 31, .35); --shadow: 0 1px 2px rgba(20,20,30,.06), 0 8px 24px rgba(20,20,30,.08); --panel: #ffffff; --bg-2: #fff1ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; } }
+:root[data-theme="dark"] { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; }
+body { background: radial-gradient(120% 60% at 50% -10%, var(--bg-2), var(--bg) 60%) fixed, var(--bg); }
+.brand { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.mark { width: 74px; height: 74px; border-radius: 22px; display: grid; place-items: center; transform: rotate(-6deg);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 10px 26px var(--glow); }
+.mark svg { width: 46px; height: 46px; }
+.logo { font-size: 2.7rem; }
+.logo i { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.btn { background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 8px 20px var(--glow); }
+.btn.alt, .btn.soft { background: var(--panel); box-shadow: var(--shadow); }
+.btn:disabled { box-shadow: none; }
+.box, .list, .pair > div, .tile { background: var(--panel); box-shadow: var(--shadow); }
+.who + .who, .line + .line, .res + .res { border-top-color: var(--surface); }
+.step button { background: var(--surface); }
+.big .step button { background: var(--panel); box-shadow: var(--shadow); }
+.big .step span.count { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.chip { background: var(--panel); box-shadow: var(--shadow); }
+.card { position: relative; overflow: hidden; border-radius: 18px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.09) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--accent), var(--accent-2));
+  box-shadow: 0 8px 18px var(--glow); }
+.card::before { content: ""; position: absolute; inset: 6px; border-radius: 13px; border: 2px solid rgba(255,255,255,.35); pointer-events: none; }
+.card .q { width: 54%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.22); display: grid; place-items: center; font-size: 2rem; }
+.card:nth-child(3n+1) { transform: rotate(-2deg); } .card:nth-child(3n) { transform: rotate(2deg); }
+.card:active { transform: scale(.94); }
+.card.taken { background: var(--panel); box-shadow: var(--shadow); transform: none; }
+.card.taken::before { border-color: var(--surface); }
+.av { background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 60%, #ff2e63)); box-shadow: 0 3px 8px color-mix(in srgb, var(--c) 35%, transparent); }
+.who.new { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.who.sel { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+.who.sel .t small, .who.sel .n { color: #fff; }
+.reveal { background: var(--panel); box-shadow: var(--shadow); position: relative; overflow: hidden; padding-top: 0; animation: flipIn .5s cubic-bezier(.2,1.2,.4,1) backwards; }
+@keyframes flipIn { from { transform: perspective(900px) rotateY(70deg); opacity: 0 } }
+.reveal::before { content: ""; display: block; align-self: stretch; height: 92px; margin: 0 -20px 4px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2))); }
+.reveal .av.xl { margin-top: -66px; box-shadow: 0 0 0 6px var(--panel), 0 8px 18px rgba(0,0,0,.18); }
+.reveal.civil { --band1: #22c55e; --band2: #0d9488; }
+.reveal.undercover { --band1: #f43f5e; --band2: #be123c; }
+.reveal.white { --band1: #a1a1aa; --band2: #52525b; }
+.reveal.wordcard .word { background: linear-gradient(135deg, var(--ink), color-mix(in srgb, var(--ink) 60%, var(--accent))); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 4px; }
+.res .win { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.tile b { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.endhead { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px; border-radius: 24px; color: #fff; text-align: center;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2)));
+  box-shadow: var(--shadow); animation: pop .4s ease-out backwards; }
+.endhead.civils { --band1: #22c55e; --band2: #0d9488; } .endhead.imposteurs { --band1: #f43f5e; --band2: #be123c; } .endhead.white { --band1: #71717a; --band2: #3f3f46; }
+.endhead h2 { color: #fff; }
+.endhead .label { color: rgba(255,255,255,.85); }
+.sheet > div { background: var(--bg); }
+canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ---- Aura Loup : même famille, en or de lune ; la nuit, tout l'écran passe en bleu nuit */
+:root { --accent: #f59e0b; --accent-2: #ea580c; --glow: rgba(245, 158, 11, .32); --bg-2: #fff6e0; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent: #fbbf24; --accent-2: #f97316; --glow: rgba(251, 191, 36, .26); --bg-2: #21180a; } }
+:root[data-theme="dark"] { --accent: #fbbf24; --accent-2: #f97316; --glow: rgba(251, 191, 36, .26); --bg-2: #21180a; }
+body.dark-night { --bg: #0b1026; --bg-2: #1a2250; --surface: #1a2142; --surface-2: #263063; --panel: #161c3a; --ink: #f2f4ff; --muted: #9aa3cf; --shadow: 0 8px 24px rgba(0,0,0,.5); color-scheme: dark; }
+.reveal.village, .reveal.place { --band1: #22c55e; --band2: #0d9488; }
+.reveal.loups { --band1: #7f1d1d; --band2: #1e1b4b; }
+.endhead.agents { --band1: #22c55e; --band2: #0d9488; } .endhead.loups { --band1: #991b1b; --band2: #1e1b4b; }
+.place-name { font-size: 2.3rem; font-weight: 700; line-height: 1.08; text-wrap: balance; max-width: 100%; }
+.rolebox { background: var(--surface); border-radius: 14px; padding: 10px 16px; font-weight: 600; }
+.rolebox small { display: block; color: var(--muted); font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
+.rchip { font-weight: 600; } .rchip.loups { color: var(--under); } .rchip.village { color: var(--civil); }
+.moon { margin-top: -62px; width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center;
+  background: linear-gradient(135deg, #1e1b4b, #312e81); box-shadow: 0 0 0 6px var(--panel), 0 0 40px rgba(251,191,36,.35); }
+.moon svg { width: 54px; height: 54px; }
+.nightwait { text-align: center; color: var(--muted); font-size: 1.4rem; font-weight: 600; padding: 60px 0; animation: breathe 2.4s ease-in-out infinite; }
+@keyframes breathe { 50% { opacity: .35 } }
+.toggle { width: 100%; text-align: left; }
+.toggle .name { flex: 1; }
+.sw { width: 48px; height: 28px; border-radius: 99px; background: var(--surface-2); position: relative; transition: background .2s; flex: none; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.sw.on { background: var(--accent); } .sw.on::after { transform: translateX(20px); }
+
+</style>
+<style>
+@font-face { font-family: "Fredoka"; src: url("../Fredoka.ttf") format("truetype"); font-weight: 300 700; font-display: swap; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+html { overscroll-behavior: none; }
+</style>
+</head>
+<body>
+
+<canvas id="fx"></canvas>
+<div class="app" id="app"></div>
+<div id="sheet"></div>
+
+<script>
+const KEY = "auraloup1";
+const BODY = ["#3b5bff", "#ff5a1f", "#16a34a", "#9333ea", "#db2777", "#0891b2", "#ca8a04", "#4f46e5", "#ea580c", "#0d9488"];
+const MARK = `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M30 6a18 18 0 1 0 12 30A15 15 0 0 1 30 6z" fill="#fff"/><path d="M14 40l4-9 3 4 3-7 3 7 3-4 4 9z" fill="#fff" opacity=".85"/></svg>`;
+const R = {
+  loup: { n: "Loup-garou", team: "loups", d: "Chaque nuit, avec les autres loups, tu dévores un villageois. Le jour, fais semblant d'être innocent." },
+  villageois: { n: "Villageois", team: "village", d: "Pas de pouvoir, mais ton vote compte. Démasque les loups." },
+  voyante: { n: "Voyante", team: "village", d: "Chaque nuit, tu découvres le vrai rôle d'un joueur." },
+  sorciere: { n: "Sorcière", team: "village", d: "Une potion pour sauver la victime des loups, une potion pour tuer. Une seule fois chacune." },
+  chasseur: { n: "Chasseur", team: "village", d: "Si tu meurs, tu emportes quelqu'un avec toi." },
+  cupidon: { n: "Cupidon", team: "village", d: "La première nuit, tu désignes deux amoureux. Si l'un meurt, l'autre meurt de chagrin." },
+};
+const SPECIALS = ["voyante", "sorciere", "chasseur", "cupidon"];
+
+let S = { screen: "home", n: 8, wolves: 0, on: { voyante: true, sorciere: true, chasseur: true, cupidon: false }, voice: true, people: {}, game: null };
+function load() {
+  let d = null; try { d = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
+  if (d) for (const k of Object.keys(S)) if (d[k] !== undefined) S[k] = d[k];
+  if (!S.game && !["home", "board", "stats"].includes(S.screen)) S.screen = "home";
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function knownNames() {
+  const set = new Set(Object.keys(S.people));
+  for (const k of ["auracover_poche5", "auraspy1", "auratime1", "auratete1"]) try { const c = JSON.parse(localStorage.getItem(k) || "{}"); for (const n of Object.keys(c.people || {})) set.add(n); } catch (e) {}
+  return [...set];
+}
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+const fold = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+function seedOf(s) { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+const av = (nm, cls = "") => `<span class="av ${cls}" style="--c:${BODY[seedOf(nm || "?") % BODY.length]}" aria-hidden="true">${esc((nm.trim()[0] || "?").toUpperCase())}</span>`;
+const plural = (n, w) => `${n} ${w}${n > 1 ? "s" : ""}`;
+const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
+function person(nm) { return S.people[nm] || (S.people[nm] = { games: 0, wins: 0, wolf: 0, wolfWins: 0, survived: 0, last: 0 }); }
+const statLine = p => p && p.games ? `${plural(p.games, "partie")} · ${plural(p.wins, "victoire")}` : "Nouveau ici";
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const autoWolves = n => n <= 6 ? 1 : n <= 9 ? 2 : n <= 12 ? 3 : 4;
+function deckFor(n) {
+  const k = S.wolves > 0 ? Math.min(S.wolves, Math.floor((n - 1) / 2)) : autoWolves(n);
+  const sp = SPECIALS.filter(r => S.on[r]).slice(0, Math.max(0, n - k - 1));
+  return [...Array(k).fill("loup"), ...sp, ...Array(n - k - sp.length).fill("villageois")];
+}
+
+// ---------- voix du narrateur
+function say(text) {
+  if (!S.voice || !("speechSynthesis" in window)) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text); u.lang = "fr-FR"; u.rate = .95; u.pitch = .9;
+    const v = speechSynthesis.getVoices().find(v => /^fr/i.test(v.lang)); if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+// ---------- partie
+function newGame() {
+  const n = S.n, roles = shuffle(deckFor(n));
+  S.game = { roles, names: Array(n).fill(""), alive: Array(n).fill(true), cur: null, q: "", peek: false, night: 0, step: null, steps: [],
+    lovers: [], sel: [], seen: null, victim: null, saved: false, poisoned: null, heal: true, poison: true, deaths: [], hunterDone: false,
+    day: false, ended: false, winner: null, log: [] };
+  go("cards");
+}
+const G = () => S.game;
+const nm = i => G().names[i] || `Joueur ${i + 1}`;
+const has = r => G().roles.includes(r);
+const aliveIdx = () => G().roles.map((_, i) => i).filter(i => G().alive[i]);
+const roleOf = i => G().roles[i];
+const alive = r => G().roles.some((x, i) => x === r && G().alive[i]);
+
+function startNight() {
+  const g = G(); g.night++; g.day = false; g.hunterShot = false; g.victim = null; g.saved = false; g.poisoned = null; g.sel = []; g.seen = null;
+  g.steps = ["sleep"];
+  if (g.night === 1 && has("cupidon")) g.steps.push("cupidon");
+  if (has("voyante")) g.steps.push("voyante");
+  g.steps.push("loups");
+  if (has("sorciere")) g.steps.push("sorciere");
+  g.steps.push("dawn");
+  g.step = 0; enterStep();
+}
+const TEXT = {
+  sleep: "La nuit tombe sur le village. Tout le monde ferme les yeux.",
+  cupidon: "Cupidon, ouvre les yeux. Choisis deux amoureux.",
+  voyante: "Voyante, ouvre les yeux. Choisis un joueur dont tu veux connaître le rôle.",
+  loups: "Loups-garous, ouvrez les yeux. Mettez-vous d'accord sur une victime.",
+  sorciere: "Sorcière, ouvre les yeux.",
+};
+let fakeTimer = null;
+function enterStep() {
+  const g = G(), st = g.steps[g.step]; g.sel = []; g.seen = null; g.sub = null;
+  clearTimeout(fakeTimer);
+  if (st === "dawn") { dawn(); return; }
+  go("night");
+  say(TEXT[st]);
+  // rôle mort : on fait semblant pour ne rien trahir
+  const r = { cupidon: "cupidon", voyante: "voyante", sorciere: "sorciere" }[st];
+  if (r && !alive(r)) fakeTimer = setTimeout(() => endStep(true), 6000 + Math.random() * 4000);
+}
+function endStep(quiet) {
+  const g = G(), st = g.steps[g.step];
+  const bye = { cupidon: "Cupidon, rendors-toi. Les amoureux, ouvrez les yeux, regardez-vous, puis rendormez-vous.", voyante: "Voyante, rendors-toi.", loups: "Loups-garous, rendormez-vous.", sorciere: "Sorcière, rendors-toi." }[st];
+  if (bye) say(bye);
+  g.step++;
+  setTimeout(enterStep, bye ? (st === "cupidon" ? 7000 : 2600) : 300);
+  g.sub = "wait"; save(); render();
+}
+function dawn() {
+  const g = G(), list = [];
+  if (g.victim !== null && !g.saved) list.push(g.victim);
+  if (g.poisoned !== null && !list.includes(g.poisoned)) list.push(g.poisoned);
+  g.day = true; killAll(list, "nuit");
+}
+function killAll(list, when) {
+  const g = G(); const out = [];
+  for (const i of list) if (g.alive[i] && !out.includes(i)) out.push(i);
+  for (const i of [...out]) if (g.lovers.includes(i)) { const o = g.lovers.find(x => x !== i); if (g.alive[o] && !out.includes(o)) out.push(o); }
+  for (const i of out) g.alive[i] = false;
+  g.deaths = out; g.when = when;
+  const names = out.map(i => `${nm(i)}, qui était ${R[roleOf(i)].n}`).join(", et ");
+  if (when === "nuit") say(out.length ? `Le village se réveille. Cette nuit, ${out.length > 1 ? "sont morts" : "est mort"} : ${names}.` : "Le village se réveille. Miracle, personne n'est mort cette nuit !");
+  else if (out.length) say(`${names}. ${out.length > 1 ? "Ils quittent" : "Il quitte"} le village.`);
+  go("deaths");
+}
+function winner() {
+  const g = G(), a = aliveIdx(), w = a.filter(i => roleOf(i) === "loup").length;
+  if (g.lovers.length === 2 && a.length === 2 && a.every(i => g.lovers.includes(i)) && (roleOf(g.lovers[0]) === "loup") !== (roleOf(g.lovers[1]) === "loup")) return "amoureux";
+  if (!a.length) return "loups";
+  if (w === 0) return "village";
+  if (w >= a.length - w) return "loups";
+  return null;
+}
+function afterDeaths() {
+  const g = G();
+  const hunter = g.deaths.find(i => roleOf(i) === "chasseur");
+  if (hunter !== undefined && !g.hunterShot) { g.hunterShot = true; g.sel = []; say(`${nm(hunter)}, tu étais le chasseur. Emmène quelqu'un avec toi.`); go("hunter"); return; }
+  const w = winner(); if (w) { finish(w); return; }
+  if (g.when === "nuit") { g.sel = []; say("Débattez, puis votez pour éliminer un suspect."); go("day"); }
+  else startNight();
+}
+function finish(w) {
+  const g = G(); g.winner = w; g.ended = true; const now = Date.now();
+  g.names.forEach((name, i) => {
+    const p = person(name), r = roleOf(i); p.games++; p.last = now;
+    const win = w === "amoureux" ? g.lovers.includes(i) : R[r].team === w;
+    if (win) p.wins++;
+    if (r === "loup") { p.wolf++; if (win) p.wolfWins++; }
+    if (g.alive[i]) p.survived++;
+  });
+  say({ village: "Les villageois ont gagné ! Il n'y a plus de loups.", loups: "Les loups-garous ont gagné ! Le village est dévoré.", amoureux: "Les amoureux ont gagné ! L'amour triomphe de tout." }[w]);
+  go("end"); confetti();
+}
+
+// ---------- écrans
+const app = document.getElementById("app"), sheet = document.getElementById("sheet");
+function go(s) { S.screen = s; save(); render(); scrollTo(0, 0); }
+const step = (act, val, cls = "") => `<div class="step"><button data-a="${act}" data-v="-1" aria-label="Moins">−</button><span class="${cls}">${val}</span><button data-a="${act}" data-v="1" aria-label="Plus">+</button></div>`;
+const pickList = (idx, max) => `<div class="list">${idx.map(i => `<button class="who ${G().sel.includes(i) ? "sel" : ""}" data-a="sel" data-v="${i}" data-max="${max}">${av(nm(i))}<span class="t">${esc(nm(i))}</span></button>`).join("")}</div>`;
+const roleChip = r => `<span class="rchip ${R[r].team}">${R[r].n}</span>`;
+
+function render() {
+  const g = G(); let h = "";
+  document.body.classList.toggle("dark-night", ["night"].includes(S.screen));
+  switch (S.screen) {
+    case "home": {
+      const deck = deckFor(S.n), k = deck.filter(r => r === "loup").length;
+      h = `<div class="brand"><span class="mark">${MARK}</span><div class="logo">Aura <i>Loup</i></div></div>
+        <div class="sub" style="margin-top:0">Loup-Garou, et c'est le téléphone qui fait le narrateur.</div>
+        <div class="big"><div class="label">Joueurs</div>${step("n", S.n, "count")}</div>
+        <div class="box">
+          <div class="line"><div class="name">Loups-garous<small>${S.wolves ? "Choisi" : "Automatique"}</small></div>${step("wolves", S.wolves ? k : "Auto")}</div>
+          ${SPECIALS.map(r => `<button class="line toggle" data-a="role" data-v="${r}"><span class="name">${R[r].n}<small>${R[r].d}</small></span><i class="sw ${S.on[r] ? "on" : ""}"></i></button>`).join("")}
+          <button class="line toggle" data-a="voice"><span class="name">Narration à voix haute<small>Le téléphone parle pendant la nuit</small></span><i class="sw ${S.voice ? "on" : ""}"></i></button>
+        </div>
+        <div class="chips">${Object.entries(deck.reduce((m, r) => (m[r] = (m[r] || 0) + 1, m), {})).map(([r, c]) => `<span class="chip">${c} ${c > 1 ? { loup: "Loups-garous", villageois: "Villageois" }[r] || R[r].n : R[r].n}</span>`).join("")}</div>
+        <button class="btn" data-a="play">Jouer</button>
+        <button class="btn alt" data-a="board">Joueurs et stats</button>
+        <div class="links"><button class="link" data-a="rules">Règles</button><a class="link" href="../" style="text-decoration:none">Aura Cover</a><a class="link" href="../spy/" style="text-decoration:none">Spy</a><a class="link" href="../time/" style="text-decoration:none">Time</a><a class="link" href="../tete/" style="text-decoration:none">Tête</a></div>`;
+      break;
+    }
+    case "cards": {
+      const left = g.names.filter(x => !x).length;
+      h = `<h2>Prends une carte</h2>
+        <div class="sub">${left === S.n ? "N'importe laquelle, puis dis qui tu es." : `Plus que ${left}. Passe le téléphone !`}</div>
+        <div class="cards">${g.names.map((x, i) => x
+          ? `<button class="card taken" aria-label="Carte de ${esc(x)}">${av(x)}<span>${esc(x)}</span></button>`
+          : `<button class="card" style="animation-delay:${i * 35}ms" data-a="pick" data-v="${i}" aria-label="Carte ${i + 1}"><span class="q">?</span><span class="num">${i + 1}</span></button>`).join("")}</div>
+        <div class="spacer"></div>
+        <div class="links"><button class="link" data-a="quit">Annuler la partie</button></div>`;
+      break;
+    }
+    case "who": {
+      h = `<h2>Qui es-tu ?</h2>
+        <input id="q" type="text" maxlength="16" placeholder="Cherche ou écris ton prénom" value="${esc(g.q)}" enterkeyhint="done" autocomplete="off" autocapitalize="words">
+        <div class="list" id="wl">${whoList()}</div>
+        <div class="spacer"></div>
+        <div class="links"><button class="link" data-a="backCards">Pas ma carte, retour</button></div>`;
+      break;
+    }
+    case "card": {
+      const i = g.cur, r = roleOf(i), lover = g.lovers.includes(i) ? g.lovers.find(x => x !== i) : null;
+      h = `<div class="spacer"></div>
+        <div class="reveal ${R[r].team}">
+          ${av(nm(i), "xl")}
+          <div class="label">${esc(nm(i))}, tu es</div>
+          <div class="place-name">${R[r].n}</div>
+          <div class="hint">${R[r].d}</div>
+          ${r === "loup" && g.roles.filter(x => x === "loup").length > 1 && g.names.every(Boolean) ? `<div class="rolebox"><small>Les autres loups</small>${g.roles.map((x, j) => x === "loup" && j !== i ? esc(nm(j)) : null).filter(Boolean).join(", ")}</div>` : ""}
+          ${lover !== null ? `<div class="rolebox"><small>Tu es amoureux de</small>${esc(nm(lover))}</div>` : ""}
+          ${!g.alive[i] ? `<div class="hint">Tu es mort, mais tu peux encore regarder la partie.</div>` : ""}
+        </div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="hide">${g.peek ? "Cacher" : "J'ai retenu, je passe le téléphone"}</button>`;
+      break;
+    }
+    case "ready": {
+      h = `<div class="spacer"></div>
+        <div class="reveal loups"><div class="moon">${MARK}</div><div class="place-name">Tout le monde a sa carte</div>
+          <div class="hint">Posez le téléphone au milieu de la table, écran vers le haut, son allumé. Pendant la nuit, seuls les joueurs appelés ouvrent les yeux et touchent le téléphone.</div></div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="night">La nuit tombe</button>
+        <div class="links"><button class="link" data-a="rules">Règles</button></div>`;
+      break;
+    }
+    case "night": {
+      const st = g.steps[g.step];
+      let body = "";
+      const fake = { cupidon: "cupidon", voyante: "voyante", sorciere: "sorciere" }[st];
+      if (g.sub === "wait") body = `<div class="nightwait">Chut…</div>`;
+      else if (st === "sleep") body = `<div class="hint">Fermez tous les yeux. Le téléphone va appeler chaque rôle.</div><div class="spacer"></div><button class="btn" data-a="stepDone">Tout le monde dort</button>`;
+      else if (fake && !alive(fake)) body = `<div class="nightwait">${R[fake].n} fait son choix…</div>`;
+      else if (st === "cupidon") body = `${pickList(aliveIdx(), 2)}<button class="btn" data-a="cupid" ${g.sel.length === 2 ? "" : "disabled"}>${g.sel.length === 2 ? "Ils sont amoureux" : "Choisis deux joueurs"}</button>`;
+      else if (st === "voyante") body = g.seen !== null
+        ? `<div class="reveal ${R[roleOf(g.seen)].team}" style="margin-top:56px">${av(nm(g.seen), "xl")}<div class="label">${esc(nm(g.seen))} est</div><div class="place-name">${R[roleOf(g.seen)].n}</div></div><button class="btn" data-a="stepDone">Je me rendors</button>`
+        : `${pickList(aliveIdx().filter(i => roleOf(i) !== "voyante"), 1)}<button class="btn" data-a="see" ${g.sel.length ? "" : "disabled"}>Voir son rôle</button>`;
+      else if (st === "loups") body = `${pickList(aliveIdx().filter(i => roleOf(i) !== "loup"), 1)}<button class="btn" data-a="bite" ${g.sel.length ? "" : "disabled"}>${g.sel.length ? `Dévorer ${esc(nm(g.sel[0]))}` : "Choisissez la victime"}</button>`;
+      else if (st === "sorciere") {
+        if (g.witchPoison) body = `<div class="hint">Qui veux-tu empoisonner ?</div>${pickList(aliveIdx().filter(i => roleOf(i) !== "sorciere"), 1)}<button class="btn" data-a="poisonGo" ${g.sel.length ? "" : "disabled"}>Empoisonner</button><button class="btn soft" data-a="poisonNo">Finalement non</button>`;
+        else body = `<div class="reveal loups" style="margin-top:0;padding-top:20px"><div class="label">Cette nuit, les loups ont attaqué</div><div class="place-name">${g.victim !== null ? esc(nm(g.victim)) : "personne"}</div>
+          <div class="hint">Potion de vie : ${g.heal ? "disponible" : "déjà utilisée"} · Potion de mort : ${g.poison ? "disponible" : "déjà utilisée"}</div></div>
+          ${g.heal && g.victim !== null && !g.saved ? `<button class="btn" data-a="heal">Sauver ${esc(nm(g.victim))}</button>` : g.saved ? `<div class="hint" style="text-align:center">Tu as sauvé ${esc(nm(g.victim))}.</div>` : ""}
+          ${g.poison && g.poisoned === null ? `<button class="btn soft" data-a="poisonOpen">Empoisonner quelqu'un</button>` : ""}
+          <button class="btn soft" data-a="stepDone">Je me rendors</button>`;
+      }
+      h = `<div class="label" style="text-align:center">Nuit ${g.night}</div>
+        <h2>${g.sub === "wait" ? "…" : st === "sleep" ? "La nuit tombe" : esc(TEXT[st] || "")}</h2>
+        ${body}
+        <div class="spacer"></div>
+        ${S.voice ? "" : `<div class="hint" style="text-align:center">Narration coupée : lisez à voix basse.</div>`}`;
+      break;
+    }
+    case "deaths": {
+      const d = g.deaths;
+      h = `<div class="label" style="text-align:center">${g.when === "nuit" ? `Le jour se lève · Jour ${g.night}` : g.when === "vote" ? "Le village a voté" : "Le chasseur a tiré"}</div>
+        <h2>${d.length ? (g.when === "nuit" ? "Cette nuit…" : g.when === "vote" ? "Éliminé" : "Touché !") : "Personne n'est mort !"}</h2>
+        ${d.map(i => `<div class="reveal ${R[roleOf(i)].team}" style="margin-top:56px">${av(nm(i), "xl dead")}<div class="label">${esc(nm(i))} était</div><div class="place-name">${R[roleOf(i)].n}</div>
+          ${g.lovers.includes(i) && d.includes(g.lovers.find(x => x !== i)) && d.indexOf(i) > 0 ? `<div class="hint">Mort de chagrin, par amour.</div>` : ""}</div>`).join("")}
+        <div class="spacer"></div>
+        <button class="btn" data-a="afterDeaths">Continuer</button>`;
+      break;
+    }
+    case "hunter": {
+      const hunter = g.deaths.find(i => roleOf(i) === "chasseur");
+      h = `<h2>${esc(nm(hunter))}, le chasseur, tire !</h2>
+        <div class="sub">Qui emportes-tu avec toi ?</div>
+        ${pickList(aliveIdx(), 1)}
+        <div class="spacer"></div>
+        <button class="btn" data-a="shoot" ${g.sel.length ? "" : "disabled"}>${g.sel.length ? `Tirer sur ${esc(nm(g.sel[0]))}` : "Choisis ta cible"}</button>`;
+      break;
+    }
+    case "day": {
+      h = `<div class="label" style="text-align:center">Jour ${g.night}</div>
+        <h2>Le village vote</h2>
+        <div class="sub">Débattez, accusez, puis touchez celui que le village élimine.</div>
+        ${pickList(aliveIdx(), 1)}
+        <div class="spacer"></div>
+        <button class="btn" data-a="vote" ${g.sel.length ? "" : "disabled"}>${g.sel.length ? `Éliminer ${esc(nm(g.sel[0]))}` : "Qui est éliminé ?"}</button>
+        <button class="btn soft" data-a="noVote">Personne aujourd'hui</button>
+        <div class="links"><button class="link" data-a="peek">Revoir ma carte</button><button class="link" data-a="rules">Règles</button><button class="link" data-a="quit">Quitter</button></div>`;
+      break;
+    }
+    case "end": {
+      const w = g.winner, t = { village: "Le village gagne !", loups: "Les loups-garous gagnent !", amoureux: "Les amoureux gagnent !" }[w];
+      const won = i => w === "amoureux" ? g.lovers.includes(i) : R[roleOf(i)].team === w;
+      const idx = g.names.map((_, i) => i).sort((a, b) => won(b) - won(a));
+      h = `<div class="endhead ${w === "loups" ? "loups" : "agents"}"><div class="label">Partie terminée · ${plural(g.night, "nuit")}</div><h2>${t}</h2></div>
+        <div class="box">${idx.map(i => `<div class="res ${g.alive[i] ? "" : "dead"}">${av(nm(i), g.alive[i] ? "" : "dead")}
+          <span class="t"><span>${esc(nm(i))}${g.lovers.includes(i) ? " ♥" : ""}</span><small>${roleChip(roleOf(i))}</small></span>
+          ${won(i) ? `<span class="win">Gagné</span>` : ""}</div>`).join("")}</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="play">Rejouer</button>
+        <button class="btn soft" data-a="board">Classement</button>
+        <div class="links"><button class="link" data-a="home">Accueil</button></div>`;
+      break;
+    }
+    case "board": {
+      const q = fold(S.bq || "");
+      const list = Object.entries(S.people).filter(([n]) => fold(n).includes(q)).sort((a, b) => b[1].wins - a[1].wins || a[0].localeCompare(b[0]));
+      h = `<h2>Joueurs et stats</h2>
+        <input id="bq" type="text" maxlength="16" placeholder="Cherche un prénom" value="${esc(S.bq || "")}" autocomplete="off">
+        <div class="list" id="bl">${boardList(list)}</div>
+        <div class="spacer"></div>
+        <button class="btn soft" data-a="${g && !g.ended ? "backGame" : "home"}">Retour</button>`;
+      break;
+    }
+    case "stats": {
+      const name = S.statOf, p = person(name);
+      const ranked = Object.entries(S.people).sort((a, b) => b[1].wins - a[1].wins).map(x => x[0]);
+      const vg = p.games - p.wolf, vw = p.wins - p.wolfWins;
+      const bar = (lbl, n, w, col) => `<div class="bar"><span>${lbl}</span><div class="tr"><i style="width:${pct(w, n)}%;background:${col}"></i></div><em>${w}/${n}</em></div>`;
+      h = `<div class="statcard">${av(name, "xl")}<h2>${esc(name)}</h2>
+          <div class="hint">${p.games ? `${ranked.indexOf(name) + 1}${ranked.indexOf(name) ? "e" : "er"} du classement` : "Pas encore de partie"}</div></div>
+        <div class="tiles">
+          <div class="tile"><b>${p.games}</b><span>parties</span></div>
+          <div class="tile"><b>${p.wins}</b><span>victoires</span></div>
+          <div class="tile"><b>${pct(p.wins, p.games)}%</b><span>de réussite</span></div>
+          <div class="tile"><b>${p.wolf}</b><span>fois loup</span></div>
+          <div class="tile"><b>${p.wolfWins}</b><span>victoires en loup</span></div>
+          <div class="tile"><b>${p.survived}</b><span>fois survivant</span></div>
+        </div>
+        <div class="box bars"><div class="label">Victoires par camp</div>
+          ${bar("Village", vg, vw, "var(--civil)")}${bar("Loups", p.wolf, p.wolfWins, "var(--under)")}</div>
+        <div class="spacer"></div>
+        <button class="btn soft" data-a="board">Retour au classement</button>
+        <div class="links"><button class="link" data-a="delP">${S.sureDel ? "Sûr ? Retouche pour supprimer" : "Supprimer ce joueur"}</button></div>`;
+      break;
+    }
+  }
+  app.innerHTML = h;
+  const q = document.getElementById("q");
+  if (q) { q.oninput = () => { g.q = q.value; document.getElementById("wl").innerHTML = whoList(); };
+    q.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); const v = q.value.trim(); if (v) choose(knownNames().find(n => fold(n) === fold(v)) || v.slice(0, 16)); } }; }
+  const bq = document.getElementById("bq");
+  if (bq) bq.oninput = () => { S.bq = bq.value; const qq = fold(bq.value);
+    document.getElementById("bl").innerHTML = boardList(Object.entries(S.people).filter(([n]) => fold(n).includes(qq)).sort((a, b) => b[1].wins - a[1].wins)); };
+}
+function whoList() {
+  const g = G(), q = fold(g.q), used = new Set(g.names.filter(Boolean)), all = knownNames();
+  const list = all.filter(n => !used.has(n) && fold(n).includes(q)).sort((a, b) => ((S.people[b] || {}).last || 0) - ((S.people[a] || {}).last || 0) || a.localeCompare(b)).slice(0, 30);
+  const exact = all.some(n => fold(n) === q);
+  let h = list.map(n => `<button class="who" data-a="me" data-v="${esc(n)}">${av(n)}<span class="t">${esc(n)}<small>${statLine(S.people[n])}</small></span><span class="go">›</span></button>`).join("");
+  if (g.q.trim() && !exact) h = `<button class="who new" data-a="me" data-v="${esc(g.q.trim().slice(0, 16))}">${av(g.q.trim())}<span class="t">C'est moi : ${esc(g.q.trim())}<small>Nouveau joueur</small></span><span class="go">＋</span></button>` + h;
+  return h || `<div class="empty">Écris ton prénom, le jeu s'en souviendra pour les prochaines parties.</div>`;
+}
+function boardList(list) {
+  if (!list.length) return `<div class="empty">${Object.keys(S.people).length ? "Personne avec ce nom." : "Personne pour l'instant. Jouez une partie et vos stats apparaîtront ici."}</div>`;
+  return list.map(([n, p], k) => `<button class="who" data-a="stat" data-v="${esc(n)}"><span class="rank ${k < 3 && p.wins ? "top" : ""}">${k + 1}</span>${av(n)}
+    <span class="t">${esc(n)}<small>${statLine(p)} · ${p.wolf} fois loup</small></span><span class="go">›</span></button>`).join("");
+}
+function choose(name) { const g = G(); if (g.names.includes(name)) return; g.names[g.cur] = name; g.q = ""; buzz(20); go("card"); }
+
+function openSheet(kind) {
+  if (!kind) { sheet.innerHTML = ""; return; }
+  const g = G();
+  const inner = kind === "rules" ? `<h2>Les règles</h2><div class="rules">
+      <p>Chacun prend une carte en secret. Les <b>loups-garous</b> veulent dévorer le village, les <b>villageois</b> veulent démasquer les loups.</p>
+      <p><b>La nuit</b>, le téléphone posé au milieu appelle chaque rôle à voix haute. Seuls les joueurs appelés ouvrent les yeux et touchent le téléphone : les loups choisissent une victime, la voyante regarde un rôle, la sorcière sauve ou empoisonne.</p>
+      <p><b>Le jour</b>, le téléphone annonce les morts et leur rôle. Le village débat et vote pour éliminer un suspect.</p>
+      <p>Le <b>chasseur</b> qui meurt emporte quelqu'un. Les <b>amoureux</b> de Cupidon meurent ensemble.</p>
+      <p>Le village gagne quand tous les loups sont morts. Les loups gagnent quand ils sont aussi nombreux que les autres.</p></div><button class="btn" data-a="close">Compris</button>`
+    : `<h2>Qui veut revoir sa carte ?</h2><div class="list">${g.names.map((_, i) => `<button class="who" data-a="peekOne" data-v="${i}">${av(nm(i))}<span class="t">${esc(nm(i))}</span></button>`).join("")}</div>
+      <button class="btn soft" data-a="close">Annuler</button>`;
+  sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true">${inner}</div></div>`;
+}
+
+const A = {
+  n: d => { S.n = Math.max(5, Math.min(16, S.n + +d)); save(); render(); },
+  wolves: d => { const cur = S.wolves || autoWolves(S.n); let v = cur + +d; if (v < 1) v = 0; S.wolves = Math.min(v, Math.floor((S.n - 1) / 2)); save(); render(); },
+  role: v => { S.on[v] = !S.on[v]; save(); render(); },
+  voice: () => { S.voice = !S.voice; save(); render(); if (S.voice) say("Narration activée."); },
+  play: () => { wake(); newGame(); },
+  home: () => { if (G() && G().ended) S.game = null; go("home"); },
+  board: () => { S.bq = ""; go("board"); },
+  backGame: () => go(G().day ? "day" : "ready"),
+  stat: v => { S.statOf = v; S.sureDel = false; go("stats"); },
+  delP: () => { if (!S.sureDel) { S.sureDel = true; render(); return; } delete S.people[S.statOf]; S.sureDel = false; go("board"); },
+  rules: () => openSheet("rules"),
+  close: () => openSheet(null),
+  bg: (v, e) => { if (e.target.classList.contains("sheet")) openSheet(null); },
+  quit: (v, e) => { if (!S.sureQuit) { S.sureQuit = true; e.target.closest("button").textContent = "Sûr ? Retouche"; setTimeout(() => S.sureQuit = false, 3000); return; } S.sureQuit = false; speechSynthesis && speechSynthesis.cancel(); S.game = null; go("home"); },
+  pick: v => { const g = G(); g.cur = +v; g.peek = false; g.q = ""; buzz(15); go("who"); },
+  me: v => choose(v),
+  backCards: () => go("cards"),
+  hide: () => { const g = G(); if (g.peek) { g.peek = false; go(g.day ? "day" : "ready"); return; } g.names.every(Boolean) ? go("ready") : go("cards"); },
+  peek: () => openSheet("peek"),
+  peekOne: v => { openSheet(null); const g = G(); g.cur = +v; g.peek = true; go("card"); },
+  night: () => { say(" "); startNight(); },
+  sel: (v, e) => { const g = G(), i = +v, max = +e.target.closest("[data-max]").dataset.max;
+    if (g.sel.includes(i)) g.sel = g.sel.filter(x => x !== i); else { g.sel.push(i); if (g.sel.length > max) g.sel.shift(); }
+    buzz(10); render(); },
+  stepDone: () => endStep(),
+  cupid: () => { const g = G(); if (g.sel.length !== 2) return; g.lovers = g.sel.slice(); endStep(); },
+  see: () => { const g = G(); if (!g.sel.length) return; g.seen = g.sel[0]; render(); },
+  bite: () => { const g = G(); if (!g.sel.length) return; g.victim = g.sel[0]; endStep(); },
+  heal: () => { const g = G(); g.saved = true; g.heal = false; save(); render(); },
+  poisonOpen: () => { const g = G(); g.witchPoison = true; g.sel = []; render(); },
+  poisonNo: () => { const g = G(); g.witchPoison = false; render(); },
+  poisonGo: () => { const g = G(); if (!g.sel.length) return; g.poisoned = g.sel[0]; g.poison = false; g.witchPoison = false; save(); render(); },
+  afterDeaths: () => afterDeaths(),
+  shoot: () => { const g = G(); if (!g.sel.length) return; const t = g.sel[0], when = g.when; g.sel = []; killAll([t], when === "nuit" ? "tir-nuit" : "tir"); },
+  vote: () => { const g = G(); if (!g.sel.length) return; buzz([30, 40, 90]); g.hunterShot = false; killAll([g.sel[0]], "vote"); },
+  noVote: () => { say("Le village ne parvient pas à se décider."); startNight(); },
+};
+// après le tir du chasseur, on reprend là où on en était
+const _after = afterDeaths;
+afterDeaths = function () { const g = G(); if (g.when === "tir-nuit") { g.when = "nuit"; g.deaths = g.deaths.filter(i => roleOf(i) !== "chasseur" || true); } else if (g.when === "tir") g.when = "vote"; _after(); };
+document.addEventListener("click", e => { const el = e.target.closest("[data-a]"); if (!el || el.disabled) return; const f = A[el.dataset.a]; if (f) f(el.dataset.v, e); });
+
+function confetti() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c = document.getElementById("fx"), x = c.getContext("2d"), dpr = devicePixelRatio || 1;
+  c.width = innerWidth * dpr; c.height = innerHeight * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const P = [...Array(130)].map(() => ({ x: innerWidth / 2 + (Math.random() - .5) * 80, y: innerHeight * .3, vx: (Math.random() - .5) * 13, vy: -Math.random() * 14 - 4,
+    w: 6 + Math.random() * 6, h: 8 + Math.random() * 8, a: Math.random() * 6, va: (Math.random() - .5) * .4, c: BODY[Math.random() * BODY.length | 0] }));
+  const t0 = performance.now(), W = innerWidth, H = innerHeight;
+  (function f(t) {
+    if (innerWidth !== W || innerHeight !== H) { c.width = c.width; return; }
+    x.clearRect(0, 0, innerWidth, innerHeight);
+    for (const p of P) { p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.a += p.va;
+      x.save(); x.translate(p.x, p.y); x.rotate(p.a); x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); x.restore(); }
+    if (t - t0 < 3200) requestAnimationFrame(f); else x.clearRect(0, 0, innerWidth, innerHeight);
+  })(t0);
+}
+
+let lock = null;
+async function wake() { try { if ("wakeLock" in navigator && !lock) { lock = await navigator.wakeLock.request("screen"); lock.addEventListener("release", () => lock = null); } } catch (e) {} }
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.game) wake(); });
+if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = () => {};
+
+load();
+// reprise après fermeture pendant la nuit : on recommence l'étape en cours
+if (S.screen === "night" && G()) { G().sub = null; }
+render();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+</script>
+</body>
+</html>
