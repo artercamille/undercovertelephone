@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#3b5bff">
+<meta name="description" content="Trouvez l'espion avec un seul téléphone.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Aura Spy">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Aura Spy</title>
+<style>
+
+/* Même mise en page qu'Aura Cover : un écran = un titre, une consigne, un bouton ; ici en bleu-violet. */
+:root {
+  --bg: #ffffff;
+  --surface: #f3f3f5;
+  --surface-2: #e9e9ed;
+  --ink: #111114;
+  --muted: #6e6e76;
+  --accent: #ff5a1f;
+  --accent-ink: #ffffff;
+  --civil: #16a34a;
+  --under: #e11d48;
+  --white: #71717a;
+  --font: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-weight: 500; font-size: 17px; line-height: 1.35;
+  -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+input { -webkit-user-select: text; user-select: text; }
+.app { max-width: 440px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; gap: 20px;
+  padding-block: 26px 28px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.logo { text-align: center; font-size: 2.6rem; font-weight: 700; line-height: 1; }
+.logo i { font-style: normal; color: var(--accent); }
+h2 { margin: 0; font-size: 1.8rem; font-weight: 700; line-height: 1.12; text-align: center; text-wrap: balance; }
+.sub { text-align: center; color: var(--muted); margin-top: -10px; text-wrap: balance; }
+.label { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.spacer { flex: 1; }
+.pop { animation: pop .3s ease-out backwards; }
+@keyframes pop { from { transform: translateY(8px); opacity: 0 } }
+
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
+.btn { width: 100%; min-height: 60px; border-radius: 16px; background: var(--accent); color: var(--accent-ink); font-size: 1.2rem; font-weight: 600; transition: transform .08s, opacity .15s; }
+.btn:active { transform: scale(.98); }
+.btn.alt, .btn.soft { background: var(--surface); color: var(--ink); }
+.btn:disabled { opacity: .35; }
+.link { color: var(--muted); font-weight: 500; font-size: .95rem; padding: 10px; }
+.links { display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 12px; }
+
+.box { background: var(--surface); border-radius: 18px; padding: 2px 16px; }
+.line { display: flex; align-items: center; gap: 12px; min-height: 62px; }
+.line + .line { border-top: 1px solid var(--surface-2); }
+.line .name { flex: 1; font-weight: 600; }
+.line .name small { display: block; color: var(--muted); font-size: .82rem; font-weight: 500; }
+.step { display: flex; align-items: center; gap: 4px; }
+.step button { width: 40px; height: 40px; border-radius: 50%; background: var(--bg); font-size: 1.3rem; font-weight: 600; }
+.step button:active { transform: scale(.9); }
+.step span { min-width: 54px; text-align: center; font-weight: 600; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.big { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.big .step { gap: 20px; }
+.big .step button { width: 56px; height: 56px; font-size: 1.7rem; background: var(--surface); }
+.big .step span.count { font-size: 4.2rem; font-weight: 700; min-width: 90px; line-height: 1; }
+.chips { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-top: -6px; }
+.chip { font-size: .88rem; font-weight: 600; padding: 4px 12px; border-radius: 99px; background: var(--surface); }
+.chip.civil { color: var(--civil); } .chip.undercover { color: var(--under); } .chip.white { color: var(--white); }
+
+/* cartes */
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.card { aspect-ratio: 3 / 4; border-radius: 16px; background: var(--accent); color: var(--accent-ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px;
+  animation: pop .3s ease-out backwards; transition: transform .1s; }
+.card .q { font-size: 2.4rem; font-weight: 700; line-height: 1; }
+.card .num { font-size: .8rem; font-weight: 600; opacity: .8; }
+.card:active { transform: scale(.95); }
+.card.taken { background: var(--surface); color: var(--muted); pointer-events: none; font-weight: 600; font-size: .95rem; text-align: center; overflow-wrap: anywhere; gap: 8px; }
+
+/* qui es-tu */
+input[type=text] { width: 100%; min-height: 58px; border-radius: 16px; border: 2px solid var(--surface-2); background: var(--bg); color: var(--ink);
+  font: inherit; font-size: 1.2rem; font-weight: 600; padding: 0 18px; }
+input[type=text]:focus { border-color: var(--accent); outline: none; }
+input::placeholder { color: var(--muted); font-weight: 500; }
+.list { display: flex; flex-direction: column; background: var(--surface); border-radius: 18px; overflow: hidden; }
+.list:empty { display: none; }
+.who { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 8px 14px; text-align: left; }
+.who + .who { border-top: 1px solid var(--surface-2); }
+.who:active { background: var(--surface-2); }
+.who .t { flex: 1; min-width: 0; font-weight: 600; font-size: 1.1rem; overflow-wrap: anywhere; }
+.who .t small { display: block; color: var(--muted); font-weight: 500; font-size: .82rem; }
+.who .go { color: var(--muted); font-size: 1.3rem; }
+.who.new { background: var(--accent); color: var(--accent-ink); }
+.who.new .t small, .who.new .go { color: var(--accent-ink); opacity: .85; }
+.who.sel { background: var(--ink); color: var(--bg); }
+.who.sel .t small, .who.sel .n { color: var(--bg); opacity: .7; }
+.who .n { width: 20px; text-align: center; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.av { --c: var(--accent); width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  background: var(--c); color: #fff; font-weight: 700; font-size: 1.05rem; }
+.av.dead { filter: grayscale(1); opacity: .5; }
+.av.xl { width: 84px; height: 84px; font-size: 2.2rem; }
+.empty { text-align: center; color: var(--muted); padding: 14px; font-size: .95rem; text-wrap: balance; }
+
+/* révélations */
+.reveal { background: var(--surface); border-radius: 24px; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  animation: pop .3s ease-out backwards; }
+.word { font-size: 2.9rem; font-weight: 700; line-height: 1.05; text-wrap: balance; max-width: 100%; }
+.role { font-size: 2.9rem; font-weight: 700; line-height: 1; }
+.role.civil { color: var(--civil); } .role.undercover { color: var(--under); } .role.white { color: var(--white); }
+.hint { color: var(--muted); font-size: .98rem; text-wrap: balance; }
+.reveal input[type=text] { text-align: center; }
+
+/* fin + stats */
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pair > div { background: var(--surface); border-radius: 18px; padding: 14px 10px; text-align: center; }
+.pair b { display: block; font-size: 1.15rem; font-weight: 700; overflow-wrap: anywhere; margin-top: 2px; }
+.res { display: flex; align-items: center; gap: 10px; min-height: 60px; font-variant-numeric: tabular-nums; }
+.res + .res { border-top: 1px solid var(--surface-2); }
+.res .t { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.res .t small { display: block; font-size: .8rem; font-weight: 600; }
+.res.dead .t > span { color: var(--muted); }
+.res .g { font-weight: 700; color: var(--civil); min-width: 34px; text-align: right; }
+.res .win { font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--accent); color: var(--accent-ink); }
+.r.civil { color: var(--civil); } .r.undercover { color: var(--under); } .r.white { color: var(--white); }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tile { background: var(--surface); border-radius: 16px; padding: 12px 6px; text-align: center; }
+.tile b { display: block; font-size: 1.7rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tile span { font-size: .78rem; color: var(--muted); font-weight: 500; }
+.bars { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; }
+.bar { display: grid; grid-template-columns: 96px 1fr 44px; align-items: center; gap: 10px; font-size: .95rem; font-weight: 600; }
+.bar .tr { height: 10px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.bar .tr i { display: block; height: 100%; border-radius: 99px; }
+.bar em { font-style: normal; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; font-size: .85rem; }
+.rank { width: 22px; text-align: center; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rank.top { color: var(--accent); }
+.statcard { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+
+.sheet { position: fixed; inset: 0; z-index: 10; background: rgba(0,0,0,.4); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s; }
+@keyframes fade { from { opacity: 0 } }
+.sheet > div { width: min(100%, 440px); background: var(--bg); border-radius: 24px 24px 0 0; display: flex; flex-direction: column; gap: 14px; max-height: 90%; overflow-y: auto;
+  animation: up .25s ease-out;
+  padding: 24px max(20px, env(safe-area-inset-right, 0px)) max(22px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)); }
+@keyframes up { from { transform: translateY(40px) } }
+.rules p { margin: 0 0 10px; }
+.rules b { font-weight: 700; }
+/* ---- couche "juste milieu" : relief, dégradés, motif sur les cartes */
+:root { --accent-2: #ff2e63; --glow: rgba(255, 90, 31, .35); --shadow: 0 1px 2px rgba(20,20,30,.06), 0 8px 24px rgba(20,20,30,.08); --panel: #ffffff; --bg-2: #fff1ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; } }
+:root[data-theme="dark"] { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; }
+body { background: radial-gradient(120% 60% at 50% -10%, var(--bg-2), var(--bg) 60%) fixed, var(--bg); }
+.brand { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.mark { width: 74px; height: 74px; border-radius: 22px; display: grid; place-items: center; transform: rotate(-6deg);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 10px 26px var(--glow); }
+.mark svg { width: 46px; height: 46px; }
+.logo { font-size: 2.7rem; }
+.logo i { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.btn { background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 8px 20px var(--glow); }
+.btn.alt, .btn.soft { background: var(--panel); box-shadow: var(--shadow); }
+.btn:disabled { box-shadow: none; }
+.box, .list, .pair > div, .tile { background: var(--panel); box-shadow: var(--shadow); }
+.who + .who, .line + .line, .res + .res { border-top-color: var(--surface); }
+.step button { background: var(--surface); }
+.big .step button { background: var(--panel); box-shadow: var(--shadow); }
+.big .step span.count { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.chip { background: var(--panel); box-shadow: var(--shadow); }
+.card { position: relative; overflow: hidden; border-radius: 18px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.09) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--accent), var(--accent-2));
+  box-shadow: 0 8px 18px var(--glow); }
+.card::before { content: ""; position: absolute; inset: 6px; border-radius: 13px; border: 2px solid rgba(255,255,255,.35); pointer-events: none; }
+.card .q { width: 54%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.22); display: grid; place-items: center; font-size: 2rem; }
+.card:nth-child(3n+1) { transform: rotate(-2deg); } .card:nth-child(3n) { transform: rotate(2deg); }
+.card:active { transform: scale(.94); }
+.card.taken { background: var(--panel); box-shadow: var(--shadow); transform: none; }
+.card.taken::before { border-color: var(--surface); }
+.av { background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 60%, #ff2e63)); box-shadow: 0 3px 8px color-mix(in srgb, var(--c) 35%, transparent); }
+.who.new { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.who.sel { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+.who.sel .t small, .who.sel .n { color: #fff; }
+.reveal { background: var(--panel); box-shadow: var(--shadow); position: relative; overflow: hidden; padding-top: 0; animation: flipIn .5s cubic-bezier(.2,1.2,.4,1) backwards; }
+@keyframes flipIn { from { transform: perspective(900px) rotateY(70deg); opacity: 0 } }
+.reveal::before { content: ""; display: block; align-self: stretch; height: 92px; margin: 0 -20px 4px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2))); }
+.reveal .av.xl { margin-top: -66px; box-shadow: 0 0 0 6px var(--panel), 0 8px 18px rgba(0,0,0,.18); }
+.reveal.civil { --band1: #22c55e; --band2: #0d9488; }
+.reveal.undercover { --band1: #f43f5e; --band2: #be123c; }
+.reveal.white { --band1: #a1a1aa; --band2: #52525b; }
+.reveal.wordcard .word { background: linear-gradient(135deg, var(--ink), color-mix(in srgb, var(--ink) 60%, var(--accent))); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 4px; }
+.res .win { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.tile b { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.endhead { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px; border-radius: 24px; color: #fff; text-align: center;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2)));
+  box-shadow: var(--shadow); animation: pop .4s ease-out backwards; }
+.endhead.civils { --band1: #22c55e; --band2: #0d9488; } .endhead.imposteurs { --band1: #f43f5e; --band2: #be123c; } .endhead.white { --band1: #71717a; --band2: #3f3f46; }
+.endhead h2 { color: #fff; }
+.endhead .label { color: rgba(255,255,255,.85); }
+.sheet > div { background: var(--bg); }
+canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ---- Aura Spy : même famille qu'Aura Cover, couleur bleu-violet */
+:root { --accent: #3b5bff; --accent-2: #9b3dff; --glow: rgba(80, 70, 255, .32); --bg-2: #eceeff; --spy: #1f1b3a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent: #5b78ff; --accent-2: #a65bff; --glow: rgba(110, 100, 255, .3); --bg-2: #15152c; --spy: #08070f; } }
+:root[data-theme="dark"] { --accent: #5b78ff; --accent-2: #a65bff; --glow: rgba(110, 100, 255, .3); --bg-2: #15152c; --spy: #08070f; }
+.reveal.spy { --band1: #2b2550; --band2: #0f0c22; }
+.reveal.place { --band1: var(--accent); --band2: var(--accent-2); }
+.endhead.spy { --band1: #2b2550; --band2: #0f0c22; } .endhead.agents { --band1: var(--accent); --band2: var(--accent-2); }
+.place-name { font-size: 2.5rem; font-weight: 700; line-height: 1.05; text-wrap: balance; }
+.rolebox { background: var(--surface); border-radius: 14px; padding: 10px 16px; font-weight: 600; }
+.rolebox small { display: block; color: var(--muted); font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
+.clock { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 16px; }
+.clock b { font-size: 3.6rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.clock.low b { background: none; color: var(--under); animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: .4 } }
+.clock .row { display: flex; gap: 8px; margin-top: 8px; }
+.clock .row button { padding: 8px 16px; border-radius: 99px; background: var(--surface); font-weight: 600; font-size: .95rem; }
+.places { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding: 12px; }
+.places button { min-height: 44px; border-radius: 12px; background: var(--surface); font-weight: 600; font-size: .92rem; padding: 6px 8px; text-align: center; line-height: 1.15; overflow-wrap: anywhere; }
+.places button.off { opacity: .35; text-decoration: line-through; }
+.places button.pick { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+.places button.good { background: var(--civil); color: #fff; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.two .btn { font-size: 1rem; min-height: 56px; }
+details.box summary { list-style: none; cursor: pointer; min-height: 52px; display: flex; align-items: center; justify-content: space-between; font-weight: 600; }
+details.box summary::-webkit-details-marker { display: none; }
+details.box summary::after { content: "+"; font-size: 1.4rem; color: var(--muted); }
+details.box[open] summary::after { content: "−"; }
+details.box .places { padding: 0 0 12px; }
+
+</style>
+<style>
+@font-face { font-family: "Fredoka"; src: url("../Fredoka.ttf") format("truetype"); font-weight: 300 700; font-display: swap; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+html { overscroll-behavior: none; }
+</style>
+</head>
+<body>
+
+<canvas id="fx"></canvas>
+<div class="app" id="app"></div>
+<div id="sheet"></div>
+
+<script>
+// Lieux et rôles d'Aura Spy (notre liste à nous)
+const PLACES = [
+  ["La plage", ["Maître-nageur", "Vendeur de chouchous", "Touriste qui crame", "Surfeur", "Enfant qui fait un château", "Papi qui pêche"]],
+  ["Le port", ["Pêcheur", "Capitaine", "Vendeur de poissons", "Plongeur", "Touriste", "Mécanicien de bateau"]],
+  ["Le stade de foot", ["Arbitre", "Supporter ultra", "Gardien", "Buteur", "Vendeur de sandwichs", "Entraîneur"]],
+  ["Le boulodrome", ["Tireur", "Pointeur", "Papi qui râle", "Celui qui mesure", "Spectateur", "Patron du bar"]],
+  ["Le snack", ["Patron", "Client affamé", "Livreur", "Cuisinier", "Client de 3 h du mat", "Caissier"]],
+  ["La boîte de nuit", ["Videur", "DJ", "Barman", "Fêtard", "Celui qui drague", "Celui qui a trop bu"]],
+  ["Le lycée", ["Prof", "Surveillant", "Élève du fond", "CPE", "Cantinier", "Délégué"]],
+  ["L'hôpital", ["Chirurgien", "Infirmier", "Patient", "Visiteur", "Urgentiste", "Brancardier"]],
+  ["L'avion", ["Pilote", "Hôtesse", "Passager qui a peur", "Bébé qui pleure", "Passager en première", "Steward"]],
+  ["Le supermarché", ["Caissière", "Vigile", "Client pressé", "Chef de rayon", "Enfant perdu", "Livreur"]],
+  ["La salle de sport", ["Coach", "Gros bras", "Débutant", "Accro au cardio", "Accueil", "Celui qui se filme"]],
+  ["Le cinéma", ["Projectionniste", "Vendeur de pop-corn", "Couple", "Critique", "Ouvreur", "Celui qui parle"]],
+  ["Le camping", ["Campeur", "Gérant", "Animateur", "Vacancier en tongs", "Maître-nageur", "Voisin bruyant"]],
+  ["Le mariage", ["Marié", "Mariée", "Témoin", "DJ", "Traiteur", "Tonton bourré"]],
+  ["La prison", ["Gardien", "Détenu", "Avocat", "Directeur", "Visiteur", "Cuisinier"]],
+  ["Le commissariat", ["Policier", "Suspect", "Commissaire", "Avocat", "Témoin", "Agent d'accueil"]],
+  ["La banque", ["Banquier", "Client", "Braqueur", "Vigile", "Directeur", "Convoyeur de fonds"]],
+  ["Le casino", ["Croupier", "Joueur ruiné", "Gros gagnant", "Vigile", "Serveuse", "Directeur"]],
+  ["Le bateau de croisière", ["Capitaine", "Animateur", "Retraité", "Cuisinier", "Serveur", "Musicien"]],
+  ["Le train", ["Contrôleur", "Conducteur", "Passager sans billet", "Vendeur du bar", "Étudiant", "Retraité"]],
+  ["La station de ski", ["Moniteur", "Perchiste", "Skieur débutant", "Snowboarder", "Secouriste", "Loueur de skis"]],
+  ["La station spatiale", ["Commandant", "Ingénieur", "Scientifique", "Touriste de l'espace", "Médecin", "Pilote"]],
+  ["Le sous-marin", ["Commandant", "Opérateur sonar", "Cuisinier", "Mécanicien", "Marin", "Radio"]],
+  ["Le bateau pirate", ["Capitaine", "Cuisinier", "Prisonnier", "Mousse", "Canonnier", "Vigie"]],
+  ["Le zoo", ["Soigneur", "Vétérinaire", "Visiteur", "Vendeur de glaces", "Photographe", "Enfant"]],
+  ["Le restaurant chic", ["Chef", "Serveur", "Critique", "Sommelier", "Client", "Plongeur"]],
+  ["Le salon de coiffure", ["Coiffeur", "Client", "Apprenti", "Barbier", "Influenceur", "Patron"]],
+  ["La station-service", ["Pompiste", "Routier", "Motard", "Caissier", "Laveur", "Touriste perdu"]],
+  ["Le tournage de film", ["Réalisateur", "Acteur", "Cascadeur", "Maquilleur", "Caméraman", "Figurant"]],
+  ["Le défilé de mode", ["Mannequin", "Styliste", "Photographe", "Maquilleuse", "Journaliste", "Influenceuse"]],
+  ["Le club de tennis", ["Prof de tennis", "Joueur", "Ramasseur de balles", "Arbitre", "Parent", "Président du club"]],
+  ["Le golf", ["Golfeur", "Caddie", "Jardinier", "Pro", "Débutant", "Serveur du club-house"]],
+  ["L'église", ["Curé", "Mariée", "Enfant de chœur", "Touriste", "Organiste", "Fidèle"]],
+  ["La fête foraine", ["Forain", "Enfant", "Vendeur de barbe à papa", "Pilote d'auto-tamponneuse", "Gagnant de peluche", "Vigile"]],
+  ["La base militaire", ["Général", "Soldat", "Sentinelle", "Médecin", "Pilote", "Cuisinier"]],
+  ["Le chantier", ["Chef de chantier", "Maçon", "Grutier", "Architecte", "Électricien", "Stagiaire"]],
+  ["Le musée", ["Guide", "Gardien", "Touriste", "Voleur de tableau", "Artiste", "Restaurateur"]],
+  ["Le concert", ["Chanteur", "Batteur", "Fan au premier rang", "Ingé son", "Vigile", "Vendeur de t-shirts"]],
+];
+const KEY = "auraspy1";
+const BODY = ["#3b5bff", "#ff5a1f", "#16a34a", "#9333ea", "#db2777", "#0891b2", "#ca8a04", "#4f46e5", "#ea580c", "#0d9488"];
+const MARK = `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 22h32l-4-12c-1-3-4-4-7-3l-5 2-5-2c-3-1-6 0-7 3z" fill="#fff"/><rect x="4" y="21" width="40" height="4" rx="2" fill="#fff"/><circle cx="16" cy="32" r="6" fill="none" stroke="#fff" stroke-width="3"/><circle cx="32" cy="32" r="6" fill="none" stroke="#fff" stroke-width="3"/><path d="M22 31q2-2 4 0" stroke="#fff" stroke-width="3" fill="none"/></svg>`;
+
+let S = { screen: "home", n: 5, spies: 1, minutes: 8, people: {}, recentPlaces: [], game: null };
+function load(data) {
+  let d = data && data.screen ? data : null;
+  if (!d) try { d = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
+  if (d) for (const k of Object.keys(S)) if (d[k] !== undefined) S[k] = d[k];
+  if (!S.game) S.screen = "home";
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+// les prénoms déjà connus dans Aura Cover sont proposés aussi
+function knownNames() {
+  const set = new Set(Object.keys(S.people));
+  try { const c = JSON.parse(localStorage.getItem("auracover_poche5") || "{}"); for (const n of Object.keys(c.people || {})) set.add(n); } catch (e) {}
+  return [...set];
+}
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+const fold = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+function seedOf(s) { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+const av = (nm, cls = "") => `<span class="av ${cls}" style="--c:${BODY[seedOf(nm || "?") % BODY.length]}" aria-hidden="true">${esc((nm.trim()[0] || "?").toUpperCase())}</span>`;
+const plural = (n, w) => `${n} ${w}${n > 1 ? "s" : ""}`;
+const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
+function person(nm) { return S.people[nm] || (S.people[nm] = { games: 0, wins: 0, pts: 0, spy: 0, spyWins: 0, last: 0 }); }
+const statLine = p => p && p.games ? `${plural(p.games, "partie")} · ${plural(p.wins, "victoire")}` : "Nouveau ici";
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const clock = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+const maxSpies = n => n >= 7 ? 2 : 1;
+
+function newGame() {
+  const n = S.n, k = Math.min(S.spies, maxSpies(n));
+  let pool = PLACES.map((_, i) => i).filter(i => !S.recentPlaces.includes(i));
+  if (!pool.length) { S.recentPlaces = []; pool = PLACES.map((_, i) => i); }
+  const place = pool[Math.random() * pool.length | 0]; S.recentPlaces = [...S.recentPlaces, place].slice(-20);
+  const roles = shuffle(PLACES[place][1]);
+  const spyIdx = new Set(shuffle([...Array(n).keys()]).slice(0, k));
+  const cards = [...Array(n)].map((_, i) => spyIdx.has(i) ? null : roles[i % roles.length]);
+  S.game = { place, cards, names: Array(n).fill(""), cur: null, q: "", peek: false, starter: null, left: S.minutes * 60, end: 0, paused: true,
+    off: [], sel: null, guessBy: null, guess: null, result: null, gained: {}, ended: false };
+  go("cards");
+}
+const isSpy = i => S.game.cards[i] === null;
+const nm = i => S.game.names[i] || `Joueur ${i + 1}`;
+
+function finish(result) {
+  const g = S.game; g.result = result; g.paused = true;
+  const spiesWin = result.spiesWin, now = Date.now();
+  g.names.forEach((name, i) => {
+    const spy = isSpy(i), win = spy === spiesWin;
+    const pts = spy ? (spiesWin ? (result.type === "guess" ? 4 : 2) : 0) : (spiesWin ? 0 : 1);
+    g.gained[i] = pts;
+    const p = person(name); p.games++; p.pts += pts; p.last = now;
+    if (win) p.wins++;
+    if (spy) { p.spy++; if (win) p.spyWins++; }
+  });
+  g.ended = true;
+  go("verdict");
+}
+
+// ---------- écrans
+const app = document.getElementById("app"), sheet = document.getElementById("sheet");
+function go(s) { S.screen = s; save(); render(); scrollTo(0, 0); }
+const step = (act, val, cls = "") => `<div class="step"><button data-a="${act}" data-v="-1" aria-label="Moins">−</button><span class="${cls}">${val}</span><button data-a="${act}" data-v="1" aria-label="Plus">+</button></div>`;
+function placesGrid(mode) {
+  const g = S.game;
+  return `<div class="places">${PLACES.map(([p], i) => {
+    const cls = mode === "guess" ? (g.guess === i ? "pick" : "") : mode === "result" ? (i === g.place ? "good" : "") : (g.off.includes(i) ? "off" : "");
+    return `<button class="${cls}" data-a="${mode === "guess" ? "guessPick" : mode === "result" ? "" : "cross"}" data-v="${i}">${esc(p)}</button>`; }).join("")}</div>`;
+}
+
+function render() {
+  const g = S.game; let h = "";
+  switch (S.screen) {
+    case "home": {
+      const k = Math.min(S.spies, maxSpies(S.n));
+      h = `<div class="spacer"></div>
+        <div class="brand"><span class="mark">${MARK}</span><div class="logo">Aura <i>Spy</i></div></div>
+        <div class="sub" style="margin-top:0">Tout le monde connaît le lieu… sauf l'espion.</div>
+        <div class="big"><div class="label">Joueurs</div>${step("n", S.n, "count")}</div>
+        <div class="box">
+          <div class="line"><div class="name">Espions<small>${S.n >= 7 ? "1 ou 2" : "2 possibles à partir de 7 joueurs"}</small></div>${step("spies", k)}</div>
+          <div class="line"><div class="name">Durée<small>Temps pour démasquer l'espion</small></div>${step("min", S.minutes + " min")}</div>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="play">Jouer</button>
+        <button class="btn alt" data-a="board">Joueurs et stats</button>
+        <div class="links"><button class="link" data-a="rules">Règles</button><a class="link" href="../" style="text-decoration:none">← Aura Cover</a></div>`;
+      break;
+    }
+    case "cards": {
+      const left = g.names.filter(x => !x).length;
+      h = `<h2>Prends une carte</h2>
+        <div class="sub">${left === S.n ? "N'importe laquelle, puis dis qui tu es." : `Plus que ${left}. Passe le téléphone !`}</div>
+        <div class="cards">${g.names.map((x, i) => x
+          ? `<button class="card taken" aria-label="Carte de ${esc(x)}">${av(x)}<span>${esc(x)}</span></button>`
+          : `<button class="card" style="animation-delay:${i * 40}ms" data-a="pick" data-v="${i}" aria-label="Carte ${i + 1}"><span class="q">?</span><span class="num">${i + 1}</span></button>`).join("")}</div>
+        <div class="spacer"></div>
+        <div class="links"><button class="link" data-a="quit">Annuler la partie</button></div>`;
+      break;
+    }
+    case "who": {
+      h = `<h2>Qui es-tu ?</h2>
+        <input id="q" type="text" maxlength="16" placeholder="Cherche ou écris ton prénom" value="${esc(g.q)}" enterkeyhint="done" autocomplete="off" autocapitalize="words">
+        <div class="list" id="wl">${whoList()}</div>
+        <div class="spacer"></div>
+        <div class="links"><button class="link" data-a="backCards">Pas ma carte, retour</button></div>`;
+      break;
+    }
+    case "card": {
+      const i = g.cur, spy = isSpy(i);
+      h = `<div class="spacer"></div>
+        <div class="reveal ${spy ? "spy" : "place"}">
+          ${av(nm(i), "xl")}
+          <div class="label">Salut ${esc(nm(i))} !</div>
+          ${spy ? `<div class="place-name">Tu es l'espion</div><div class="hint">Tu ne connais pas le lieu. Écoute les questions, réponds sans te griller, et devine où vous êtes.</div>`
+            : `<div class="hint">Vous êtes à</div><div class="place-name fit">${esc(PLACES[g.place][0])}</div>
+               <div class="rolebox"><small>Ton rôle</small>${esc(g.cards[i])}</div>
+               <div class="hint">Un espion se cache parmi vous. Ne dis pas le lieu trop clairement !</div>`}
+        </div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="hide">${g.peek ? "Cacher" : "J'ai retenu, je passe le téléphone"}</button>`;
+      break;
+    }
+    case "play": {
+      const low = !g.paused && g.left <= 30;
+      h = `<div class="label" style="text-align:center">Interrogatoire</div>
+        <h2 class="pop">${esc(nm(g.starter))} pose la première question</h2>
+        <div class="sub">Chacun pose une question à quelqu'un, qui répond puis interroge à son tour.</div>
+        <div class="box clock ${low ? "low" : ""}" id="clock"><b id="t">${clock(g.left)}</b>
+          <div class="row"><button data-a="tToggle" id="tbtn">${g.paused ? (g.left < S.minutes * 60 ? "Reprendre" : "Lancer le chrono") : "Pause"}</button><button data-a="tAdd">+1 min</button></div></div>
+        <div class="two"><button class="btn" data-a="accuse">On accuse</button><button class="btn alt" data-a="reveal">L'espion se dévoile</button></div>
+        <details class="box"><summary>Les lieux possibles (${PLACES.length})</summary><div class="hint" style="text-align:left;margin:-4px 0 8px">Touche un lieu pour le barrer.</div>${placesGrid("cross")}</details>
+        <div class="spacer"></div>
+        <div class="links"><button class="link" data-a="peek">Revoir ma carte</button><button class="link" data-a="rules">Règles</button><button class="link" data-a="quit">Quitter</button></div>`;
+      break;
+    }
+    case "accuse": {
+      const sel = g.sel;
+      h = `<h2>${g.timeUp ? "Temps écoulé !" : "Qui est l'espion ?"}</h2>
+        <div class="sub">${g.timeUp ? "Dernier vote : mettez-vous d'accord sur un suspect." : "Mettez-vous d'accord, puis touchez le suspect."}</div>
+        <div class="list">${g.names.map((_, i) => `<button class="who ${sel === i ? "sel" : ""}" data-a="sel" data-v="${i}">${av(nm(i))}<span class="t">${esc(nm(i))}</span></button>`).join("")}</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="doAccuse" ${sel === null ? "disabled" : ""}>${sel === null ? "Choisis le suspect" : `Accuser ${esc(nm(sel))}`}</button>
+        ${g.timeUp ? "" : `<div class="links"><button class="link" data-a="backPlay">Retour</button></div>`}`;
+      break;
+    }
+    case "revealWho": {
+      h = `<h2>Qui se dévoile ?</h2>
+        <div class="sub">L'espion touche son prénom, puis devine le lieu. S'il se trompe, il perd.</div>
+        <div class="list">${g.names.map((_, i) => `<button class="who" data-a="revealBy" data-v="${i}">${av(nm(i))}<span class="t">${esc(nm(i))}</span></button>`).join("")}</div>
+        ${g.notSpy ? `<div class="empty">${esc(g.notSpy)} n'est pas l'espion ! Bien essayé.</div>` : ""}
+        <div class="spacer"></div>
+        <div class="links"><button class="link" data-a="backPlay">Retour</button></div>`;
+      break;
+    }
+    case "guess": {
+      h = `<h2>${esc(nm(g.guessBy))}, où êtes-vous ?</h2>
+        <div class="sub">Un seul essai.</div>
+        <div class="box" style="padding:0">${placesGrid("guess")}</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="doGuess" ${g.guess === null ? "disabled" : ""}>${g.guess === null ? "Choisis un lieu" : `C'est ${esc(PLACES[g.guess][0])} !`}</button>
+        <div class="links"><button class="link" data-a="backPlay">Annuler</button></div>`;
+      break;
+    }
+    case "verdict": {
+      const r = g.result, spies = g.names.map((_, i) => i).filter(isSpy);
+      let title, line, who;
+      if (r.type === "guess") { who = r.by; title = r.spiesWin ? "a trouvé le lieu !" : "s'est trompé !";
+        line = r.spiesWin ? `C'était bien ${esc(PLACES[g.place][0])}.` : `Il a dit ${esc(PLACES[r.guess][0])}, c'était ${esc(PLACES[g.place][0])}.`; }
+      else { who = r.accused; title = r.spiesWin ? "était innocent…" : "était l'espion !";
+        line = r.spiesWin ? `L'espion, c'était ${spies.map(i => esc(nm(i))).join(" et ")}.` : "Bien joué, l'espion est démasqué."; }
+      h = `<div class="spacer"></div>
+        <div class="reveal ${isSpy(who) ? "spy" : "place"}">
+          ${av(nm(who), "xl")}
+          <div class="label">${esc(nm(who))}</div>
+          <div class="place-name">${title}</div>
+          <div class="hint">${line}</div>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="toEnd">Voir les résultats</button>`;
+      if (!r.spiesWin) setTimeout(confetti, 300);
+      break;
+    }
+    case "end": {
+      const r = g.result;
+      const idx = g.names.map((_, i) => i).sort((a, b) => (isSpy(b) === r.spiesWin) - (isSpy(a) === r.spiesWin) || (g.gained[b] || 0) - (g.gained[a] || 0));
+      h = `<div class="endhead ${r.spiesWin ? "spy" : "agents"}"><div class="label">Partie terminée</div><h2>${r.spiesWin ? (idx.filter(isSpy).length > 1 ? "Les espions gagnent !" : "L'espion gagne !") : "Les agents gagnent !"}</h2></div>
+        <div class="pair"><div><div class="label">Le lieu</div><b>${esc(PLACES[g.place][0])}</b></div><div><div class="label">${idx.filter(isSpy).length > 1 ? "Les espions" : "L'espion"}</div><b>${idx.filter(isSpy).map(i => esc(nm(i))).join(", ")}</b></div></div>
+        <div class="box">${idx.map(i => `<div class="res">${av(nm(i))}
+          <span class="t"><span>${esc(nm(i))}</span><small style="color:var(--muted)">${isSpy(i) ? "Espion" : esc(g.cards[i])}</small></span>
+          ${isSpy(i) === r.spiesWin ? `<span class="win">Gagné</span>` : ""}<span class="g">${g.gained[i] ? "+" + g.gained[i] : ""}</span></div>`).join("")}</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="play">Rejouer</button>
+        <button class="btn soft" data-a="board">Classement</button>
+        <div class="links"><button class="link" data-a="home">Accueil</button></div>`;
+      break;
+    }
+    case "board": {
+      const q = fold(S.bq || "");
+      const list = Object.entries(S.people).filter(([n]) => fold(n).includes(q)).sort((a, b) => b[1].pts - a[1].pts || b[1].wins - a[1].wins || a[0].localeCompare(b[0]));
+      h = `<h2>Joueurs et stats</h2>
+        <input id="bq" type="text" maxlength="16" placeholder="Cherche un prénom" value="${esc(S.bq || "")}" autocomplete="off">
+        <div class="list" id="bl">${boardList(list)}</div>
+        <div class="spacer"></div>
+        <button class="btn soft" data-a="${g && !g.ended ? "backGame" : "home"}">Retour</button>`;
+      break;
+    }
+    case "stats": {
+      const name = S.statOf, p = person(name);
+      const ranked = Object.entries(S.people).sort((a, b) => b[1].pts - a[1].pts).map(x => x[0]);
+      const ag = p.games - p.spy, agWins = p.wins - p.spyWins;
+      const bar = (lbl, n, w, col) => `<div class="bar"><span>${lbl}</span><div class="tr"><i style="width:${pct(w, n)}%;background:${col}"></i></div><em>${w}/${n}</em></div>`;
+      h = `<div class="statcard">${av(name, "xl")}<h2>${esc(name)}</h2>
+          <div class="hint">${p.games ? `${ranked.indexOf(name) + 1}${ranked.indexOf(name) ? "e" : "er"} du classement` : "Pas encore de partie"}</div></div>
+        <div class="tiles">
+          <div class="tile"><b>${p.games}</b><span>parties</span></div>
+          <div class="tile"><b>${p.wins}</b><span>victoires</span></div>
+          <div class="tile"><b>${pct(p.wins, p.games)}%</b><span>de réussite</span></div>
+          <div class="tile"><b>${p.pts}</b><span>points</span></div>
+          <div class="tile"><b>${p.spy}</b><span>fois espion</span></div>
+          <div class="tile"><b>${p.spyWins}</b><span>victoires en espion</span></div>
+        </div>
+        <div class="box bars"><div class="label">Victoires par rôle</div>
+          ${bar("Agent", ag, agWins, "var(--accent)")}${bar("Espion", p.spy, p.spyWins, "var(--spy)")}</div>
+        <div class="spacer"></div>
+        <button class="btn soft" data-a="board">Retour au classement</button>
+        <div class="links"><button class="link" data-a="delP">${S.sureDel ? "Sûr ? Retouche pour supprimer" : "Supprimer ce joueur"}</button></div>`;
+      break;
+    }
+  }
+  app.innerHTML = h;
+  app.querySelectorAll(".fit").forEach(el => { let s = 40; el.style.fontSize = s + "px"; while (s > 20 && el.scrollWidth > el.parentElement.clientWidth - 8) el.style.fontSize = (s -= 2) + "px"; });
+  const q = document.getElementById("q");
+  if (q) { q.oninput = () => { g.q = q.value; document.getElementById("wl").innerHTML = whoList(); };
+    q.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); const v = q.value.trim(); if (v) choose(knownNames().find(n => fold(n) === fold(v)) || v.slice(0, 16)); } }; }
+  const dt = app.querySelector("details"); if (dt) { dt.open = !!g.openP; dt.ontoggle = () => { g.openP = dt.open; save(); }; }
+  const bq = document.getElementById("bq");
+  if (bq) bq.oninput = () => { S.bq = bq.value; const qq = fold(bq.value);
+    document.getElementById("bl").innerHTML = boardList(Object.entries(S.people).filter(([n]) => fold(n).includes(qq)).sort((a, b) => b[1].pts - a[1].pts || b[1].wins - a[1].wins)); };
+}
+function whoList() {
+  const g = S.game, q = fold(g.q), used = new Set(g.names.filter(Boolean));
+  const all = knownNames();
+  const list = all.filter(n => !used.has(n) && fold(n).includes(q))
+    .sort((a, b) => ((S.people[b] || {}).last || 0) - ((S.people[a] || {}).last || 0) || a.localeCompare(b)).slice(0, 30);
+  const exact = all.some(n => fold(n) === q);
+  let h = list.map(n => `<button class="who" data-a="me" data-v="${esc(n)}">${av(n)}<span class="t">${esc(n)}<small>${statLine(S.people[n])}</small></span><span class="go">›</span></button>`).join("");
+  if (g.q.trim() && !exact) h = `<button class="who new" data-a="me" data-v="${esc(g.q.trim().slice(0, 16))}">${av(g.q.trim())}<span class="t">C'est moi : ${esc(g.q.trim())}<small>Nouveau joueur</small></span><span class="go">＋</span></button>` + h;
+  return h || `<div class="empty">Écris ton prénom, le jeu s'en souviendra pour les prochaines parties.</div>`;
+}
+function boardList(list) {
+  if (!list.length) return `<div class="empty">${Object.keys(S.people).length ? "Personne avec ce nom." : "Personne pour l'instant. Jouez une partie et vos stats apparaîtront ici."}</div>`;
+  return list.map(([n, p], k) => `<button class="who" data-a="stat" data-v="${esc(n)}"><span class="rank ${k < 3 && p.pts ? "top" : ""}">${k + 1}</span>${av(n)}
+    <span class="t">${esc(n)}<small>${statLine(p)} · ${p.pts} pts</small></span><span class="go">›</span></button>`).join("");
+}
+function choose(name) {
+  const g = S.game; if (g.names.includes(name)) return;
+  g.names[g.cur] = name; g.q = ""; buzz(20); go("card");
+}
+function startPlay() {
+  const g = S.game; g.starter = Math.random() * S.n | 0; g.left = S.minutes * 60; g.paused = true; go("play");
+}
+
+function openSheet(kind) {
+  if (!kind) { sheet.innerHTML = ""; return; }
+  const g = S.game;
+  const inner = kind === "rules" ? `<h2>Les règles</h2><div class="rules">
+      <p>Chacun prend une carte en secret. Les <b>agents</b> voient le lieu et leur rôle. L'<b>espion</b> ne sait pas où il est.</p>
+      <p>Chacun à son tour pose une question à quelqu'un sur le lieu. Les agents doivent prouver qu'ils le connaissent sans le dire trop clairement.</p>
+      <p>À tout moment, vous pouvez <b>accuser</b> quelqu'un. Si c'est l'espion, les agents gagnent. Sinon, l'espion gagne.</p>
+      <p>L'espion peut aussi <b>se dévoiler</b> et deviner le lieu. S'il trouve, il gagne. S'il se trompe, il perd.</p>
+      <p>Quand le chrono est fini, dernier vote.</p>
+      <p>Points : agents gagnants +1, espion +2 s'il survit, +4 s'il trouve le lieu.</p></div><button class="btn" data-a="close">Compris</button>`
+    : `<h2>Qui veut revoir sa carte ?</h2><div class="list">${g.names.map((_, i) => `<button class="who" data-a="peekOne" data-v="${i}">${av(nm(i))}<span class="t">${esc(nm(i))}</span></button>`).join("")}</div>
+      <button class="btn soft" data-a="close">Annuler</button>`;
+  sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true">${inner}</div></div>`;
+}
+
+const A = {
+  n: d => { S.n = Math.max(3, Math.min(12, S.n + +d)); save(); render(); },
+  spies: d => { S.spies = Math.max(1, Math.min(maxSpies(S.n), S.spies + +d)); save(); render(); },
+  min: d => { S.minutes = Math.max(3, Math.min(15, S.minutes + +d)); save(); render(); },
+  play: () => { wake(); newGame(); },
+  home: () => { if (S.game && S.game.ended) S.game = null; go("home"); },
+  board: () => { S.bq = ""; go("board"); },
+  backGame: () => go(S.game.starter !== null ? "play" : "cards"),
+  stat: v => { S.statOf = v; S.sureDel = false; go("stats"); },
+  delP: () => { if (!S.sureDel) { S.sureDel = true; render(); return; } delete S.people[S.statOf]; S.sureDel = false; go("board"); },
+  rules: () => openSheet("rules"),
+  close: () => openSheet(null),
+  bg: (v, e) => { if (e.target.classList.contains("sheet")) openSheet(null); },
+  quit: (v, e) => { if (!S.sureQuit) { S.sureQuit = true; e.target.closest("button").textContent = "Sûr ? Retouche"; setTimeout(() => S.sureQuit = false, 3000); return; } S.sureQuit = false; S.game = null; go("home"); },
+  pick: v => { const g = S.game; g.cur = +v; g.peek = false; g.q = ""; buzz(15); go("who"); },
+  me: v => choose(v),
+  backCards: () => go("cards"),
+  hide: () => { const g = S.game; if (g.peek) { g.peek = false; go("play"); return; } g.names.every(Boolean) ? startPlay() : go("cards"); },
+  peek: () => openSheet("peek"),
+  peekOne: v => { openSheet(null); const g = S.game; g.cur = +v; g.peek = true; go("card"); },
+  tToggle: () => { const g = S.game; if (g.paused) { g.end = Date.now() + g.left * 1000; g.paused = false; } else { tick(); g.paused = true; } save(); render(); },
+  tAdd: () => { const g = S.game; g.left += 60; if (!g.paused) g.end += 60000; save(); render(); },
+  cross: v => { const g = S.game, i = +v; g.off = g.off.includes(i) ? g.off.filter(x => x !== i) : [...g.off, i]; save();
+    const b = app.querySelector(`.places [data-v="${i}"]`); if (b) b.classList.toggle("off"); },
+  accuse: () => { const g = S.game; g.sel = null; g.timeUp = false; go("accuse"); },
+  backPlay: () => go("play"),
+  sel: v => { S.game.sel = +v; buzz(10); render(); },
+  doAccuse: () => { const g = S.game; if (g.sel === null) return; buzz([30, 40, 90]); finish({ type: "accuse", accused: g.sel, spiesWin: !isSpy(g.sel) }); },
+  reveal: () => { S.game.notSpy = ""; go("revealWho"); },
+  revealBy: v => { const g = S.game, i = +v; if (!isSpy(i)) { g.notSpy = nm(i); render(); return; } g.guessBy = i; g.guess = null; go("guess"); },
+  guessPick: v => { S.game.guess = +v; buzz(10); render(); },
+  doGuess: () => { const g = S.game; if (g.guess === null) return; finish({ type: "guess", by: g.guessBy, guess: g.guess, spiesWin: g.guess === g.place }); },
+  toEnd: () => go("end"),
+};
+document.addEventListener("click", e => { const el = e.target.closest("[data-a]"); if (!el || el.disabled || !el.dataset.a) return; const f = A[el.dataset.a]; if (f) f(el.dataset.v, e); });
+
+// chrono
+function tick() {
+  const g = S.game; if (!g || g.paused) return;
+  g.left = Math.max(0, Math.ceil((g.end - Date.now()) / 1000));
+  const t = document.getElementById("t"); if (t) t.textContent = clock(g.left);
+  const c = document.getElementById("clock"); if (c) c.classList.toggle("low", g.left <= 30);
+}
+setInterval(() => {
+  const g = S.game; if (!g || g.paused || g.ended) return;
+  tick();
+  if (g.left === 0) { g.paused = true; g.timeUp = true; g.sel = null; buzz([300, 150, 300]); go("accuse"); }
+}, 250);
+
+function confetti() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c = document.getElementById("fx"), x = c.getContext("2d"), dpr = devicePixelRatio || 1;
+  c.width = innerWidth * dpr; c.height = innerHeight * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const P = [...Array(130)].map(() => ({ x: innerWidth / 2 + (Math.random() - .5) * 80, y: innerHeight * .35, vx: (Math.random() - .5) * 13, vy: -Math.random() * 14 - 4,
+    w: 6 + Math.random() * 6, h: 8 + Math.random() * 8, a: Math.random() * 6, va: (Math.random() - .5) * .4, c: BODY[Math.random() * BODY.length | 0] }));
+  const t0 = performance.now();
+  (function f(t) {
+    x.clearRect(0, 0, innerWidth, innerHeight);
+    for (const p of P) { p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.a += p.va;
+      x.save(); x.translate(p.x, p.y); x.rotate(p.a); x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); x.restore(); }
+    if (t - t0 < 3200) requestAnimationFrame(f); else x.clearRect(0, 0, innerWidth, innerHeight);
+  })(t0);
+}
+
+let lock = null;
+async function wake() { try { if ("wakeLock" in navigator && !lock) { lock = await navigator.wakeLock.request("screen"); lock.addEventListener("release", () => lock = null); } } catch (e) {} }
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.game) wake(); });
+
+load(null);
+if (S.game && !S.game.paused) { tick(); }
+render();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+</script>
+</body>
+</html>
