@@ -11,6 +11,7 @@ Des jeux de soirée dans une seule appli, avec **un seul téléphone** pour tout
 | **Juste Milieu** | Un indice, un cadran : trouvez où il pense | 4 et plus |
 | **Nom de Code** | Un mot pour faire deviner plusieurs cartes | 4 et plus |
 | **Tu Préfères** | Deux choix impossibles, tout le monde vote | 2 et plus |
+| **Le Faux Artiste** | Tout le monde dessine, un seul fait semblant | 3 à 10 |
 | **Trois Manches** | Décris, un seul mot, puis mime, en équipes | 4 et plus |
 | **Sur le Front** | Le téléphone sur le front, les autres font deviner | 2 et plus |
 | **Les Loups** | Le Loup-Garou, avec le téléphone comme narrateur | 5 à 18 |
