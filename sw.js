@@ -1,6 +1,6 @@
 // Garde toute l'appli Tablée sur le téléphone pour qu'elle marche sans connexion.
 // Changer VERSION à chaque mise à jour pour que les téléphones récupèrent la nouvelle version.
-const VERSION = "tablee-v8";
+const VERSION = "tablee-v9";
 const FILES = ["./", "index.html", "manifest.webmanifest", "Fredoka.ttf",
   "cover/", "spy/", "milieu/", "codes/", "preferes/", "artiste/", "motcache/", "time/", "tete/", "loup/", "apero/",
   "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-512.png", "icons/apple-touch-icon.png", "icons/favicon-64.png"];

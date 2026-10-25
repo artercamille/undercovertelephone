@@ -359,7 +359,7 @@ function newGame() {
 function nextRound() {
   const g = S.game; g.round++;
   if (!g.deck.length) g.deck = shuffle(SPECTRES.map((_, i) => i));
-  g.card = g.deck.pop(); g.target = 6 + Math.random() * 88; g.needle = 50; g.side = null; g.last = null;
+  g.card = g.deck.pop(); g.target = 14 + Math.random() * 72;   // la cible entière (2-3-4-3-2) reste toujours visible g.needle = 50; g.side = null; g.last = null;
   go("handoff");
 }
 const psychic = () => { const g = S.game; if (S.mode === "teams") { const t = S.teams[g.team]; return t[g.spk[g.team] % t.length]; } return S.solo[g.soloSpk % S.solo.length]; };
