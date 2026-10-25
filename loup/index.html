@@ -226,6 +226,18 @@ body.dark-night { --bg: #0b1026; --bg-2: #1a2250; --surface: #1a2142; --surface-
 .sw { width: 48px; height: 28px; border-radius: 99px; background: var(--surface-2); position: relative; transition: background .2s; flex: none; }
 .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
 .sw.on { background: var(--accent); } .sw.on::after { transform: translateX(20px); }
+.reveal.solo { --band1: #7c3aed; --band2: #db2777; }
+.chip.village { color: var(--civil); } .chip.loups { color: var(--under); } .chip.solo { color: #9333ea; }
+.rchip.solo { color: #9333ea; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.two .btn { font-size: 1rem; min-height: 56px; }
+details.box { padding: 0 16px; }
+details.box summary { list-style: none; cursor: pointer; min-height: 56px; display: flex; align-items: center; gap: 8px; font-weight: 700; }
+details.box summary small { color: var(--muted); font-weight: 600; margin-right: auto; }
+details.box summary::-webkit-details-marker { display: none; }
+details.box summary::after { content: "+"; font-size: 1.4rem; color: var(--muted); }
+details.box[open] summary::after { content: "−"; }
+details.box .line:first-of-type { border-top: 1px solid var(--surface); }
 
 </style>
 <style>
@@ -241,24 +253,47 @@ html { overscroll-behavior: none; }
 <div id="sheet"></div>
 
 <script>
-const KEY = "auraloup1";
+const KEY = "auraloup2";
 const BODY = ["#3b5bff", "#ff5a1f", "#16a34a", "#9333ea", "#db2777", "#0891b2", "#ca8a04", "#4f46e5", "#ea580c", "#0d9488"];
 const MARK = `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M30 6a18 18 0 1 0 12 30A15 15 0 0 1 30 6z" fill="#fff"/><path d="M14 40l4-9 3 4 3-7 3 7 3-4 4 9z" fill="#fff" opacity=".85"/></svg>`;
-const R = {
-  loup: { n: "Loup-garou", team: "loups", d: "Chaque nuit, avec les autres loups, tu dévores un villageois. Le jour, fais semblant d'être innocent." },
-  villageois: { n: "Villageois", team: "village", d: "Pas de pouvoir, mais ton vote compte. Démasque les loups." },
-  voyante: { n: "Voyante", team: "village", d: "Chaque nuit, tu découvres le vrai rôle d'un joueur." },
-  sorciere: { n: "Sorcière", team: "village", d: "Une potion pour sauver la victime des loups, une potion pour tuer. Une seule fois chacune." },
-  chasseur: { n: "Chasseur", team: "village", d: "Si tu meurs, tu emportes quelqu'un avec toi." },
-  cupidon: { n: "Cupidon", team: "village", d: "La première nuit, tu désignes deux amoureux. Si l'un meurt, l'autre meurt de chagrin." },
-};
-const SPECIALS = ["voyante", "sorciere", "chasseur", "cupidon"];
 
-let S = { screen: "home", n: 8, wolves: 0, on: { voyante: true, sorciere: true, chasseur: true, cupidon: false }, voice: true, people: {}, game: null };
+// Rôles (inspirés des Loups-Garous de Thiercelieux et de ses extensions)
+const R = {
+  loup: { n: "Loup-garou", pl: "Loups-garous", team: "loups", d: "Chaque nuit, avec les autres loups, tu dévores un villageois. Le jour, fais semblant d'être innocent." },
+  villageois: { n: "Villageois", pl: "Villageois", team: "village", d: "Pas de pouvoir, mais ton vote compte. Démasque les loups." },
+  voyante: { n: "Voyante", team: "village", g: "village", d: "Chaque nuit, tu découvres le vrai rôle d'un joueur." },
+  sorciere: { n: "Sorcière", team: "village", g: "village", d: "Une potion pour sauver une victime, une potion pour tuer. Une seule fois chacune." },
+  chasseur: { n: "Chasseur", team: "village", g: "village", d: "Si tu meurs, tu emportes quelqu'un avec toi." },
+  cupidon: { n: "Cupidon", team: "village", g: "village", d: "La première nuit, tu désignes deux amoureux. Si l'un meurt, l'autre meurt de chagrin." },
+  petitefille: { n: "Petite fille", team: "village", g: "village", d: "Quand les loups se réveillent, tu peux entrouvrir les yeux pour les espionner. S'ils te voient, gare à toi." },
+  salvateur: { n: "Salvateur", team: "village", g: "village", d: "Chaque nuit, tu protèges un joueur des loups. Jamais le même deux nuits de suite." },
+  ancien: { n: "Ancien", team: "village", g: "village", d: "Tu résistes à la première attaque des loups." },
+  idiot: { n: "Idiot du village", team: "village", g: "village", d: "Si le village vote contre toi, tu es épargné mais tu ne votes plus." },
+  bouc: { n: "Bouc émissaire", team: "village", g: "village", d: "En cas d'égalité au vote, c'est toi qui es éliminé." },
+  corbeau: { n: "Corbeau", team: "village", g: "village", d: "Chaque nuit, tu désignes un suspect qui aura deux voix de plus contre lui au vote." },
+  renard: { n: "Renard", team: "village", g: "village", d: "Chaque nuit, tu flaires trois joueurs. S'il n'y a aucun loup parmi eux, tu perds ton flair." },
+  chevalier: { n: "Chevalier à l'épée rouillée", team: "village", g: "village", d: "Si les loups te dévorent, l'un d'eux attrape le tétanos et meurt la nuit suivante." },
+  soeur: { n: "Sœur", pl: "Deux sœurs", team: "village", g: "village", d: "La première nuit, tu découvres ta sœur. Vous pouvez vous faire confiance.", card: 2 },
+  frere: { n: "Frère", pl: "Trois frères", team: "village", g: "village", d: "La première nuit, tu découvres tes deux frères. Vous pouvez vous faire confiance.", card: 3 },
+  enfant: { n: "Enfant sauvage", team: "village", g: "village", d: "La première nuit, tu choisis un modèle. S'il meurt, tu deviens loup-garou." },
+  chienloup: { n: "Chien-loup", team: "village", g: "village", d: "La première nuit, tu choisis ton camp : rester un brave chien du village, ou devenir loup-garou." },
+  grandloup: { n: "Grand méchant loup", team: "loups", g: "loups", d: "Tu dévores avec les loups, puis une victime de plus chaque nuit, tant qu'aucun loup n'est mort." },
+  infect: { n: "Infect père des loups", team: "loups", g: "loups", d: "Une fois dans la partie, tu peux infecter la victime des loups : elle devient loup-garou au lieu de mourir." },
+  loupblanc: { n: "Loup blanc", team: "solo", g: "solo", d: "Tu chasses avec les loups, mais une nuit sur deux tu peux dévorer un loup. Tu gagnes seul si tu es le dernier en vie." },
+  ange: { n: "Ange", team: "solo", g: "solo", d: "Tu gagnes seul si le village t'élimine au premier vote. Sinon, tu deviens un simple villageois." },
+  flute: { n: "Joueur de flûte", team: "solo", g: "solo", d: "Chaque nuit, tu charmes deux joueurs. Tu gagnes seul si tous les vivants sont charmés." },
+};
+const GROUPS = [["village", "Village"], ["loups", "Loups spéciaux"], ["solo", "Solitaires"]];
+const OPTIONAL = Object.keys(R).filter(k => R[k].g);
+const WOLFROLES = new Set(["loup", "grandloup", "infect", "loupblanc"]);
+
+let S = { screen: "home", n: 8, wolves: 0, on: { voyante: true, sorciere: true, chasseur: true, cupidon: false }, capitaine: false, voice: true, people: {}, game: null, openG: "village" };
 function load() {
   let d = null; try { d = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
+  if (!d) try { const o = JSON.parse(localStorage.getItem("auraloup1") || "null"); if (o) d = { people: o.people || {}, on: o.on, n: o.n, voice: o.voice }; } catch (e) {}
   if (d) for (const k of Object.keys(S)) if (d[k] !== undefined) S[k] = d[k];
   if (!S.game && !["home", "board", "stats"].includes(S.screen)) S.screen = "home";
+  if (S.game && S.screen === "night") S.game.sub = null;
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 function knownNames() {
@@ -276,11 +311,22 @@ const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
 function person(nm) { return S.people[nm] || (S.people[nm] = { games: 0, wins: 0, wolf: 0, wolfWins: 0, survived: 0, last: 0 }); }
 const statLine = p => p && p.games ? `${plural(p.games, "partie")} · ${plural(p.wins, "victoire")}` : "Nouveau ici";
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
-const autoWolves = n => n <= 6 ? 1 : n <= 9 ? 2 : n <= 12 ? 3 : 4;
-function deckFor(n) {
-  const k = S.wolves > 0 ? Math.min(S.wolves, Math.floor((n - 1) / 2)) : autoWolves(n);
-  const sp = SPECIALS.filter(r => S.on[r]).slice(0, Math.max(0, n - k - 1));
-  return [...Array(k).fill("loup"), ...sp, ...Array(n - k - sp.length).fill("villageois")];
+const autoWolves = n => n <= 6 ? 1 : n <= 9 ? 2 : n <= 12 ? 3 : n <= 15 ? 4 : 5;
+
+// paquet de cartes selon les réglages
+function deckInfo(n) {
+  let k = S.wolves > 0 ? Math.min(S.wolves, Math.floor((n - 1) / 2)) : autoWolves(n);
+  const deck = [], dropped = [];
+  const specialWolves = ["grandloup", "infect"].filter(r => S.on[r]);
+  for (const r of specialWolves) { if (k > 0) { deck.push(r); k--; } else dropped.push(r); }
+  for (let i = 0; i < k; i++) deck.push("loup");
+  for (const r of OPTIONAL) {
+    if (!S.on[r] || WOLFROLES.has(r) && r !== "loupblanc" || specialWolves.includes(r)) continue;
+    const c = R[r].card || 1;
+    if (deck.length + c <= n - 1 || (deck.length + c <= n && R[r].team !== "village")) for (let i = 0; i < c; i++) deck.push(r); else dropped.push(r);
+  }
+  while (deck.length < n) deck.push("villageois");
+  return { deck, dropped };
 }
 
 // ---------- voix du narrateur
@@ -296,98 +342,191 @@ function say(text) {
 
 // ---------- partie
 function newGame() {
-  const n = S.n, roles = shuffle(deckFor(n));
-  S.game = { roles, names: Array(n).fill(""), alive: Array(n).fill(true), cur: null, q: "", peek: false, night: 0, step: null, steps: [],
-    lovers: [], sel: [], seen: null, victim: null, saved: false, poisoned: null, heal: true, poison: true, deaths: [], hunterDone: false,
-    day: false, ended: false, winner: null, log: [] };
+  const n = S.n, roles = shuffle(deckInfo(n).deck);
+  S.game = { roles, names: Array(n).fill(""), alive: Array(n).fill(true), turned: Array(n).fill(false), cur: null, q: "", peek: false,
+    night: 0, step: 0, steps: [], sub: null, sel: [], lovers: [], seen: null,
+    victim: null, gmlVictim: null, whiteVictim: null, protect: null, lastProtect: null, healed: null, poisoned: null, heal: true, poison: true,
+    infectUsed: false, infected: null, ancienHit: false, model: null, charmed: [], crow: null, fox: true, foxRes: null, rusty: false, rustyNow: false,
+    idiot: false, captain: null, wolfDied: false, deaths: [], queue: [], when: null, day: false, votes: 0, ended: false, winner: null };
   go("cards");
 }
 const G = () => S.game;
 const nm = i => G().names[i] || `Joueur ${i + 1}`;
-const has = r => G().roles.includes(r);
-const aliveIdx = () => G().roles.map((_, i) => i).filter(i => G().alive[i]);
 const roleOf = i => G().roles[i];
-const alive = r => G().roles.some((x, i) => x === r && G().alive[i]);
-
-function startNight() {
-  const g = G(); g.night++; g.day = false; g.hunterShot = false; g.victim = null; g.saved = false; g.poisoned = null; g.sel = []; g.seen = null;
-  g.steps = ["sleep"];
-  if (g.night === 1 && has("cupidon")) g.steps.push("cupidon");
-  if (has("voyante")) g.steps.push("voyante");
-  g.steps.push("loups");
-  if (has("sorciere")) g.steps.push("sorciere");
-  g.steps.push("dawn");
-  g.step = 0; enterStep();
+const isWolf = i => WOLFROLES.has(roleOf(i)) || G().turned[i];
+const aliveIdx = () => G().roles.map((_, i) => i).filter(i => G().alive[i]);
+const has = r => G().roles.includes(r);
+const aliveRole = r => G().roles.some((x, i) => x === r && G().alive[i]);
+const idxOf = r => G().roles.map((x, i) => x === r ? i : -1).filter(i => i >= 0);
+function roleName(i) {
+  const r = roleOf(i), g = G();
+  if (g.turned[i] && !WOLFROLES.has(r)) return `${R[r].n}, devenu loup-garou`;
+  if (r === "ange" && g.votes > 0 && g.alive[i]) return "Ange, devenu villageois";
+  return R[r].n;
 }
+const teamOf = i => isWolf(i) && roleOf(i) !== "loupblanc" ? "loups" : R[roleOf(i)].team === "solo" && !(roleOf(i) === "ange" && G().votes > 0) ? "solo" : isWolf(i) ? "loups" : "village";
+
+// étapes de la nuit : [id, rôle qui agit, condition]
+const STEPS = [
+  ["sleep", null, () => true],
+  ["cupidon", "cupidon", g => g.night === 1],
+  ["enfant", "enfant", g => g.night === 1],
+  ["chienloup", "chienloup", g => g.night === 1],
+  ["soeur", "soeur", g => g.night === 1],
+  ["frere", "frere", g => g.night === 1],
+  ["salvateur", "salvateur", () => true],
+  ["voyante", "voyante", () => true],
+  ["renard", "renard", () => true],
+  ["loups", null, () => true],
+  ["infectTap", null, g => g.infected !== null],
+  ["grandloup", "grandloup", () => true],
+  ["loupblanc", "loupblanc", g => g.night % 2 === 0],
+  ["sorciere", "sorciere", () => true],
+  ["flute", "flute", () => true],
+  ["charmes", "flute", () => true],
+  ["corbeau", "corbeau", () => true],
+];
 const TEXT = {
   sleep: "La nuit tombe sur le village. Tout le monde ferme les yeux.",
   cupidon: "Cupidon, ouvre les yeux. Choisis deux amoureux.",
+  enfant: "Enfant sauvage, ouvre les yeux. Choisis ton modèle.",
+  chienloup: "Chien-loup, ouvre les yeux. Choisis ton camp.",
+  soeur: "Les deux sœurs, ouvrez les yeux et reconnaissez-vous.",
+  frere: "Les trois frères, ouvrez les yeux et reconnaissez-vous.",
+  salvateur: "Salvateur, ouvre les yeux. Qui protèges-tu cette nuit ?",
   voyante: "Voyante, ouvre les yeux. Choisis un joueur dont tu veux connaître le rôle.",
+  renard: "Renard, ouvre les yeux. Désigne trois joueurs à flairer.",
   loups: "Loups-garous, ouvrez les yeux. Mettez-vous d'accord sur une victime.",
+  infectTap: "Infect père des loups, touche discrètement la tête de la personne infectée.",
+  grandloup: "Grand méchant loup, ouvre les yeux. Choisis une victime de plus.",
+  loupblanc: "Loup blanc, ouvre les yeux. Tu peux dévorer un loup-garou.",
   sorciere: "Sorcière, ouvre les yeux.",
+  flute: "Joueur de flûte, ouvre les yeux. Choisis deux joueurs à charmer.",
+  charmes: "Les joueurs charmés, ouvrez les yeux et reconnaissez-vous.",
+  corbeau: "Corbeau, ouvre les yeux. Désigne un suspect.",
 };
+const BYE = {
+  cupidon: "Cupidon, rendors-toi. Les amoureux, ouvrez les yeux, regardez-vous, puis rendormez-vous.",
+  enfant: "Enfant sauvage, rendors-toi.", chienloup: "Chien-loup, rendors-toi.", soeur: "Les sœurs, rendormez-vous.", frere: "Les frères, rendormez-vous.",
+  salvateur: "Salvateur, rendors-toi.", voyante: "Voyante, rendors-toi.", renard: "Renard, rendors-toi.", loups: "Loups-garous, rendormez-vous.",
+  infectTap: "Père des loups, rendors-toi.", grandloup: "Grand méchant loup, rendors-toi.", loupblanc: "Loup blanc, rendors-toi.",
+  sorciere: "Sorcière, rendors-toi.", flute: "Joueur de flûte, rendors-toi.", charmes: "Charmés, rendormez-vous.", corbeau: "Corbeau, rendors-toi.",
+};
+// le rôle peut-il agir ? sinon on fait semblant pour ne rien trahir
+function canAct(id) {
+  const g = G();
+  if (id === "renard") return aliveRole("renard") && g.fox;
+  if (id === "grandloup") return aliveRole("grandloup") && !g.wolfDied;
+  if (id === "sorciere") return aliveRole("sorciere");
+  const r = (STEPS.find(s => s[0] === id) || [])[1];
+  return !r || aliveRole(r);
+}
+function startNight() {
+  const g = G(); g.night++; g.day = false; g.votes = g.votes || 0;
+  Object.assign(g, { victim: null, gmlVictim: null, whiteVictim: null, protect: null, healed: null, poisoned: null, infected: null, crow: null, sel: [], seen: null, foxRes: null, witchPoison: false });
+  g.rustyNow = g.rusty; g.rusty = false;
+  g.steps = STEPS.filter(([id, r, cond]) => (r === null || has(r)) && cond(g)).map(s => s[0]);
+  { const k = g.steps.indexOf("loups"); g.steps.splice(k + 1, 0, "infectTap"); }
+  g.steps.push("dawn"); g.step = 0; enterStep();
+}
 let fakeTimer = null;
 function enterStep() {
-  const g = G(), st = g.steps[g.step]; g.sel = []; g.seen = null; g.sub = null;
+  const g = G(); let st = g.steps[g.step]; g.sel = []; g.seen = null; g.sub = null; g.foxRes = null;
   clearTimeout(fakeTimer);
+  if (st === "infectTap" && g.infected === null) { g.step++; enterStep(); return; }
+  if (st === "charmes" && !(g.charmed.some(i => g.alive[i]) && aliveRole("flute"))) { g.step++; enterStep(); return; }
   if (st === "dawn") { dawn(); return; }
+  g.fake = !canAct(st);
   go("night");
   say(TEXT[st]);
-  // rôle mort : on fait semblant pour ne rien trahir
-  const r = { cupidon: "cupidon", voyante: "voyante", sorciere: "sorciere" }[st];
-  if (r && !alive(r)) fakeTimer = setTimeout(() => endStep(true), 6000 + Math.random() * 4000);
+  if (g.fake) fakeTimer = setTimeout(() => endStep(), 6000 + Math.random() * 4000);
 }
-function endStep(quiet) {
-  const g = G(), st = g.steps[g.step];
-  const bye = { cupidon: "Cupidon, rendors-toi. Les amoureux, ouvrez les yeux, regardez-vous, puis rendormez-vous.", voyante: "Voyante, rendors-toi.", loups: "Loups-garous, rendormez-vous.", sorciere: "Sorcière, rendors-toi." }[st];
+function endStep() {
+  const g = G(), st = g.steps[g.step], bye = BYE[st];
   if (bye) say(bye);
-  g.step++;
+  g.step++; g.sub = "wait"; save(); render();
   setTimeout(enterStep, bye ? (st === "cupidon" ? 7000 : 2600) : 300);
-  g.sub = "wait"; save(); render();
 }
+
+// ---------- morts
 function dawn() {
   const g = G(), list = [];
-  if (g.victim !== null && !g.saved) list.push(g.victim);
-  if (g.poisoned !== null && !list.includes(g.poisoned)) list.push(g.poisoned);
+  const wolfAttack = v => {
+    if (v === null || !g.alive[v]) return;
+    if (v === g.protect || v === g.healed) return;
+    if (roleOf(v) === "ancien" && !g.ancienHit) { g.ancienHit = true; return; }
+    if (roleOf(v) === "chevalier") g.rusty = true;
+    list.push(v);
+  };
+  if (g.infected === null) wolfAttack(g.victim);
+  wolfAttack(g.gmlVictim);
+  if (g.whiteVictim !== null && g.alive[g.whiteVictim]) list.push(g.whiteVictim);
+  if (g.poisoned !== null) list.push(g.poisoned);
+  if (g.rustyNow) { const w = aliveIdx().filter(isWolf); if (w.length) list.push(w[Math.random() * w.length | 0]); }
+  g.lastProtect = g.protect;
   g.day = true; killAll(list, "nuit");
 }
 function killAll(list, when) {
-  const g = G(); const out = [];
+  const g = G(), out = [];
   for (const i of list) if (g.alive[i] && !out.includes(i)) out.push(i);
-  for (const i of [...out]) if (g.lovers.includes(i)) { const o = g.lovers.find(x => x !== i); if (g.alive[o] && !out.includes(o)) out.push(o); }
-  for (const i of out) g.alive[i] = false;
+  for (let k = 0; k < out.length; k++) { const i = out[k]; if (g.lovers.includes(i)) { const o = g.lovers.find(x => x !== i); if (g.alive[o] && !out.includes(o)) out.push(o); } }
+  for (const i of out) { g.alive[i] = false; if (isWolf(i)) g.wolfDied = true; }
+  // l'enfant sauvage perd son modèle
+  for (const e of idxOf("enfant")) if (g.alive[e] && out.includes(g.model)) g.turned[e] = true;
   g.deaths = out; g.when = when;
-  const names = out.map(i => `${nm(i)}, qui était ${R[roleOf(i)].n}`).join(", et ");
+  g.queue = [];
+  for (const i of out) if (roleOf(i) === "chasseur") g.queue.push(["hunter", i]);
+  if (out.includes(g.captain)) g.queue.push(["successor", g.captain]);
+  const names = out.map(i => `${nm(i)}, qui était ${roleName(i)}`).join(", et ");
   if (when === "nuit") say(out.length ? `Le village se réveille. Cette nuit, ${out.length > 1 ? "sont morts" : "est mort"} : ${names}.` : "Le village se réveille. Miracle, personne n'est mort cette nuit !");
   else if (out.length) say(`${names}. ${out.length > 1 ? "Ils quittent" : "Il quitte"} le village.`);
   go("deaths");
 }
-function winner() {
-  const g = G(), a = aliveIdx(), w = a.filter(i => roleOf(i) === "loup").length;
-  if (g.lovers.length === 2 && a.length === 2 && a.every(i => g.lovers.includes(i)) && (roleOf(g.lovers[0]) === "loup") !== (roleOf(g.lovers[1]) === "loup")) return "amoureux";
-  if (!a.length) return "loups";
-  if (w === 0) return "village";
-  if (w >= a.length - w) return "loups";
-  return null;
-}
 function afterDeaths() {
   const g = G();
-  const hunter = g.deaths.find(i => roleOf(i) === "chasseur");
-  if (hunter !== undefined && !g.hunterShot) { g.hunterShot = true; g.sel = []; say(`${nm(hunter)}, tu étais le chasseur. Emmène quelqu'un avec toi.`); go("hunter"); return; }
+  const nx = g.queue.shift();
+  if (nx && nx[0] === "hunter") { g.sel = []; g.shooter = nx[1]; say(`${nm(nx[1])}, tu étais le chasseur. Emmène quelqu'un avec toi.`); go("hunter"); return; }
+  if (nx && nx[0] === "successor" && aliveIdx().length) { g.sel = []; say(`${nm(nx[1])}, tu étais capitaine. Désigne ton successeur.`); go("successor"); return; }
   const w = winner(); if (w) { finish(w); return; }
-  if (g.when === "nuit") { g.sel = []; say("Débattez, puis votez pour éliminer un suspect."); go("day"); }
-  else startNight();
+  if (g.when === "nuit") toDay(); else startNight();
+}
+function toDay() {
+  const g = G(); g.sel = [];
+  if (S.capitaine && (g.captain === null || !g.alive[g.captain])) { say("Le village doit élire son capitaine."); go("election"); return; }
+  say(g.crow !== null && g.alive[g.crow] ? `Le corbeau a parlé : ${nm(g.crow)} a déjà deux voix contre lui. Débattez, puis votez.` : "Débattez, puis votez pour éliminer un suspect.");
+  go("day");
+}
+function winner() {
+  const g = G(), a = aliveIdx();
+  if (!a.length) return "loups";
+  if (aliveRole("flute")) { const f = idxOf("flute")[0]; if (a.every(i => i === f || g.charmed.includes(i))) return "flute"; }
+  if (g.lovers.length === 2 && a.length === 2 && a.every(i => g.lovers.includes(i)) && isWolf(g.lovers[0]) !== isWolf(g.lovers[1])) return "amoureux";
+  const wolves = a.filter(isWolf), blanc = a.filter(i => roleOf(i) === "loupblanc"), others = a.length - wolves.length;
+  if (!wolves.length) return "village";
+  if (blanc.length && a.length === 1) return "loupblanc";
+  if (blanc.length) return others === 0 && wolves.length === 1 ? "loupblanc" : null;
+  if (wolves.length >= others) return "loups";
+  return null;
+}
+function won(i, w) {
+  const g = G();
+  if (w === "amoureux") return g.lovers.includes(i);
+  if (w === "loupblanc") return roleOf(i) === "loupblanc";
+  if (w === "flute") return roleOf(i) === "flute";
+  if (w === "ange") return roleOf(i) === "ange";
+  if (roleOf(i) === "loupblanc" || roleOf(i) === "flute" || (roleOf(i) === "ange" && g.votes === 0)) return false;
+  return (isWolf(i) ? "loups" : "village") === w;
 }
 function finish(w) {
   const g = G(); g.winner = w; g.ended = true; const now = Date.now();
   g.names.forEach((name, i) => {
-    const p = person(name), r = roleOf(i); p.games++; p.last = now;
-    const win = w === "amoureux" ? g.lovers.includes(i) : R[r].team === w;
+    const p = person(name), win = won(i, w); p.games++; p.last = now;
     if (win) p.wins++;
-    if (r === "loup") { p.wolf++; if (win) p.wolfWins++; }
+    if (isWolf(i)) { p.wolf++; if (win) p.wolfWins++; }
     if (g.alive[i]) p.survived++;
   });
-  say({ village: "Les villageois ont gagné ! Il n'y a plus de loups.", loups: "Les loups-garous ont gagné ! Le village est dévoré.", amoureux: "Les amoureux ont gagné ! L'amour triomphe de tout." }[w]);
+  say({ village: "Les villageois ont gagné ! Il n'y a plus de loups.", loups: "Les loups-garous ont gagné ! Le village est dévoré.", amoureux: "Les amoureux ont gagné ! L'amour triomphe de tout.",
+    loupblanc: "Le loup blanc a gagné, seul contre tous !", flute: "Le joueur de flûte a gagné : tout le village est sous son charme !", ange: "L'ange a gagné ! Il voulait être éliminé." }[w]);
   go("end"); confetti();
 }
 
@@ -395,24 +534,74 @@ function finish(w) {
 const app = document.getElementById("app"), sheet = document.getElementById("sheet");
 function go(s) { S.screen = s; save(); render(); scrollTo(0, 0); }
 const step = (act, val, cls = "") => `<div class="step"><button data-a="${act}" data-v="-1" aria-label="Moins">−</button><span class="${cls}">${val}</span><button data-a="${act}" data-v="1" aria-label="Plus">+</button></div>`;
-const pickList = (idx, max) => `<div class="list">${idx.map(i => `<button class="who ${G().sel.includes(i) ? "sel" : ""}" data-a="sel" data-v="${i}" data-max="${max}">${av(nm(i))}<span class="t">${esc(nm(i))}</span></button>`).join("")}</div>`;
-const roleChip = r => `<span class="rchip ${R[r].team}">${R[r].n}</span>`;
+const pickList = (idx, max) => `<div class="list">${idx.map(i => `<button class="who ${G().sel.includes(i) ? "sel" : ""}" data-a="sel" data-v="${i}" data-max="${max}">${av(nm(i))}<span class="t">${esc(nm(i))}${G().captain === i ? "<small>Capitaine</small>" : ""}</span></button>`).join("")}</div>`;
+const groupNames = ids => ids.map(i => esc(nm(i))).join(", ");
+
+function nightBody(st) {
+  const g = G(), A_ = aliveIdx();
+  if (g.sub === "wait") return `<div class="nightwait">Chut…</div>`;
+  if (st === "sleep") return `<div class="hint">Fermez tous les yeux. Le téléphone va appeler chaque rôle.</div><div class="spacer"></div><button class="btn" data-a="stepDone">Tout le monde dort</button>`;
+  if (g.fake) return `<div class="nightwait">…</div>`;
+  const sel = g.sel, btn = (a, ok, txt, off) => `<button class="btn" data-a="${a}" ${ok ? "" : "disabled"}>${ok ? txt : off}</button>`;
+  switch (st) {
+    case "cupidon": return pickList(A_, 2) + btn("cupid", sel.length === 2, "Ils sont amoureux", "Choisis deux joueurs");
+    case "enfant": return pickList(A_.filter(i => roleOf(i) !== "enfant"), 1) + btn("model", sel.length, "C'est mon modèle", "Choisis ton modèle");
+    case "chienloup": return `<div class="two"><button class="btn soft" data-a="dog" data-v="village">Rester chien</button><button class="btn" data-a="dog" data-v="loups">Devenir loup</button></div>`;
+    case "soeur": case "frere": return `<div class="rolebox" style="text-align:center"><small>${st === "soeur" ? "Les sœurs" : "Les frères"}</small>${groupNames(idxOf(st))}</div><button class="btn" data-a="stepDone">C'est fait</button>`;
+    case "salvateur": return `<div class="hint">${g.lastProtect !== null ? `Tu ne peux pas protéger ${esc(nm(g.lastProtect))} deux nuits de suite.` : "Tu peux te protéger toi-même."}</div>` + pickList(A_.filter(i => i !== g.lastProtect), 1) + btn("protect", sel.length, "Protéger", "Choisis un joueur");
+    case "voyante": return g.seen !== null
+      ? `<div class="reveal ${teamOf(g.seen)}" style="margin-top:56px">${av(nm(g.seen), "xl")}<div class="label">${esc(nm(g.seen))} est</div><div class="place-name">${esc(roleName(g.seen))}</div></div><button class="btn" data-a="stepDone">Je me rendors</button>`
+      : pickList(A_.filter(i => roleOf(i) !== "voyante"), 1) + btn("see", sel.length, "Voir son rôle", "Choisis un joueur");
+    case "renard": return g.foxRes !== null
+      ? `<div class="reveal ${g.foxRes ? "loups" : "village"}" style="margin-top:0;padding-top:20px"><div class="place-name">${g.foxRes ? "Il y a au moins un loup !" : "Aucun loup"}</div><div class="hint">${g.foxRes ? "Ton flair est intact." : "Tu perds ton flair pour le reste de la partie."}</div></div><button class="btn" data-a="stepDone">Je me rendors</button>`
+      : (() => { const pool = A_.filter(i => roleOf(i) !== "renard"), need = Math.min(3, pool.length); g.need = need;
+          return pickList(pool, need) + btn("sniff", sel.length === need, "Flairer", `Choisis ${need} joueur${need > 1 ? "s" : ""}`); })();
+    case "loups": {
+      if (!A_.some(i => !isWolf(i))) return `<div class="hint">Plus personne à dévorer.</div><button class="btn" data-a="stepDone">Se rendormir</button>`;
+      const canInfect = aliveRole("infect") && !g.infectUsed;
+      return `<div class="hint">Loups : ${groupNames(A_.filter(isWolf))}</div>` + pickList(A_.filter(i => !isWolf(i)), 1) +
+        (canInfect && sel.length ? `<div class="two"><button class="btn" data-a="bite">Dévorer</button><button class="btn soft" data-a="infect">Infecter</button></div>` : btn("bite", sel.length, sel.length ? `Dévorer ${esc(nm(sel[0]))}` : "", "Choisissez la victime"));
+    }
+    case "infectTap": return `<div class="rolebox" style="text-align:center"><small>Infecté</small>${esc(nm(g.infected))}</div><div class="hint">Il fait maintenant partie des loups et se réveillera avec eux.</div><button class="btn" data-a="stepDone">C'est fait</button>`;
+    case "grandloup": return pickList(A_.filter(i => !isWolf(i) && i !== g.victim), 1) + btn("gml", sel.length, "Dévorer aussi", "Choisis une victime") + `<button class="btn soft" data-a="stepDone">Personne</button>`;
+    case "loupblanc": return pickList(A_.filter(i => isWolf(i) && roleOf(i) !== "loupblanc"), 1) + btn("white", sel.length, "Dévorer ce loup", "Choisis un loup") + `<button class="btn soft" data-a="stepDone">Pas cette nuit</button>`;
+    case "sorciere": {
+      if (g.witchPoison) return `<div class="hint">Qui veux-tu empoisonner ?</div>${pickList(A_.filter(i => roleOf(i) !== "sorciere"), 1)}${btn("poisonGo", sel.length, "Empoisonner", "Choisis un joueur")}<button class="btn soft" data-a="poisonNo">Finalement non</button>`;
+      const attacked = [g.infected === null ? g.victim : null, g.gmlVictim].filter(v => v !== null && v !== g.protect);
+      return `<div class="reveal loups" style="margin-top:0;padding-top:20px"><div class="label">Cette nuit, les loups ont attaqué</div><div class="place-name">${attacked.length ? groupNames(attacked) : "personne"}</div>
+        <div class="hint">Potion de vie : ${g.heal ? "disponible" : "utilisée"} · Potion de mort : ${g.poison ? "disponible" : "utilisée"}</div></div>
+        ${g.heal ? attacked.map(v => `<button class="btn" data-a="heal" data-v="${v}">Sauver ${esc(nm(v))}</button>`).join("") : ""}
+        ${g.healed !== null ? `<div class="hint" style="text-align:center">Tu as sauvé ${esc(nm(g.healed))}.</div>` : ""}
+        ${g.poison && g.poisoned === null ? `<button class="btn soft" data-a="poisonOpen">Empoisonner quelqu'un</button>` : g.poisoned !== null ? `<div class="hint" style="text-align:center">Tu as empoisonné ${esc(nm(g.poisoned))}.</div>` : ""}
+        <button class="btn soft" data-a="stepDone">Je me rendors</button>`;
+    }
+    case "flute": { const pool = A_.filter(i => roleOf(i) !== "flute" && !g.charmed.includes(i)); const need = Math.min(2, pool.length);
+      return pickList(pool, 2) + btn("charm", sel.length === need, "Charmer", need ? `Choisis ${need} joueur${need > 1 ? "s" : ""}` : "Tout le monde est charmé"); }
+    case "charmes": return `<div class="rolebox" style="text-align:center"><small>Les charmés</small>${groupNames(g.charmed.filter(i => g.alive[i]))}</div><button class="btn" data-a="stepDone">C'est fait</button>`;
+    case "corbeau": return pickList(A_.filter(i => roleOf(i) !== "corbeau"), 1) + btn("crow", sel.length, "Désigner", "Choisis un suspect") + `<button class="btn soft" data-a="stepDone">Personne</button>`;
+  }
+  return "";
+}
 
 function render() {
   const g = G(); let h = "";
-  document.body.classList.toggle("dark-night", ["night"].includes(S.screen));
+  document.body.classList.toggle("dark-night", S.screen === "night");
   switch (S.screen) {
     case "home": {
-      const deck = deckFor(S.n), k = deck.filter(r => r === "loup").length;
+      const { deck, dropped } = deckInfo(S.n), counts = deck.reduce((m, r) => (m[r] = (m[r] || 0) + 1, m), {});
       h = `<div class="brand"><span class="mark">${MARK}</span><div class="logo">Aura <i>Loup</i></div></div>
         <div class="sub" style="margin-top:0">Loup-Garou, et c'est le téléphone qui fait le narrateur.</div>
         <div class="big"><div class="label">Joueurs</div>${step("n", S.n, "count")}</div>
         <div class="box">
-          <div class="line"><div class="name">Loups-garous<small>${S.wolves ? "Choisi" : "Automatique"}</small></div>${step("wolves", S.wolves ? k : "Auto")}</div>
-          ${SPECIALS.map(r => `<button class="line toggle" data-a="role" data-v="${r}"><span class="name">${R[r].n}<small>${R[r].d}</small></span><i class="sw ${S.on[r] ? "on" : ""}"></i></button>`).join("")}
+          <div class="line"><div class="name">Loups-garous<small>${S.wolves ? "Choisi" : "Automatique"} · Grand méchant loup et Infect en font partie</small></div>${step("wolves", S.wolves ? deck.filter(r => WOLFROLES.has(r) && r !== "loupblanc").length : "Auto")}</div>
+          <button class="line toggle" data-a="cap"><span class="name">Capitaine<small>Élu le premier jour, il désigne son successeur en mourant</small></span><i class="sw ${S.capitaine ? "on" : ""}"></i></button>
           <button class="line toggle" data-a="voice"><span class="name">Narration à voix haute<small>Le téléphone parle pendant la nuit</small></span><i class="sw ${S.voice ? "on" : ""}"></i></button>
         </div>
-        <div class="chips">${Object.entries(deck.reduce((m, r) => (m[r] = (m[r] || 0) + 1, m), {})).map(([r, c]) => `<span class="chip">${c} ${c > 1 ? { loup: "Loups-garous", villageois: "Villageois" }[r] || R[r].n : R[r].n}</span>`).join("")}</div>
+        ${GROUPS.map(([gid, gname]) => { const list = OPTIONAL.filter(r => R[r].g === gid), on = list.filter(r => S.on[r]).length;
+          return `<details class="box" ${S.openG === gid ? "open" : ""} data-g="${gid}"><summary>Rôles : ${gname} <small>${on} / ${list.length}</small></summary>
+            ${list.map(r => `<button class="line toggle" data-a="role" data-v="${r}"><span class="name">${R[r].pl && R[r].card ? R[r].pl : R[r].n}<small>${R[r].d}</small></span><i class="sw ${S.on[r] ? "on" : ""}"></i></button>`).join("")}</details>`; }).join("")}
+        <div class="chips">${Object.entries(counts).map(([r, c]) => `<span class="chip ${R[r].team}">${R[r].card ? R[r].pl : c > 1 ? `${c} ${R[r].pl || R[r].n}` : R[r].n}</span>`).join("")}</div>
+        ${dropped.length ? `<div class="hint" style="text-align:center">Pas assez de joueurs pour : ${dropped.map(r => R[r].n).join(", ")}.</div>` : ""}
         <button class="btn" data-a="play">Jouer</button>
         <button class="btn alt" data-a="board">Joueurs et stats</button>
         <div class="links"><button class="link" data-a="rules">Règles</button><a class="link" href="../" style="text-decoration:none">Aura Cover</a><a class="link" href="../spy/" style="text-decoration:none">Spy</a><a class="link" href="../time/" style="text-decoration:none">Time</a><a class="link" href="../tete/" style="text-decoration:none">Tête</a></div>`;
@@ -424,7 +613,7 @@ function render() {
         <div class="sub">${left === S.n ? "N'importe laquelle, puis dis qui tu es." : `Plus que ${left}. Passe le téléphone !`}</div>
         <div class="cards">${g.names.map((x, i) => x
           ? `<button class="card taken" aria-label="Carte de ${esc(x)}">${av(x)}<span>${esc(x)}</span></button>`
-          : `<button class="card" style="animation-delay:${i * 35}ms" data-a="pick" data-v="${i}" aria-label="Carte ${i + 1}"><span class="q">?</span><span class="num">${i + 1}</span></button>`).join("")}</div>
+          : `<button class="card" style="animation-delay:${i * 30}ms" data-a="pick" data-v="${i}" aria-label="Carte ${i + 1}"><span class="q">?</span><span class="num">${i + 1}</span></button>`).join("")}</div>
         <div class="spacer"></div>
         <div class="links"><button class="link" data-a="quit">Annuler la partie</button></div>`;
       break;
@@ -438,15 +627,19 @@ function render() {
       break;
     }
     case "card": {
-      const i = g.cur, r = roleOf(i), lover = g.lovers.includes(i) ? g.lovers.find(x => x !== i) : null;
+      const i = g.cur, r = roleOf(i), lover = g.lovers.includes(i) ? g.lovers.find(x => x !== i) : null, all = g.names.every(Boolean);
+      const mates = isWolf(i) && all ? aliveIdx().filter(j => j !== i && isWolf(j)) : [];
       h = `<div class="spacer"></div>
-        <div class="reveal ${R[r].team}">
+        <div class="reveal ${teamOf(i)}">
           ${av(nm(i), "xl")}
           <div class="label">${esc(nm(i))}, tu es</div>
-          <div class="place-name">${R[r].n}</div>
-          <div class="hint">${R[r].d}</div>
-          ${r === "loup" && g.roles.filter(x => x === "loup").length > 1 && g.names.every(Boolean) ? `<div class="rolebox"><small>Les autres loups</small>${g.roles.map((x, j) => x === "loup" && j !== i ? esc(nm(j)) : null).filter(Boolean).join(", ")}</div>` : ""}
+          <div class="place-name">${esc(roleName(i))}</div>
+          <div class="hint">${g.turned[i] && !WOLFROLES.has(r) ? R.loup.d : R[r].d}</div>
+          ${mates.length && g.night > 0 ? `<div class="rolebox"><small>Les autres loups</small>${groupNames(mates)}</div>` : ""}
           ${lover !== null ? `<div class="rolebox"><small>Tu es amoureux de</small>${esc(nm(lover))}</div>` : ""}
+          ${(r === "soeur" || r === "frere") && g.night > 0 ? `<div class="rolebox"><small>${r === "soeur" ? "Ta sœur" : "Tes frères"}</small>${groupNames(idxOf(r).filter(j => j !== i))}</div>` : ""}
+          ${r === "enfant" && g.model !== null ? `<div class="rolebox"><small>Ton modèle</small>${esc(nm(g.model))}</div>` : ""}
+          ${g.charmed.includes(i) ? `<div class="rolebox"><small>Envoûté</small>Le joueur de flûte t'a charmé</div>` : ""}
           ${!g.alive[i] ? `<div class="hint">Tu es mort, mais tu peux encore regarder la partie.</div>` : ""}
         </div>
         <div class="spacer"></div>
@@ -464,69 +657,75 @@ function render() {
     }
     case "night": {
       const st = g.steps[g.step];
-      let body = "";
-      const fake = { cupidon: "cupidon", voyante: "voyante", sorciere: "sorciere" }[st];
-      if (g.sub === "wait") body = `<div class="nightwait">Chut…</div>`;
-      else if (st === "sleep") body = `<div class="hint">Fermez tous les yeux. Le téléphone va appeler chaque rôle.</div><div class="spacer"></div><button class="btn" data-a="stepDone">Tout le monde dort</button>`;
-      else if (fake && !alive(fake)) body = `<div class="nightwait">${R[fake].n} fait son choix…</div>`;
-      else if (st === "cupidon") body = `${pickList(aliveIdx(), 2)}<button class="btn" data-a="cupid" ${g.sel.length === 2 ? "" : "disabled"}>${g.sel.length === 2 ? "Ils sont amoureux" : "Choisis deux joueurs"}</button>`;
-      else if (st === "voyante") body = g.seen !== null
-        ? `<div class="reveal ${R[roleOf(g.seen)].team}" style="margin-top:56px">${av(nm(g.seen), "xl")}<div class="label">${esc(nm(g.seen))} est</div><div class="place-name">${R[roleOf(g.seen)].n}</div></div><button class="btn" data-a="stepDone">Je me rendors</button>`
-        : `${pickList(aliveIdx().filter(i => roleOf(i) !== "voyante"), 1)}<button class="btn" data-a="see" ${g.sel.length ? "" : "disabled"}>Voir son rôle</button>`;
-      else if (st === "loups") body = `${pickList(aliveIdx().filter(i => roleOf(i) !== "loup"), 1)}<button class="btn" data-a="bite" ${g.sel.length ? "" : "disabled"}>${g.sel.length ? `Dévorer ${esc(nm(g.sel[0]))}` : "Choisissez la victime"}</button>`;
-      else if (st === "sorciere") {
-        if (g.witchPoison) body = `<div class="hint">Qui veux-tu empoisonner ?</div>${pickList(aliveIdx().filter(i => roleOf(i) !== "sorciere"), 1)}<button class="btn" data-a="poisonGo" ${g.sel.length ? "" : "disabled"}>Empoisonner</button><button class="btn soft" data-a="poisonNo">Finalement non</button>`;
-        else body = `<div class="reveal loups" style="margin-top:0;padding-top:20px"><div class="label">Cette nuit, les loups ont attaqué</div><div class="place-name">${g.victim !== null ? esc(nm(g.victim)) : "personne"}</div>
-          <div class="hint">Potion de vie : ${g.heal ? "disponible" : "déjà utilisée"} · Potion de mort : ${g.poison ? "disponible" : "déjà utilisée"}</div></div>
-          ${g.heal && g.victim !== null && !g.saved ? `<button class="btn" data-a="heal">Sauver ${esc(nm(g.victim))}</button>` : g.saved ? `<div class="hint" style="text-align:center">Tu as sauvé ${esc(nm(g.victim))}.</div>` : ""}
-          ${g.poison && g.poisoned === null ? `<button class="btn soft" data-a="poisonOpen">Empoisonner quelqu'un</button>` : ""}
-          <button class="btn soft" data-a="stepDone">Je me rendors</button>`;
-      }
       h = `<div class="label" style="text-align:center">Nuit ${g.night}</div>
         <h2>${g.sub === "wait" ? "…" : st === "sleep" ? "La nuit tombe" : esc(TEXT[st] || "")}</h2>
-        ${body}
+        ${nightBody(st)}
         <div class="spacer"></div>
         ${S.voice ? "" : `<div class="hint" style="text-align:center">Narration coupée : lisez à voix basse.</div>`}`;
       break;
     }
     case "deaths": {
       const d = g.deaths;
-      h = `<div class="label" style="text-align:center">${g.when === "nuit" ? `Le jour se lève · Jour ${g.night}` : g.when === "vote" ? "Le village a voté" : "Le chasseur a tiré"}</div>
+      const lbl = g.when === "nuit" ? `Le jour se lève · Jour ${g.night}` : g.when === "vote" ? "Le village a voté" : "Le chasseur a tiré";
+      h = `<div class="label" style="text-align:center">${lbl}</div>
         <h2>${d.length ? (g.when === "nuit" ? "Cette nuit…" : g.when === "vote" ? "Éliminé" : "Touché !") : "Personne n'est mort !"}</h2>
-        ${d.map(i => `<div class="reveal ${R[roleOf(i)].team}" style="margin-top:56px">${av(nm(i), "xl dead")}<div class="label">${esc(nm(i))} était</div><div class="place-name">${R[roleOf(i)].n}</div>
-          ${g.lovers.includes(i) && d.includes(g.lovers.find(x => x !== i)) && d.indexOf(i) > 0 ? `<div class="hint">Mort de chagrin, par amour.</div>` : ""}</div>`).join("")}
+        ${d.map(i => `<div class="reveal ${teamOf(i)}" style="margin-top:56px">${av(nm(i), "xl dead")}<div class="label">${esc(nm(i))} était</div><div class="place-name">${esc(roleName(i))}</div>
+          ${g.lovers.includes(i) && d.indexOf(i) > 0 && d.includes(g.lovers.find(x => x !== i)) ? `<div class="hint">Mort de chagrin, par amour.</div>` : ""}</div>`).join("")}
         <div class="spacer"></div>
         <button class="btn" data-a="afterDeaths">Continuer</button>`;
       break;
     }
     case "hunter": {
-      const hunter = g.deaths.find(i => roleOf(i) === "chasseur");
-      h = `<h2>${esc(nm(hunter))}, le chasseur, tire !</h2>
+      h = `<h2>${esc(nm(g.shooter))}, le chasseur, tire !</h2>
         <div class="sub">Qui emportes-tu avec toi ?</div>
         ${pickList(aliveIdx(), 1)}
         <div class="spacer"></div>
         <button class="btn" data-a="shoot" ${g.sel.length ? "" : "disabled"}>${g.sel.length ? `Tirer sur ${esc(nm(g.sel[0]))}` : "Choisis ta cible"}</button>`;
       break;
     }
+    case "successor": {
+      h = `<h2>Le capitaine est mort</h2>
+        <div class="sub">${esc(nm(g.captain))} désigne son successeur.</div>
+        ${pickList(aliveIdx(), 1)}
+        <div class="spacer"></div>
+        <button class="btn" data-a="succ" ${g.sel.length ? "" : "disabled"}>${g.sel.length ? `${esc(nm(g.sel[0]))} devient capitaine` : "Choisis le successeur"}</button>`;
+      break;
+    }
+    case "election": {
+      h = `<div class="label" style="text-align:center">Jour ${g.night}</div><h2>Élection du capitaine</h2>
+        <div class="sub">Votez à main levée. Le capitaine compte double au vote et tranche les égalités.</div>
+        ${pickList(aliveIdx(), 1)}
+        <div class="spacer"></div>
+        <button class="btn" data-a="elect" ${g.sel.length ? "" : "disabled"}>${g.sel.length ? `${esc(nm(g.sel[0]))} est capitaine` : "Qui est élu ?"}</button>`;
+      break;
+    }
     case "day": {
+      const crow = g.crow !== null && g.alive[g.crow] ? g.crow : null;
       h = `<div class="label" style="text-align:center">Jour ${g.night}</div>
         <h2>Le village vote</h2>
-        <div class="sub">Débattez, accusez, puis touchez celui que le village élimine.</div>
+        <div class="sub">Débattez, accusez, puis touchez celui que le village élimine.${g.captain !== null && g.alive[g.captain] ? ` La voix de ${esc(nm(g.captain))}, capitaine, compte double.` : ""}${g.idiot ? ` L'idiot du village ne vote plus.` : ""}</div>
+        ${crow !== null ? `<div class="rolebox" style="text-align:center"><small>Le corbeau a parlé</small>${esc(nm(crow))} a déjà 2 voix contre lui</div>` : ""}
         ${pickList(aliveIdx(), 1)}
         <div class="spacer"></div>
         <button class="btn" data-a="vote" ${g.sel.length ? "" : "disabled"}>${g.sel.length ? `Éliminer ${esc(nm(g.sel[0]))}` : "Qui est éliminé ?"}</button>
-        <button class="btn soft" data-a="noVote">Personne aujourd'hui</button>
+        <div class="two"><button class="btn soft" data-a="tie">Égalité</button><button class="btn soft" data-a="noVote">Personne</button></div>
         <div class="links"><button class="link" data-a="peek">Revoir ma carte</button><button class="link" data-a="rules">Règles</button><button class="link" data-a="quit">Quitter</button></div>`;
       break;
     }
+    case "idiot": {
+      const i = idxOf("idiot")[0];
+      h = `<div class="spacer"></div><div class="reveal village">${av(nm(i), "xl")}<div class="label">${esc(nm(i))} est</div><div class="place-name">Idiot du village</div>
+        <div class="hint">Le village l'épargne en rigolant. Il reste en vie, mais ne vote plus.</div></div>
+        <div class="spacer"></div><button class="btn" data-a="idiotOk">La nuit tombe</button>`;
+      break;
+    }
     case "end": {
-      const w = g.winner, t = { village: "Le village gagne !", loups: "Les loups-garous gagnent !", amoureux: "Les amoureux gagnent !" }[w];
-      const won = i => w === "amoureux" ? g.lovers.includes(i) : R[roleOf(i)].team === w;
-      const idx = g.names.map((_, i) => i).sort((a, b) => won(b) - won(a));
-      h = `<div class="endhead ${w === "loups" ? "loups" : "agents"}"><div class="label">Partie terminée · ${plural(g.night, "nuit")}</div><h2>${t}</h2></div>
+      const w = g.winner, t = { village: "Le village gagne !", loups: "Les loups-garous gagnent !", amoureux: "Les amoureux gagnent !", loupblanc: "Le loup blanc gagne seul !", flute: "Le joueur de flûte gagne !", ange: "L'ange gagne !" }[w];
+      const idx = g.names.map((_, i) => i).sort((a, b) => won(b, w) - won(a, w));
+      h = `<div class="endhead ${w === "loups" || w === "loupblanc" ? "loups" : "agents"}"><div class="label">Partie terminée · ${plural(g.night, "nuit")}</div><h2>${t}</h2></div>
         <div class="box">${idx.map(i => `<div class="res ${g.alive[i] ? "" : "dead"}">${av(nm(i), g.alive[i] ? "" : "dead")}
-          <span class="t"><span>${esc(nm(i))}${g.lovers.includes(i) ? " ♥" : ""}</span><small>${roleChip(roleOf(i))}</small></span>
-          ${won(i) ? `<span class="win">Gagné</span>` : ""}</div>`).join("")}</div>
+          <span class="t"><span>${esc(nm(i))}${g.lovers.includes(i) ? " ♥" : ""}</span><small class="rchip ${teamOf(i)}">${esc(roleName(i))}</small></span>
+          ${won(i, w) ? `<span class="win">Gagné</span>` : ""}</div>`).join("")}</div>
         <div class="spacer"></div>
         <button class="btn" data-a="play">Rejouer</button>
         <button class="btn soft" data-a="board">Classement</button>
@@ -567,6 +766,7 @@ function render() {
     }
   }
   app.innerHTML = h;
+  app.querySelectorAll("details[data-g]").forEach(d => d.ontoggle = () => { if (d.open) { S.openG = d.dataset.g; app.querySelectorAll("details[data-g]").forEach(o => { if (o !== d) o.open = false; }); save(); } });
   const q = document.getElementById("q");
   if (q) { q.oninput = () => { g.q = q.value; document.getElementById("wl").innerHTML = whoList(); };
     q.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); const v = q.value.trim(); if (v) choose(knownNames().find(n => fold(n) === fold(v)) || v.slice(0, 16)); } }; }
@@ -593,20 +793,21 @@ function openSheet(kind) {
   if (!kind) { sheet.innerHTML = ""; return; }
   const g = G();
   const inner = kind === "rules" ? `<h2>Les règles</h2><div class="rules">
-      <p>Chacun prend une carte en secret. Les <b>loups-garous</b> veulent dévorer le village, les <b>villageois</b> veulent démasquer les loups.</p>
-      <p><b>La nuit</b>, le téléphone posé au milieu appelle chaque rôle à voix haute. Seuls les joueurs appelés ouvrent les yeux et touchent le téléphone : les loups choisissent une victime, la voyante regarde un rôle, la sorcière sauve ou empoisonne.</p>
-      <p><b>Le jour</b>, le téléphone annonce les morts et leur rôle. Le village débat et vote pour éliminer un suspect.</p>
-      <p>Le <b>chasseur</b> qui meurt emporte quelqu'un. Les <b>amoureux</b> de Cupidon meurent ensemble.</p>
-      <p>Le village gagne quand tous les loups sont morts. Les loups gagnent quand ils sont aussi nombreux que les autres.</p></div><button class="btn" data-a="close">Compris</button>`
+      <p>Chacun prend une carte en secret. Les <b>loups-garous</b> veulent dévorer le village, les <b>villageois</b> veulent démasquer les loups. Certains <b>solitaires</b> jouent pour eux seuls.</p>
+      <p><b>La nuit</b>, le téléphone posé au milieu appelle chaque rôle à voix haute. Seuls les joueurs appelés ouvrent les yeux et touchent le téléphone. Un rôle mort est quand même appelé, pour ne rien trahir.</p>
+      <p><b>Le jour</b>, le téléphone annonce les morts et leur rôle. Le village débat et vote pour éliminer un suspect. En cas d'égalité, touchez « Égalité » : le bouc émissaire meurt s'il est en vie, sinon personne.</p>
+      <p>Le village gagne quand tous les loups sont morts. Les loups gagnent quand ils sont aussi nombreux que les autres. Le loup blanc, le joueur de flûte, l'ange et les amoureux ont leurs propres victoires.</p>
+      <p>Chaque rôle est expliqué dans les réglages de l'accueil et sur la carte du joueur.</p></div><button class="btn" data-a="close">Compris</button>`
     : `<h2>Qui veut revoir sa carte ?</h2><div class="list">${g.names.map((_, i) => `<button class="who" data-a="peekOne" data-v="${i}">${av(nm(i))}<span class="t">${esc(nm(i))}</span></button>`).join("")}</div>
       <button class="btn soft" data-a="close">Annuler</button>`;
   sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true">${inner}</div></div>`;
 }
 
 const A = {
-  n: d => { S.n = Math.max(5, Math.min(16, S.n + +d)); save(); render(); },
+  n: d => { S.n = Math.max(5, Math.min(18, S.n + +d)); save(); render(); },
   wolves: d => { const cur = S.wolves || autoWolves(S.n); let v = cur + +d; if (v < 1) v = 0; S.wolves = Math.min(v, Math.floor((S.n - 1) / 2)); save(); render(); },
   role: v => { S.on[v] = !S.on[v]; save(); render(); },
+  cap: () => { S.capitaine = !S.capitaine; save(); render(); },
   voice: () => { S.voice = !S.voice; save(); render(); if (S.voice) say("Narration activée."); },
   play: () => { wake(); newGame(); },
   home: () => { if (G() && G().ended) S.game = null; go("home"); },
@@ -617,7 +818,7 @@ const A = {
   rules: () => openSheet("rules"),
   close: () => openSheet(null),
   bg: (v, e) => { if (e.target.classList.contains("sheet")) openSheet(null); },
-  quit: (v, e) => { if (!S.sureQuit) { S.sureQuit = true; e.target.closest("button").textContent = "Sûr ? Retouche"; setTimeout(() => S.sureQuit = false, 3000); return; } S.sureQuit = false; speechSynthesis && speechSynthesis.cancel(); S.game = null; go("home"); },
+  quit: (v, e) => { if (!S.sureQuit) { S.sureQuit = true; e.target.closest("button").textContent = "Sûr ? Retouche"; setTimeout(() => S.sureQuit = false, 3000); return; } S.sureQuit = false; try { speechSynthesis.cancel(); } catch (e) {} S.game = null; go("home"); },
   pick: v => { const g = G(); g.cur = +v; g.peek = false; g.q = ""; buzz(15); go("who"); },
   me: v => choose(v),
   backCards: () => go("cards"),
@@ -630,20 +831,40 @@ const A = {
     buzz(10); render(); },
   stepDone: () => endStep(),
   cupid: () => { const g = G(); if (g.sel.length !== 2) return; g.lovers = g.sel.slice(); endStep(); },
+  model: () => { const g = G(); if (!g.sel.length) return; g.model = g.sel[0]; endStep(); },
+  dog: v => { const g = G(); if (v === "loups") idxOf("chienloup").forEach(i => g.turned[i] = true); endStep(); },
+  protect: () => { const g = G(); if (!g.sel.length) return; g.protect = g.sel[0]; endStep(); },
   see: () => { const g = G(); if (!g.sel.length) return; g.seen = g.sel[0]; render(); },
+  sniff: () => { const g = G(); if (!g.sel.length || g.sel.length !== g.need) return; g.foxRes = g.sel.some(isWolf); if (!g.foxRes) g.fox = false; render(); },
   bite: () => { const g = G(); if (!g.sel.length) return; g.victim = g.sel[0]; endStep(); },
-  heal: () => { const g = G(); g.saved = true; g.heal = false; save(); render(); },
+  infect: () => { const g = G(); if (!g.sel.length) return; g.victim = g.sel[0]; g.infected = g.sel[0]; g.infectUsed = true; g.turned[g.infected] = true; endStep(); },
+  gml: () => { const g = G(); if (!g.sel.length) return; g.gmlVictim = g.sel[0]; endStep(); },
+  white: () => { const g = G(); if (!g.sel.length) return; g.whiteVictim = g.sel[0]; endStep(); },
+  heal: v => { const g = G(); g.healed = +v; g.heal = false; save(); render(); },
   poisonOpen: () => { const g = G(); g.witchPoison = true; g.sel = []; render(); },
   poisonNo: () => { const g = G(); g.witchPoison = false; render(); },
   poisonGo: () => { const g = G(); if (!g.sel.length) return; g.poisoned = g.sel[0]; g.poison = false; g.witchPoison = false; save(); render(); },
+  charm: () => { const g = G(); g.charmed.push(...g.sel); endStep(); },
+  crow: () => { const g = G(); if (!g.sel.length) return; g.crow = g.sel[0]; endStep(); },
   afterDeaths: () => afterDeaths(),
-  shoot: () => { const g = G(); if (!g.sel.length) return; const t = g.sel[0], when = g.when; g.sel = []; killAll([t], when === "nuit" ? "tir-nuit" : "tir"); },
-  vote: () => { const g = G(); if (!g.sel.length) return; buzz([30, 40, 90]); g.hunterShot = false; killAll([g.sel[0]], "vote"); },
-  noVote: () => { say("Le village ne parvient pas à se décider."); startNight(); },
+  shoot: () => { const g = G(); if (!g.sel.length) return; const t = g.sel[0], back = g.when, rest = g.queue; g.sel = [];
+    killAll([t], "tir"); g.queue = [...g.queue, ...rest]; g.backTo = back; },
+  succ: () => { const g = G(); if (!g.sel.length) return; g.captain = g.sel[0]; say(`${nm(g.captain)} est le nouveau capitaine.`); afterDeaths(); },
+  elect: () => { const g = G(); if (!g.sel.length) return; g.captain = g.sel[0]; say(`${nm(g.captain)} est élu capitaine. Débattez, puis votez.`); g.sel = []; go("day"); },
+  vote: () => { const g = G(); if (!g.sel.length) return; const t = g.sel[0]; buzz([30, 40, 90]);
+    const first = g.votes === 0; g.votes++;
+    if (roleOf(t) === "idiot" && !g.idiot) { g.idiot = true; say(`${nm(t)} est l'idiot du village. Le village l'épargne, mais il ne votera plus.`); go("idiot"); return; }
+    if (first && roleOf(t) === "ange") { g.alive[t] = false; finish("ange"); return; }
+    killAll([t], "vote"); },
+  tie: () => { const g = G(); g.votes++; const b = idxOf("bouc").find(i => g.alive[i]);
+    if (b !== undefined) { say(`Égalité. ${nm(b)}, le bouc émissaire, est éliminé.`); killAll([b], "vote"); }
+    else { say("Égalité. Personne n'est éliminé aujourd'hui."); startNight(); } },
+  noVote: () => { G().votes++; say("Le village ne parvient pas à se décider."); startNight(); },
+  idiotOk: () => startNight(),
 };
-// après le tir du chasseur, on reprend là où on en était
+// après le tir du chasseur, on reprend là où on en était (jour ou nuit)
 const _after = afterDeaths;
-afterDeaths = function () { const g = G(); if (g.when === "tir-nuit") { g.when = "nuit"; g.deaths = g.deaths.filter(i => roleOf(i) !== "chasseur" || true); } else if (g.when === "tir") g.when = "vote"; _after(); };
+afterDeaths = function () { const g = G(); if (g.when === "tir" && !g.queue.length) { g.when = g.backTo === "nuit" ? "nuit" : "vote"; } _after(); };
 document.addEventListener("click", e => { const el = e.target.closest("[data-a]"); if (!el || el.disabled) return; const f = A[el.dataset.a]; if (f) f(el.dataset.v, e); });
 
 function confetti() {
@@ -665,11 +886,8 @@ function confetti() {
 let lock = null;
 async function wake() { try { if ("wakeLock" in navigator && !lock) { lock = await navigator.wakeLock.request("screen"); lock.addEventListener("release", () => lock = null); } } catch (e) {} }
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.game) wake(); });
-if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = () => {};
 
 load();
-// reprise après fermeture pendant la nuit : on recommence l'étape en cours
-if (S.screen === "night" && G()) { G().sub = null; }
 render();
 </script>
 
