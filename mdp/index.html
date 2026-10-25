@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06b6d4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tablée">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" type="image/png" href="../icons/favicon-64.png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<title>Mot de Passe</title>
+<style>
+
+/* Tablée : un écran = un titre, une consigne, un bouton ; chaque jeu a sa couleur. */
+:root {
+  --bg: #ffffff;
+  --surface: #f3f3f5;
+  --surface-2: #e9e9ed;
+  --ink: #111114;
+  --muted: #6e6e76;
+  --accent: #ff5a1f;
+  --accent-ink: #ffffff;
+  --civil: #16a34a;
+  --under: #e11d48;
+  --white: #71717a;
+  --font: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-weight: 500; font-size: 17px; line-height: 1.35;
+  -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+input { -webkit-user-select: text; user-select: text; }
+.app { max-width: 440px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; gap: 20px;
+  padding-block: 26px 28px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.logo { text-align: center; font-size: 2.6rem; font-weight: 700; line-height: 1; }
+.logo i { font-style: normal; color: var(--accent); }
+h2 { margin: 0; font-size: 1.8rem; font-weight: 700; line-height: 1.12; text-align: center; text-wrap: balance; }
+.sub { text-align: center; color: var(--muted); margin-top: -10px; text-wrap: balance; }
+.label { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.spacer { flex: 1; }
+.pop { animation: pop .3s ease-out backwards; }
+@keyframes pop { from { transform: translateY(8px); opacity: 0 } }
+
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
+.btn { width: 100%; min-height: 60px; border-radius: 16px; background: var(--accent); color: var(--accent-ink); font-size: 1.2rem; font-weight: 600; transition: transform .08s, opacity .15s; }
+.btn:active { transform: scale(.98); }
+.btn.alt, .btn.soft { background: var(--surface); color: var(--ink); }
+.btn:disabled { opacity: .35; }
+.link { color: var(--muted); font-weight: 500; font-size: .95rem; padding: 10px; }
+.links { display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 12px; }
+
+.box { background: var(--surface); border-radius: 18px; padding: 2px 16px; }
+.line { display: flex; align-items: center; gap: 12px; min-height: 62px; }
+.line + .line { border-top: 1px solid var(--surface-2); }
+.line .name { flex: 1; font-weight: 600; }
+.line .name small { display: block; color: var(--muted); font-size: .82rem; font-weight: 500; }
+.step { display: flex; align-items: center; gap: 4px; }
+.step button { width: 40px; height: 40px; border-radius: 50%; background: var(--bg); font-size: 1.3rem; font-weight: 600; }
+.step button:active { transform: scale(.9); }
+.step span { min-width: 54px; text-align: center; font-weight: 600; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.big { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.big .step { gap: 20px; }
+.big .step button { width: 56px; height: 56px; font-size: 1.7rem; background: var(--surface); }
+.big .step span.count { font-size: 4.2rem; font-weight: 700; min-width: 90px; line-height: 1; }
+.chips { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-top: -6px; }
+.chip { font-size: .88rem; font-weight: 600; padding: 4px 12px; border-radius: 99px; background: var(--surface); }
+.chip.civil { color: var(--civil); } .chip.undercover { color: var(--under); } .chip.white { color: var(--white); }
+
+/* cartes */
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.card { aspect-ratio: 3 / 4; border-radius: 16px; background: var(--accent); color: var(--accent-ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px;
+  animation: pop .3s ease-out backwards; transition: transform .1s; }
+.card .q { font-size: 2.4rem; font-weight: 700; line-height: 1; }
+.card .num { font-size: .8rem; font-weight: 600; opacity: .8; }
+.card:active { transform: scale(.95); }
+.card.taken { background: var(--surface); color: var(--muted); pointer-events: none; font-weight: 600; font-size: .95rem; text-align: center; overflow-wrap: anywhere; gap: 8px; }
+
+/* qui es-tu */
+input[type=text] { width: 100%; min-height: 58px; border-radius: 16px; border: 2px solid var(--surface-2); background: var(--bg); color: var(--ink);
+  font: inherit; font-size: 1.2rem; font-weight: 600; padding: 0 18px; }
+input[type=text]:focus { border-color: var(--accent); outline: none; }
+input::placeholder { color: var(--muted); font-weight: 500; }
+.list { display: flex; flex-direction: column; background: var(--surface); border-radius: 18px; overflow: hidden; }
+.list:empty { display: none; }
+.who { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 8px 14px; text-align: left; }
+.who + .who { border-top: 1px solid var(--surface-2); }
+.who:active { background: var(--surface-2); }
+.who .t { flex: 1; min-width: 0; font-weight: 600; font-size: 1.1rem; overflow-wrap: anywhere; }
+.who .t small { display: block; color: var(--muted); font-weight: 500; font-size: .82rem; }
+.who .go { color: var(--muted); font-size: 1.3rem; }
+.who.new { background: var(--accent); color: var(--accent-ink); }
+.who.new .t small, .who.new .go { color: var(--accent-ink); opacity: .85; }
+.who.sel { background: var(--ink); color: var(--bg); }
+.who.sel .t small, .who.sel .n { color: var(--bg); opacity: .7; }
+.who .n { width: 20px; text-align: center; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.av { --c: var(--accent); width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  background: var(--c); color: #fff; font-weight: 700; font-size: 1.05rem; }
+.av.dead { filter: grayscale(1); opacity: .5; }
+.av.xl { width: 84px; height: 84px; font-size: 2.2rem; }
+.empty { text-align: center; color: var(--muted); padding: 14px; font-size: .95rem; text-wrap: balance; }
+
+/* révélations */
+.reveal { background: var(--surface); border-radius: 24px; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  animation: pop .3s ease-out backwards; }
+.word { font-size: 2.9rem; font-weight: 700; line-height: 1.05; text-wrap: balance; max-width: 100%; }
+.role { font-size: 2.9rem; font-weight: 700; line-height: 1; }
+.role.civil { color: var(--civil); } .role.undercover { color: var(--under); } .role.white { color: var(--white); }
+.hint { color: var(--muted); font-size: .98rem; text-wrap: balance; }
+.reveal input[type=text] { text-align: center; }
+
+/* fin + stats */
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pair > div { background: var(--surface); border-radius: 18px; padding: 14px 10px; text-align: center; }
+.pair b { display: block; font-size: 1.15rem; font-weight: 700; overflow-wrap: anywhere; margin-top: 2px; }
+.res { display: flex; align-items: center; gap: 10px; min-height: 60px; font-variant-numeric: tabular-nums; }
+.res + .res { border-top: 1px solid var(--surface-2); }
+.res .t { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.res .t small { display: block; font-size: .8rem; font-weight: 600; }
+.res.dead .t > span { color: var(--muted); }
+.res .g { font-weight: 700; color: var(--civil); min-width: 34px; text-align: right; }
+.res .win { font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--accent); color: var(--accent-ink); }
+.r.civil { color: var(--civil); } .r.undercover { color: var(--under); } .r.white { color: var(--white); }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tile { background: var(--surface); border-radius: 16px; padding: 12px 6px; text-align: center; }
+.tile b { display: block; font-size: 1.7rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tile span { font-size: .78rem; color: var(--muted); font-weight: 500; }
+.bars { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; }
+.bar { display: grid; grid-template-columns: 96px 1fr 44px; align-items: center; gap: 10px; font-size: .95rem; font-weight: 600; }
+.bar .tr { height: 10px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.bar .tr i { display: block; height: 100%; border-radius: 99px; }
+.bar em { font-style: normal; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; font-size: .85rem; }
+.rank { width: 22px; text-align: center; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rank.top { color: var(--accent); }
+.statcard { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+
+.sheet { position: fixed; inset: 0; z-index: 10; background: rgba(0,0,0,.4); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s; }
+@keyframes fade { from { opacity: 0 } }
+.sheet > div { width: min(100%, 440px); background: var(--bg); border-radius: 24px 24px 0 0; display: flex; flex-direction: column; gap: 14px; max-height: 90%; overflow-y: auto;
+  animation: up .25s ease-out;
+  padding: 24px max(20px, env(safe-area-inset-right, 0px)) max(22px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)); }
+@keyframes up { from { transform: translateY(40px) } }
+.rules p { margin: 0 0 10px; }
+.rules b { font-weight: 700; }
+/* ---- couche "juste milieu" : relief, dégradés, motif sur les cartes */
+:root { --accent-2: #ff2e63; --glow: rgba(255, 90, 31, .35); --shadow: 0 1px 2px rgba(20,20,30,.06), 0 8px 24px rgba(20,20,30,.08); --panel: #ffffff; --bg-2: #fff1ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; } }
+:root[data-theme="dark"] { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; }
+body { background: radial-gradient(120% 60% at 50% -10%, var(--bg-2), var(--bg) 60%) fixed, var(--bg); }
+.brand { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.mark { width: 74px; height: 74px; border-radius: 22px; display: grid; place-items: center; transform: rotate(-6deg);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 10px 26px var(--glow); }
+.mark svg { width: 46px; height: 46px; }
+.logo { font-size: 2.7rem; }
+.logo i { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.btn { background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 8px 20px var(--glow); }
+.btn.alt, .btn.soft { background: var(--panel); box-shadow: var(--shadow); }
+.btn:disabled { box-shadow: none; }
+.box, .list, .pair > div, .tile { background: var(--panel); box-shadow: var(--shadow); }
+.who + .who, .line + .line, .res + .res { border-top-color: var(--surface); }
+.step button { background: var(--surface); }
+.big .step button { background: var(--panel); box-shadow: var(--shadow); }
+.big .step span.count { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.chip { background: var(--panel); box-shadow: var(--shadow); }
+.card { position: relative; overflow: hidden; border-radius: 18px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.09) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--accent), var(--accent-2));
+  box-shadow: 0 8px 18px var(--glow); }
+.card::before { content: ""; position: absolute; inset: 6px; border-radius: 13px; border: 2px solid rgba(255,255,255,.35); pointer-events: none; }
+.card .q { width: 54%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.22); display: grid; place-items: center; font-size: 2rem; }
+.card:nth-child(3n+1) { transform: rotate(-2deg); } .card:nth-child(3n) { transform: rotate(2deg); }
+.card:active { transform: scale(.94); }
+.card.taken { background: var(--panel); box-shadow: var(--shadow); transform: none; }
+.card.taken::before { border-color: var(--surface); }
+.av { background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 60%, #ff2e63)); box-shadow: 0 3px 8px color-mix(in srgb, var(--c) 35%, transparent); }
+.who.new { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.who.sel { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+.who.sel .t small, .who.sel .n { color: #fff; }
+.reveal { background: var(--panel); box-shadow: var(--shadow); position: relative; overflow: hidden; padding-top: 0; animation: flipIn .5s cubic-bezier(.2,1.2,.4,1) backwards; }
+@keyframes flipIn { from { transform: perspective(900px) rotateY(70deg); opacity: 0 } }
+.reveal::before { content: ""; display: block; align-self: stretch; height: 92px; margin: 0 -20px 4px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2))); }
+.reveal .av.xl { margin-top: -66px; box-shadow: 0 0 0 6px var(--panel), 0 8px 18px rgba(0,0,0,.18); }
+.reveal.civil { --band1: #22c55e; --band2: #0d9488; }
+.reveal.undercover { --band1: #f43f5e; --band2: #be123c; }
+.reveal.white { --band1: #a1a1aa; --band2: #52525b; }
+.reveal.wordcard .word { background: linear-gradient(135deg, var(--ink), color-mix(in srgb, var(--ink) 60%, var(--accent))); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 4px; }
+.res .win { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.tile b { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.endhead { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px; border-radius: 24px; color: #fff; text-align: center;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2)));
+  box-shadow: var(--shadow); animation: pop .4s ease-out backwards; }
+.endhead.civils { --band1: #22c55e; --band2: #0d9488; } .endhead.imposteurs { --band1: #f43f5e; --band2: #be123c; } .endhead.white { --band1: #71717a; --band2: #3f3f46; }
+.endhead h2 { color: #fff; }
+.endhead .label { color: rgba(255,255,255,.85); }
+.sheet > div { background: var(--bg); }
+canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ---- Mot de Passe : turquoise ; le mot affiché en grand pour les deux donneurs d'indices */
+:root { --accent: #06b6d4; --accent-2: #0e7490; --glow: rgba(6, 182, 212, .28); --bg-2: #e6f8fb; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent: #22d3ee; --accent-2: #0891b2; --glow: rgba(34, 211, 238, .22); --bg-2: #0b1d22; } }
+:root[data-theme="dark"] { --accent: #22d3ee; --accent-2: #0891b2; --glow: rgba(34, 211, 238, .22); --bg-2: #0b1d22; }
+/* ---- éléments communs aux nouveaux jeux */
+.endhead.main { --band1: var(--accent); --band2: var(--accent-2); }
+.reveal.main { --band1: var(--accent); --band2: var(--accent-2); }
+.place-name { font-size: 2.2rem; font-weight: 700; line-height: 1.08; text-wrap: balance; max-width: 100%; }
+.teambox { background: var(--panel); box-shadow: var(--shadow); border-radius: 20px; overflow: hidden; }
+.teamhead { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 16px; color: #fff; font-weight: 700; font-size: 1.1rem;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(135deg, var(--band1, var(--accent)), var(--band2, var(--accent-2))); }
+.teamhead small { font-weight: 600; opacity: .9; font-size: .85rem; }
+.chips2 { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; }
+.pchip { display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; border-radius: 99px; background: var(--surface); font-weight: 600; font-size: .98rem; }
+.pchip .av { width: 30px; height: 30px; font-size: .85rem; }
+.pchip i { font-style: normal; color: var(--muted); font-size: 1.2rem; margin-left: 2px; }
+.pchip.add { padding: 0 16px; min-height: 38px; color: var(--accent); background: transparent; box-shadow: inset 0 0 0 2px var(--surface-2); }
+.res .tot { font-weight: 700; font-size: 1.25rem; min-width: 32px; text-align: right; font-variant-numeric: tabular-nums; }
+.tdot { width: 22px; height: 22px; border-radius: 50%; flex: none; background: linear-gradient(135deg, var(--band1), var(--band2)); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.two .btn { font-size: 1.05rem; min-height: 56px; }
+.toggle { width: 100%; text-align: left; }
+.toggle .name { flex: 1; }
+.sw { width: 48px; height: 28px; border-radius: 99px; background: var(--surface-2); position: relative; transition: background .2s; flex: none; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.sw.on { background: var(--accent); } .sw.on::after { transform: translateX(20px); }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; background: var(--surface); border-radius: 14px; padding: 4px; }
+.seg button { min-height: 44px; border-radius: 11px; font-weight: 600; color: var(--muted); padding: 0 6px; }
+.seg button.on { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; box-shadow: 0 4px 12px var(--glow); }
+.rolebox { background: var(--surface); border-radius: 14px; padding: 10px 16px; font-weight: 600; }
+.rolebox small { display: block; color: var(--muted); font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
+.clock { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 16px; }
+.clock b { font-size: 3.4rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.clock.low b { background: none; color: var(--under); animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: .4 } }
+.clock .row { display: flex; gap: 8px; margin-top: 8px; }
+.clock .row button { padding: 8px 16px; border-radius: 99px; background: var(--surface); font-weight: 600; font-size: .95rem; }
+
+.scorebar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; font-weight: 600; }
+.scorebar .sc { padding: 6px 14px; border-radius: 99px; background: var(--surface); color: var(--muted); }
+.scorebar .sc.on { color: #fff; background: linear-gradient(135deg, var(--band1), var(--band2)); }
+.scorebar b { margin-left: 4px; font-variant-numeric: tabular-nums; }
+.scorebar .goal { color: var(--muted); font-size: .85rem; }
+.pairs { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.pair1 { display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 6px; border-radius: 99px; color: #fff; background: linear-gradient(135deg, var(--band1), var(--band2)); }
+.bigword { border-radius: 28px; padding: 30px 18px; text-align: center; color: #fff; display: flex; flex-direction: column; gap: 6px; box-shadow: var(--shadow);
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.09) 0 12px, transparent 12px 24px), linear-gradient(150deg, var(--band1), var(--band2)); animation: pop .35s ease-out; }
+.bigword .label { color: rgba(255,255,255,.85); }
+.bigword .word { font-size: 54px; font-weight: 700; line-height: 1.05; white-space: nowrap; }
+.turnline { text-align: center; padding: 10px 14px; border-radius: 14px; background: var(--surface); }
+.btn.ok { background: linear-gradient(135deg, #22c55e, #059669); box-shadow: 0 8px 20px rgba(34,197,94,.3); }
+.rules p { margin: 0 0 10px; }
+
+</style>
+<style>
+@font-face { font-family: "Fredoka"; src: url("../Fredoka.ttf") format("truetype"); font-weight: 300 700; font-display: swap; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+html { overscroll-behavior: none; }
+body.full { overflow: hidden; }
+.backmenu { align-self: flex-start; color: var(--muted); font-weight: 600; text-decoration: none; padding: 6px 2px; margin-bottom: -12px; }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div id="sheet"></div>
+<script>
+// ---------- outils communs à tous les jeux Tablée
+const BODY = ["#3b5bff", "#ff5a1f", "#16a34a", "#9333ea", "#db2777", "#0891b2", "#ca8a04", "#4f46e5", "#ea580c", "#0d9488"];
+const NAME_KEYS = ["auracover_poche5", "auraspy1", "auratime1", "auratete1", "auraloup2", "auraapero1", "tablee_milieu", "tablee_codes", "tablee_preferes", "tablee_artiste", "tablee_motcache", "tablee_piege", "tablee_mdp"];
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+const fold = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+function seedOf(s) { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+const av = (nm, cls = "") => `<span class="av ${cls}" style="--c:${BODY[seedOf(nm || "?") % BODY.length]}" aria-hidden="true">${esc((nm.trim()[0] || "?").toUpperCase())}</span>`;
+const plural = (n, w) => `${n} ${w}${n > 1 ? "s" : ""}`;
+const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const rnd = n => Math.random() * n | 0;
+function knownNames(own) {
+  const set = new Set(Object.keys(own || {}));
+  for (const k of NAME_KEYS) try { const c = JSON.parse(localStorage.getItem(k) || "{}"); for (const n of Object.keys(c.people || {})) set.add(n); } catch (e) {}
+  return [...set];
+}
+// liste « qui es-tu ? » : prénoms connus filtrés + « nouveau joueur »
+function nameList(q, exclude, people, act) {
+  const f = fold(q), all = knownNames(people), used = new Set(exclude);
+  const list = all.filter(n => !used.has(n) && fold(n).includes(f)).sort((a, b) => ((people[b] || {}).last || 0) - ((people[a] || {}).last || 0) || a.localeCompare(b)).slice(0, 30);
+  const exact = all.some(n => fold(n) === f) || [...used].some(n => fold(n) === f);
+  let h = list.map(n => `<button class="who" data-a="${act}" data-v="${esc(n)}">${av(n)}<span class="t">${esc(n)}</span><span class="go">＋</span></button>`).join("");
+  if (q.trim() && !exact) h = `<button class="who new" data-a="${act}" data-v="${esc(q.trim().slice(0, 16))}">${av(q.trim())}<span class="t">${esc(q.trim())}<small>Nouveau joueur</small></span><span class="go">＋</span></button>` + h;
+  return h || `<div class="empty">Écris un prénom, le jeu s'en souviendra.</div>`;
+}
+const exactName = (v, people) => knownNames(people).find(n => fold(n) === fold(v)) || v.slice(0, 16);
+function confetti() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  let c = document.getElementById("fx"); if (!c) { c = document.createElement("canvas"); c.id = "fx"; document.body.appendChild(c); }
+  const x = c.getContext("2d"), dpr = devicePixelRatio || 1;
+  c.width = innerWidth * dpr; c.height = innerHeight * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const P = [...Array(130)].map(() => ({ x: innerWidth / 2 + (Math.random() - .5) * 80, y: innerHeight * .3, vx: (Math.random() - .5) * 13, vy: -Math.random() * 14 - 4,
+    w: 6 + Math.random() * 6, h: 8 + Math.random() * 8, a: Math.random() * 6, va: (Math.random() - .5) * .4, c: BODY[Math.random() * BODY.length | 0] }));
+  const t0 = performance.now(), W = innerWidth, H = innerHeight;
+  (function f(t) {
+    if (innerWidth !== W || innerHeight !== H) { c.width = c.width; return; }
+    x.clearRect(0, 0, innerWidth, innerHeight);
+    for (const p of P) { p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.a += p.va;
+      x.save(); x.translate(p.x, p.y); x.rotate(p.a); x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); x.restore(); }
+    if (t - t0 < 3200) requestAnimationFrame(f); else x.clearRect(0, 0, innerWidth, innerHeight);
+  })(t0);
+}
+let wakeLock = null;
+async function wake() { try { if ("wakeLock" in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request("screen"); wakeLock.addEventListener("release", () => wakeLock = null); } } catch (e) {} }
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") wake(); });
+const step = (act, val, cls = "") => `<div class="step"><button data-a="${act}" data-v="-1" aria-label="Moins">−</button><span class="${cls}">${val}</span><button data-a="${act}" data-v="1" aria-label="Plus">+</button></div>`;
+
+const MOTS = ["Chien", "Pizza", "Voiture", "Plage", "Téléphone", "Soleil", "Ballon", "Avion", "Pomme", "Lit", "Chat", "Glace", "Vélo", "Arbre", "Lune", "Livre", "Piscine", "Train", "Banane",
+  "Chocolat", "Guitare", "Montre", "Lunettes", "Gâteau", "Cheval", "Fleur", "Maison", "Bateau", "Neige", "Clé", "Fromage", "Poisson", "École", "Pain", "Chapeau", "Café", "Dinosaure",
+  "Volcan", "Pyramide", "Astronaute", "Parachute", "Aquarium", "Trampoline", "Sous-marin", "Igloo", "Phare", "Cactus", "Hamac", "Boussole", "Ascenseur", "Barbecue", "Pingouin",
+  "Château", "Arc-en-ciel", "Labyrinthe", "Magicien", "Cirque", "Tatouage", "Carnaval", "Mariage", "Pharmacie", "Vampire", "Pirate", "Robot", "Fantôme", "Sorcière", "Dragon",
+  "Licorne", "Momie", "Ninja", "Roi", "Reine", "Prince", "Clown", "Pompier", "Policier", "Médecin", "Boulanger", "Facteur", "Pilote", "Chanteur", "Footballeur", "Boxe", "Tennis",
+  "Ski", "Surf", "Golf", "Basket", "Natation", "Judo", "Rugby", "Bowling", "Échecs", "Carte", "Dé", "Trésor", "Couronne", "Épée", "Bouclier", "Flèche", "Canon", "Bombe",
+  "Fusée", "Planète", "Étoile", "Comète", "Désert", "Forêt", "Montagne", "Rivière", "Océan", "Île", "Grotte", "Cascade", "Orage", "Éclair", "Tornade", "Brouillard", "Pluie",
+  "Hiver", "Été", "Noël", "Halloween", "Anniversaire", "Bougie", "Cadeau", "Ballon de foot", "Stade", "Arbitre", "Sifflet", "Médaille", "Coupe", "Podium", "Record",
+  "Cinéma", "Théâtre", "Concert", "Musée", "Bibliothèque", "Hôpital", "Prison", "Banque", "Casino", "Hôtel", "Restaurant", "Boulangerie", "Supermarché", "Marché", "Gare",
+  "Aéroport", "Métro", "Taxi", "Bus", "Moto", "Camion", "Tracteur", "Hélicoptère", "Montgolfière", "Trottinette", "Skateboard", "Rollers", "Casque", "Gant", "Écharpe",
+  "Parapluie", "Valise", "Sac à dos", "Miroir", "Peigne", "Brosse à dents", "Savon", "Serviette", "Oreiller", "Couverture", "Réveil", "Horloge", "Calendrier", "Agenda",
+  "Ordinateur", "Clavier", "Souris", "Écran", "Imprimante", "Internet", "Wifi", "Batterie", "Chargeur", "Selfie", "Vidéo", "Photo", "Appareil photo", "Micro", "Enceinte",
+  "Casque audio", "Piano", "Violon", "Batterie", "Trompette", "Flûte", "Danse", "Karaoké", "Discothèque", "Cocktail", "Bière", "Vin", "Champagne", "Jus d'orange", "Lait",
+  "Thé", "Soupe", "Salade", "Frites", "Burger", "Kebab", "Sushi", "Pâtes", "Riz", "Œuf", "Crêpe", "Gaufre", "Croissant", "Baguette", "Tarte", "Bonbon", "Miel", "Confiture"];
+const KEY = "tablee_mdp";
+MOTS.splice(0, MOTS.length, ...new Set(MOTS));
+const MARK = `<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="20" width="32" height="22" rx="5" fill="#fff"/><path d="M15 20v-5a9 9 0 0 1 18 0v5" fill="none" stroke="#fff" stroke-width="4"/><circle cx="24" cy="31" r="3.5" fill="#0e7490"/></svg>`;
+const T = [{ name: "Turquoise", c: "#06b6d4", c2: "#0e7490" }, { name: "Corail", c: "#fb7185", c2: "#e11d48" }];
+
+let S = { screen: "home", teams: [[], []], words: 10, people: {}, recent: [], game: null };
+function load() { let d = null; try { d = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {} if (d) for (const k of Object.keys(S)) if (d[k] !== undefined) S[k] = d[k]; if (!S.game && S.screen !== "home") S.screen = "home"; }
+function save() { try { localStorage.setItem(KEY, JSON.stringify({ ...S, recent: S.recent.slice(-150) })); } catch (e) {} }
+function person(nm) { return S.people[nm] || (S.people[nm] = { games: 0, wins: 0, found: 0, last: 0 }); }
+const ready = () => S.teams.every(t => t.length >= 2);
+const band = t => `--band1:${T[t].c};--band2:${T[t].c2}`;
+
+function newGame() {
+  const g = { n: 0, score: [0, 0], rot: [0, 0], starter: rnd(2), word: null, turn: 0, clue: 1, ended: false, last: null, foundBy: {} };
+  S.game = g; nextWord();
+}
+function nextWord() {
+  const g = S.game; g.n++;
+  let pool = MOTS.filter(w => !S.recent.includes(w)); if (!pool.length) { S.recent = []; pool = MOTS; }
+  g.word = pool[rnd(pool.length)]; S.recent.push(g.word);
+  g.turn = (g.starter + g.n - 1) % 2; g.clue = 1; g.last = null;
+  go("show");
+}
+// dans chaque équipe : un donneur d'indices et un devineur, qui tournent à chaque mot
+const giver = t => { const tm = S.teams[t], k = S.game.rot[t] % tm.length; return tm[k]; };
+const guesser = t => { const tm = S.teams[t], k = (S.game.rot[t] + 1) % tm.length; return tm[k]; };
+const pts = clue => Math.max(1, 11 - clue);
+function found() {
+  const g = S.game, t = g.turn, p = pts(g.clue);
+  g.score[t] += p; g.last = { t, p, word: g.word, by: guesser(t) };
+  g.foundBy[guesser(t)] = (g.foundBy[guesser(t)] || 0) + 1;
+  buzz([40, 50, 80]); go("won");
+}
+function miss() {
+  const g = S.game; g.clue++; buzz(20);
+  if (g.clue > 10) { g.last = { t: null, word: g.word }; go("won"); return; }
+  g.turn = 1 - g.turn; save(); render();
+}
+function after() {
+  const g = S.game; g.rot[0]++; g.rot[1]++;
+  if (g.n >= S.words) finish(); else nextWord();
+}
+function finish() {
+  const g = S.game, w = g.score[0] === g.score[1] ? -1 : g.score[0] > g.score[1] ? 0 : 1, now = Date.now();
+  S.teams.forEach((tm, t) => tm.forEach(n => { const p = person(n); p.games++; p.last = now; p.found += g.foundBy[n] || 0; if (w === t) p.wins++; }));
+  g.winner = w; g.ended = true; go("end"); confetti();
+}
+
+const app = document.getElementById("app"), sheet = document.getElementById("sheet");
+function go(s) { S.screen = s; save(); render(); scrollTo(0, 0); }
+const scoreBar = () => { const g = S.game; return `<div class="scorebar">${[0, 1].map(t => `<span class="sc ${g.turn === t ? "on" : ""}" style="${band(t)}">${T[t].name} <b>${g.score[t]}</b></span>`).join("")}<span class="goal">mot ${g.n} / ${S.words}</span></div>`; };
+function render() {
+  const g = S.game; let h = "";
+  switch (S.screen) {
+    case "home": {
+      const ok = ready();
+      h = `<a class="backmenu" href="../">‹ Menu</a><div class="brand"><span class="mark">${MARK}</span><div class="logo">Mot de <i>Passe</i></div></div>
+        <div class="sub" style="margin-top:0">Un seul mot par indice pour faire trouver le mot de passe à ton partenaire. Le plus vite possible.</div>
+        ${[0, 1].map(t => `<div class="teambox" style="${band(t)}"><div class="teamhead"><span>Équipe ${T[t].name}</span><small>${plural(S.teams[t].length, "joueur")}</small></div>
+          <div class="chips2">${S.teams[t].map((n, k) => `<button class="pchip" data-a="rm" data-v="${t}:${k}">${av(n)}<span>${esc(n)}</span><i>×</i></button>`).join("")}<button class="pchip add" data-a="add" data-v="${t}">+ Ajouter</button></div></div>`).join("")}
+        <button class="btn soft" data-a="mix">Mélanger les équipes</button>
+        <div class="box"><div class="line"><div class="name">Mots par partie</div>${step("words", S.words)}</div></div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="play" ${ok ? "" : "disabled"}>${ok ? "Jouer" : "Il faut 2 joueurs par équipe"}</button>
+        ${g && !g.ended ? `<button class="btn soft" data-a="resume">Reprendre la partie</button>` : ""}
+        <div class="links"><button class="link" data-a="rules">Règles</button><a class="link" href="../" style="text-decoration:none">‹ Menu</a></div>`;
+      break;
+    }
+    case "show": {
+      h = `${scoreBar()}<div class="spacer"></div>
+        <div class="reveal main"><div class="label">Les donneurs d'indices</div>
+          <div class="pairs">${[0, 1].map(t => `<span class="pair1" style="${band(t)}">${av(giver(t))}<b>${esc(giver(t))}</b></span>`).join("")}</div>
+          <div class="hint">Vous deux seulement regardez le mot. ${esc(guesser(0))} et ${esc(guesser(1))}, détournez les yeux !</div></div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="reveal">On est prêts, montrer le mot</button>
+        <div class="links"><button class="link" data-a="skipWord">Changer de mot</button><button class="link" data-a="home">Pause</button></div>`;
+      break;
+    }
+    case "play": {
+      const t = g.turn;
+      h = `${scoreBar()}
+        <div class="bigword" style="${band(t)}"><div class="label">Le mot de passe</div><div class="word fit">${esc(g.word)}</div></div>
+        <div class="turnline" style="${band(t)}">Indice n°${g.clue} · <b>${esc(giver(t))}</b> fait deviner <b>${esc(guesser(t))}</b> · vaut ${plural(pts(g.clue), "point")}</div>
+        <div class="hint" style="text-align:center">Un seul mot. Pas de geste, pas de mot de la même famille. Le devineur n'a droit qu'à une réponse.</div>
+        <div class="spacer"></div>
+        <div class="two"><button class="btn soft" data-a="miss">Raté, à l'autre équipe</button><button class="btn ok" data-a="found">Trouvé !</button></div>
+        <div class="links"><button class="link" data-a="skipWord">Passer ce mot</button><button class="link" data-a="home">Pause</button></div>`;
+      break;
+    }
+    case "won": {
+      const l = g.last;
+      h = `${scoreBar()}<div class="spacer"></div>
+        <div class="reveal main" style="${l.t !== null ? band(l.t) : ""}">${l.t !== null ? av(l.by, "xl") : ""}<div class="label">Le mot était « ${esc(l.word)} »</div>
+          <div class="place-name">${l.t !== null ? `+${plural(l.p, "point")} pour l'équipe ${T[l.t].name}` : "Personne n'a trouvé"}</div>
+          ${l.t !== null ? `<div class="hint">${esc(l.by)} a trouvé.</div>` : ""}</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="after">${g.n >= S.words ? "Voir les résultats" : "Mot suivant"}</button>`;
+      break;
+    }
+    case "end": {
+      const w = g.winner;
+      h = `<div class="endhead main" style="${w >= 0 ? band(w) : ""}"><div class="label">Partie terminée · ${plural(S.words, "mot")}</div><h2>${w === -1 ? "Égalité !" : `L'équipe ${T[w].name} gagne !`}</h2></div>
+        <div class="box">${[0, 1].map(t => `<div class="res"><span class="tdot" style="${band(t)}"></span><span class="t"><span>Équipe ${T[t].name}</span><small style="color:var(--muted)">${S.teams[t].map(esc).join(", ")}</small></span><span class="tot">${g.score[t]}</span></div>`).join("")}</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="play">Rejouer</button>
+        <div class="links"><button class="link" data-a="home">Accueil</button><a class="link" href="../" style="text-decoration:none">‹ Menu</a></div>`;
+      break;
+    }
+  }
+  app.innerHTML = h;
+  app.querySelectorAll(".fit").forEach(el => { let s = 54; el.style.fontSize = s + "px"; while (s > 22 && el.scrollWidth > el.parentElement.clientWidth - 10) el.style.fontSize = (s -= 2) + "px"; });
+}
+let addTo = 0, addQ = "";
+function openSheet(kind) {
+  if (!kind) { sheet.innerHTML = ""; return; }
+  if (kind === "rules") { sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true"><h2>Les règles</h2><div class="rules">
+    <p>Deux équipes d'au moins deux joueurs. À chaque mot, un joueur de chaque équipe fait deviner, un autre devine. Les rôles tournent à chaque mot.</p>
+    <p>Les deux donneurs d'indices voient le <b>mot de passe</b>. Chacun leur tour, ils donnent <b>un seul mot</b> comme indice à leur partenaire, qui a droit à une seule réponse.</p>
+    <p>Raté ? C'est à l'autre équipe de donner un indice, et elle profite des indices déjà donnés. Trouvé au 1er indice : 10 points, au 2e : 9 points, et ainsi de suite.</p>
+    <p>L'équipe qui a le plus de points à la fin gagne.</p></div><button class="btn" data-a="close">Compris</button></div></div>`; return; }
+  const excl = S.teams.flat();
+  sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true"><h2>Ajouter à l'équipe ${T[addTo].name}</h2>
+    <input id="aq" type="text" maxlength="16" placeholder="Cherche ou écris un prénom" value="${esc(addQ)}" autocomplete="off" autocapitalize="words" enterkeyhint="done">
+    <div class="list" id="al">${nameList(addQ, excl, S.people, "addName")}</div><button class="btn" data-a="close">OK</button></div></div>`;
+  const aq = document.getElementById("aq");
+  aq.oninput = () => { addQ = aq.value; document.getElementById("al").innerHTML = nameList(addQ, excl, S.people, "addName"); };
+  aq.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); if (aq.value.trim()) addName(exactName(aq.value.trim(), S.people)); } };
+}
+function addName(n) { for (const t of S.teams) { const i = t.indexOf(n); if (i >= 0) t.splice(i, 1); } S.teams[addTo].push(n); person(n).last = Date.now(); addQ = ""; save(); render(); openSheet("add"); const aq = document.getElementById("aq"); if (aq) aq.focus(); }
+const A = {
+  add: v => { addTo = +v; addQ = ""; openSheet("add"); }, addName: v => addName(v),
+  rm: v => { const [t, k] = v.split(":").map(Number); S.teams[t].splice(k, 1); save(); render(); },
+  mix: () => { const all = shuffle(S.teams.flat()); S.teams = [[], []]; all.forEach((n, i) => S.teams[i % 2].push(n)); buzz(20); save(); render(); },
+  words: d => { S.words = Math.max(4, Math.min(30, S.words + 2 * d)); save(); render(); },
+  play: () => { if (!ready()) return; wake(); newGame(); },
+  resume: () => go(S.game.last ? "won" : "show"),
+  home: () => go("home"),
+  reveal: () => { buzz(20); go("play"); },
+  skipWord: () => { const g = S.game; g.n--; nextWord(); },
+  found: () => found(), miss: () => miss(), after: () => after(),
+  rules: () => openSheet("rules"), close: () => openSheet(null),
+  bg: (v, e) => { if (e.target.classList.contains("sheet")) openSheet(null); },
+};
+document.addEventListener("click", e => { const el = e.target.closest("[data-a]"); if (!el || el.disabled) return; const f = A[el.dataset.a]; if (f) f(el.dataset.v, e); });
+load(); render();
+
+</script>
+<script>
+// une seule appli : un seul service worker à la racine
+if ("serviceWorker" in navigator) addEventListener("load", async () => {
+  try { for (const r of await navigator.serviceWorker.getRegistrations()) if (r.scope !== new URL("../", location).href) r.unregister(); } catch (e) {}
+  navigator.serviceWorker.register("../sw.js", { scope: "../" }).catch(() => {});
+});
+</script>
+</body>
+</html>
