@@ -12,6 +12,7 @@ Des jeux de soirée dans une seule appli, avec **un seul téléphone** pour tout
 | **Nom de Code** | Un mot pour faire deviner plusieurs cartes | 4 et plus |
 | **Tu Préfères** | Deux choix impossibles, tout le monde vote | 2 et plus |
 | **Le Faux Artiste** | Tout le monde dessine, un seul fait semblant | 3 à 10 |
+| **Le Dernier Mot** | Trouvez le mot secret, puis le complice | 4 à 10 |
 | **Trois Manches** | Décris, un seul mot, puis mime, en équipes | 4 et plus |
 | **Sur le Front** | Le téléphone sur le front, les autres font deviner | 2 et plus |
 | **Les Loups** | Le Loup-Garou, avec le téléphone comme narrateur | 5 à 18 |
