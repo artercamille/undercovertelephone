@@ -1,7 +1,7 @@
 {
-  "name": "Aura · Jeux de soirée",
-  "short_name": "Aura",
-  "description": "Six jeux de soirée avec un seul téléphone qui tourne autour de la table.",
+  "name": "Tablée · Jeux de soirée",
+  "short_name": "Tablée",
+  "description": "Jeux de soirée avec un seul téléphone pour toute la table.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",
@@ -10,8 +10,21 @@
   "background_color": "#ffffff",
   "theme_color": "#9b3dff",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

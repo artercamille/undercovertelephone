@@ -7,14 +7,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Aura">
+<meta name="apple-mobile-web-app-title" content="Tablée">
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="icon" type="image/png" href="../icons/favicon-64.png">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
-<title>Aura Loup</title>
+<title>Les Loups</title>
 <style>
 
-/* Même mise en page qu'Aura Cover : un écran = un titre, une consigne, un bouton ; ici en or de lune. */
+/* Même mise en page que L'Intrus : un écran = un titre, une consigne, un bouton ; ici en or de lune. */
 :root {
   --bg: #ffffff;
   --surface: #f3f3f5;
@@ -203,7 +203,7 @@ body { background: radial-gradient(120% 60% at 50% -10%, var(--bg-2), var(--bg) 
 canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
-/* ---- Aura Loup : même famille, en or de lune ; la nuit, tout l'écran passe en bleu nuit */
+/* ---- Les Loups : même famille, en or de lune ; la nuit, tout l'écran passe en bleu nuit */
 :root { --accent: #f59e0b; --accent-2: #ea580c; --glow: rgba(245, 158, 11, .32); --bg-2: #fff6e0; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent: #fbbf24; --accent-2: #f97316; --glow: rgba(251, 191, 36, .26); --bg-2: #21180a; } }
 :root[data-theme="dark"] { --accent: #fbbf24; --accent-2: #f97316; --glow: rgba(251, 191, 36, .26); --bg-2: #21180a; }
@@ -590,7 +590,7 @@ function render() {
   switch (S.screen) {
     case "home": {
       const { deck, dropped } = deckInfo(S.n), counts = deck.reduce((m, r) => (m[r] = (m[r] || 0) + 1, m), {});
-      h = `<a class="backmenu" href="../">‹ Menu</a><div class="brand"><span class="mark">${MARK}</span><div class="logo">Aura <i>Loup</i></div></div>
+      h = `<a class="backmenu" href="../">‹ Menu</a><div class="brand"><span class="mark">${MARK}</span><div class="logo">Les <i>Loups</i></div></div>
         <div class="sub" style="margin-top:0">Loup-Garou, et c'est le téléphone qui fait le narrateur.</div>
         <div class="big"><div class="label">Joueurs</div>${step("n", S.n, "count")}</div>
         <div class="box">

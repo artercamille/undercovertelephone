@@ -7,14 +7,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Aura">
+<meta name="apple-mobile-web-app-title" content="Tablée">
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="icon" type="image/png" href="../icons/favicon-64.png">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
-<title>Aura Spy</title>
+<title>L'Espion</title>
 <style>
 
-/* Même mise en page qu'Aura Cover : un écran = un titre, une consigne, un bouton ; ici en bleu-violet. */
+/* Même mise en page que L'Intrus : un écran = un titre, une consigne, un bouton ; ici en bleu-violet. */
 :root {
   --bg: #ffffff;
   --surface: #f3f3f5;
@@ -203,7 +203,7 @@ body { background: radial-gradient(120% 60% at 50% -10%, var(--bg-2), var(--bg) 
 canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
-/* ---- Aura Spy : même famille qu'Aura Cover, couleur bleu-violet */
+/* ---- L'Espion : même famille que L'Intrus, couleur bleu-violet */
 :root { --accent: #3b5bff; --accent-2: #9b3dff; --glow: rgba(80, 70, 255, .32); --bg-2: #eceeff; --spy: #1f1b3a; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent: #5b78ff; --accent-2: #a65bff; --glow: rgba(110, 100, 255, .3); --bg-2: #15152c; --spy: #08070f; } }
 :root[data-theme="dark"] { --accent: #5b78ff; --accent-2: #a65bff; --glow: rgba(110, 100, 255, .3); --bg-2: #15152c; --spy: #08070f; }
@@ -249,7 +249,7 @@ body.full { overflow: hidden; }
 <div id="sheet"></div>
 
 <script>
-// Lieux et rôles d'Aura Spy (notre liste à nous)
+// Lieux et rôles de L'Espion (notre liste à nous)
 const PLACES = [
   ["La plage", ["Maître-nageur", "Vendeur de chouchous", "Touriste qui crame", "Surfeur", "Enfant qui fait un château", "Papi qui pêche"]],
   ["L'université", ["Professeur", "Étudiant", "Doyen", "Bibliothécaire", "Chercheur", "Agent d'entretien"]],
@@ -302,7 +302,7 @@ function load(data) {
   if (!S.game) S.screen = "home";
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
-// les prénoms déjà connus dans Aura Cover sont proposés aussi
+// les prénoms déjà connus dans L'Intrus sont proposés aussi
 function knownNames() {
   const set = new Set(Object.keys(S.people));
   try { const c = JSON.parse(localStorage.getItem("auracover_poche5") || "{}"); for (const n of Object.keys(c.people || {})) set.add(n); } catch (e) {}
@@ -368,7 +368,7 @@ function render() {
     case "home": {
       const k = Math.min(S.spies, maxSpies(S.n));
       h = `<a class="backmenu" href="../">‹ Menu</a><div class="spacer"></div>
-        <div class="brand"><span class="mark">${MARK}</span><div class="logo">Aura <i>Spy</i></div></div>
+        <div class="brand"><span class="mark">${MARK}</span><div class="logo">L'<i>Espion</i></div></div>
         <div class="sub" style="margin-top:0">Tout le monde connaît le lieu… sauf l'espion.</div>
         <div class="big"><div class="label">Joueurs</div>${step("n", S.n, "count")}</div>
         <div class="box">

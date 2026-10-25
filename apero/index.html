@@ -7,14 +7,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Aura">
+<meta name="apple-mobile-web-app-title" content="Tablée">
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="icon" type="image/png" href="../icons/favicon-64.png">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
-<title>Aura Apéro</title>
+<title>L'Apéro</title>
 <style>
 
-/* Même mise en page qu'Aura Cover : un écran = un titre, une consigne, un bouton ; ici en citron vert. */
+/* Même mise en page que L'Intrus : un écran = un titre, une consigne, un bouton ; ici en citron vert. */
 :root {
   --bg: #ffffff;
   --surface: #f3f3f5;
@@ -203,7 +203,7 @@ body { background: radial-gradient(120% 60% at 50% -10%, var(--bg-2), var(--bg) 
 canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
-/* ---- Aura Apéro : même famille, en citron vert ; chaque carte prend la couleur de son type */
+/* ---- L'Apéro : même famille, en citron vert ; chaque carte prend la couleur de son type */
 :root { --accent: #84cc16; --accent-2: #16a34a; --glow: rgba(132, 204, 22, .32); --bg-2: #f1fbe3; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent: #a3e635; --accent-2: #22c55e; --glow: rgba(163, 230, 53, .25); --bg-2: #142012; } }
 :root[data-theme="dark"] { --accent: #a3e635; --accent-2: #22c55e; --glow: rgba(163, 230, 53, .25); --bg-2: #142012; }
@@ -251,7 +251,7 @@ body.full { overflow: hidden; }
 <div id="sheet"></div>
 
 <script>
-// Cartes d'Aura Apéro. {A} {B} = joueurs tirés au hasard, {D} = « bois 2 gorgées » (ou un gage en version sans alcool), {G} = « distribue 3 gorgées »
+// Cartes de L'Apéro. {A} {B} = joueurs tirés au hasard, {D} = « bois 2 gorgées » (ou un gage en version sans alcool), {G} = « distribue 3 gorgées »
 const CARDS = {
   defi: [
     "{A}, cite 5 marques de voiture en 10 secondes. Sinon, {D}.",
@@ -519,7 +519,7 @@ function render() {
   switch (S.screen) {
     case "home": {
       const ok = S.players.length >= 2;
-      h = `<a class="backmenu" href="../">‹ Menu</a><div class="brand"><span class="mark">${MARK}</span><div class="logo">Aura <i>Apéro</i></div></div>
+      h = `<a class="backmenu" href="../">‹ Menu</a><div class="brand"><span class="mark">${MARK}</span><div class="logo">L'<i>Apéro</i></div></div>
         <div class="sub" style="margin-top:0">Défis, votes, « je n'ai jamais »… une carte après l'autre.</div>
         <div class="teambox"><div class="teamhead"><span>Les joueurs</span><small>${S.players.length}</small></div>
           <div class="chips2">${S.players.map((nm, k) => `<button class="pchip" data-a="rm" data-v="${k}">${av(nm)}<span>${esc(nm)}</span><i aria-label="Retirer">×</i></button>`).join("")}

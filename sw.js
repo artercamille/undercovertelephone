@@ -1,8 +1,8 @@
-// Garde toute l'appli Aura sur le téléphone pour qu'elle marche sans connexion.
+// Garde toute l'appli Tablée sur le téléphone pour qu'elle marche sans connexion.
 // Changer VERSION à chaque mise à jour pour que les téléphones récupèrent la nouvelle version.
-const VERSION = "aura-v3";
+const VERSION = "tablee-v4";
 const FILES = ["./", "index.html", "manifest.webmanifest", "Fredoka.ttf",
-  "cover/", "spy/", "time/", "tete/", "loup/", "apero/",
+  "cover/", "spy/", "milieu/", "time/", "tete/", "loup/", "apero/",
   "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-512.png", "icons/apple-touch-icon.png", "icons/favicon-64.png"];
 
 self.addEventListener("install", e => {

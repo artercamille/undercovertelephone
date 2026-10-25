@@ -7,14 +7,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Aura">
+<meta name="apple-mobile-web-app-title" content="Tablée">
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="icon" type="image/png" href="../icons/favicon-64.png">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
-<title>Aura Time</title>
+<title>Trois Manches</title>
 <style>
 
-/* Même mise en page qu'Aura Cover : un écran = un titre, une consigne, un bouton ; ici en vert. */
+/* Même mise en page que L'Intrus : un écran = un titre, une consigne, un bouton ; ici en vert. */
 :root {
   --bg: #ffffff;
   --surface: #f3f3f5;
@@ -203,7 +203,7 @@ body { background: radial-gradient(120% 60% at 50% -10%, var(--bg-2), var(--bg) 
 canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
-/* ---- Aura Time : même famille, en vert ; les couleurs d'équipe prennent le relais pendant le jeu */
+/* ---- Trois Manches : même famille, en vert ; les couleurs d'équipe prennent le relais pendant le jeu */
 :root { --accent: #10b981; --accent-2: #0891b2; --glow: rgba(16, 185, 129, .32); --bg-2: #e8faf3; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent: #22c993; --accent-2: #22a7d0; --glow: rgba(34, 201, 147, .28); --bg-2: #0f1f1a; } }
 :root[data-theme="dark"] { --accent: #22c993; --accent-2: #22a7d0; --glow: rgba(34, 201, 147, .28); --bg-2: #0f1f1a; }
@@ -251,7 +251,7 @@ body.full { overflow: hidden; }
 <div id="sheet"></div>
 
 <script>
-// Cartes d'Aura Time : des noms que tout le monde connaît (personnes et personnages)
+// Cartes de Trois Manches : des noms que tout le monde connaît (personnes et personnages)
 const DECK = ["Napoléon", "Albert Einstein", "Zinédine Zidane", "Kylian Mbappé", "Lionel Messi", "Cristiano Ronaldo", "Michael Jordan", "Usain Bolt", "Roger Federer", "Serena Williams",
   "Teddy Riner", "Tony Parker", "Antoine Griezmann", "Neymar", "Muhammad Ali", "Mike Tyson", "Michael Jackson", "Madonna", "Beyoncé", "Rihanna",
   "Elvis Presley", "Johnny Hallyday", "Céline Dion", "Stromae", "Aya Nakamura", "Jul", "Eminem", "Shakira", "Lady Gaga", "Taylor Swift",
@@ -364,7 +364,7 @@ function render() {
   switch (S.screen) {
     case "home": {
       h = `<a class="backmenu" href="../">‹ Menu</a><div class="spacer"></div>
-        <div class="brand"><span class="mark">${MARK}</span><div class="logo">Aura <i>Time</i></div></div>
+        <div class="brand"><span class="mark">${MARK}</span><div class="logo">Trois <i>Manches</i></div></div>
         <div class="sub" style="margin-top:0">Décris, un seul mot, puis mime. En équipes, contre la montre.</div>
         <div class="big"><div class="label">Équipes</div>${step("nTeams", S.nTeams, "count")}</div>
         <div class="box">

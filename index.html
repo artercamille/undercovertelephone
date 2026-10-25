@@ -4,18 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#9b3dff">
-<meta name="description" content="Six jeux de soirée avec un seul téléphone qui tourne autour de la table.">
+<meta name="description" content="Jeux de soirée avec un seul téléphone pour toute la table.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Aura">
+<meta name="apple-mobile-web-app-title" content="Tablée">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/favicon-64.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<title>Aura</title>
+<title>Tablée</title>
 <style>
 
-/* Menu des jeux Aura : la même famille visuelle, chaque jeu garde sa couleur sur sa tuile. */
+/* Tablée : un écran = un titre, une consigne, un bouton ; chaque jeu a sa couleur. */
 :root {
   --bg: #ffffff;
   --surface: #f3f3f5;
@@ -204,87 +204,101 @@ body { background: radial-gradient(120% 60% at 50% -10%, var(--bg-2), var(--bg) 
 canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
-/* ---- menu */
+
 :root { --accent: #ff5a1f; --accent-2: #9b3dff; --glow: rgba(155, 61, 255, .25); --bg-2: #fff0f4; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg-2: #1d1230; } }
 :root[data-theme="dark"] { --bg-2: #1d1230; }
-.hub-title { text-align: center; font-size: 3.6rem; font-weight: 700; line-height: 1; letter-spacing: -.01em;
-  background: linear-gradient(90deg, #ff5a1f, #ec4899, #9b3dff, #3b5bff, #10b981); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hub-title { text-align: center; font-size: 3.4rem; font-weight: 700; line-height: 1; letter-spacing: -.01em; }
+.hub-title i { font-style: normal; background: linear-gradient(90deg, #ff5a1f, #ec4899, #9b3dff, #3b5bff); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .games { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.game { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 4px; padding: 16px 14px 14px; border-radius: 22px; color: #fff; text-decoration: none; min-height: 190px;
+.game { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 4px; padding: 16px 14px 14px; border-radius: 22px; color: #fff; text-decoration: none; min-height: 186px;
   background: repeating-linear-gradient(45deg, rgba(255,255,255,.09) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--g1), var(--g2));
   box-shadow: 0 10px 22px color-mix(in srgb, var(--g1) 35%, transparent); transition: transform .1s; animation: pop .35s ease-out backwards; }
-.game:nth-child(2) { animation-delay: .04s } .game:nth-child(3) { animation-delay: .08s } .game:nth-child(4) { animation-delay: .12s } .game:nth-child(5) { animation-delay: .16s } .game:nth-child(6) { animation-delay: .2s }
 .game:active { transform: scale(.96); }
 .gicon { width: 50px; height: 50px; border-radius: 16px; background: rgba(255,255,255,.22); display: grid; place-items: center; margin-bottom: 6px; transform: rotate(-6deg); }
 .gicon svg { width: 32px; height: 32px; }
-.gname { font-size: 1.25rem; font-weight: 700; line-height: 1.1; }
-.gdesc { font-size: .85rem; line-height: 1.25; opacity: .92; flex: 1; }
+.gname { font-size: 1.2rem; font-weight: 700; line-height: 1.1; }
+.gdesc { font-size: .84rem; line-height: 1.25; opacity: .92; flex: 1; }
 .gplayers { font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; opacity: .85; margin-top: 6px; }
 .install { background: var(--panel); box-shadow: var(--shadow); border-radius: 18px; padding: 14px 16px; font-size: .92rem; color: var(--muted); text-align: center; text-wrap: balance; }
 .install b { color: var(--ink); }
 
+</style>
+<style>
 @font-face { font-family: "Fredoka"; src: url("Fredoka.ttf") format("truetype"); font-weight: 300 700; font-display: swap; }
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 html { overscroll-behavior: none; }
+body.full { overflow: hidden; }
+.backmenu { align-self: flex-start; color: var(--muted); font-weight: 600; text-decoration: none; padding: 6px 2px; margin-bottom: -12px; }
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="hub-title">Aura</div>
-  <div class="sub" style="margin-top:-6px">Jeux de soirée · un seul téléphone qui tourne</div>
+  <div class="hub-title">Tabl<i>ée</i></div>
+  <div class="sub" style="margin-top:-6px">Jeux de soirée · un seul téléphone pour toute la table</div>
   <div class="games">
     <a class="game" href="cover/" style="--g1:#ff5a1f;--g2:#ff2e63">
       <span class="gicon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M4 22c6-6 12-8 20-8s14 2 20 8c-2 8-8 12-14 12-3 0-5-2-6-4-1 2-3 4-6 4-6 0-12-4-14-12z" fill="#fff"/><circle cx="15" cy="23" r="4" fill="#ff2e63"/><circle cx="33" cy="23" r="4" fill="#ff2e63"/></svg></span>
-      <span class="gname">Aura Cover</span>
-      <span class="gdesc">Undercover : trouve qui n'a pas le même mot que toi.</span>
+      <span class="gname">L'Intrus</span>
+      <span class="gdesc">Trouve qui n'a pas le même mot que toi.</span>
       <span class="gplayers">3 à 12 joueurs</span>
     </a>
     <a class="game" href="spy/" style="--g1:#3b5bff;--g2:#9b3dff">
       <span class="gicon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 22h32l-4-12c-1-3-4-4-7-3l-5 2-5-2c-3-1-6 0-7 3z" fill="#fff"/><rect x="4" y="21" width="40" height="4" rx="2" fill="#fff"/><circle cx="16" cy="32" r="6" fill="none" stroke="#fff" stroke-width="3"/><circle cx="32" cy="32" r="6" fill="none" stroke="#fff" stroke-width="3"/><path d="M22 31q2-2 4 0" stroke="#fff" stroke-width="3" fill="none"/></svg></span>
-      <span class="gname">Aura Spy</span>
+      <span class="gname">L'Espion</span>
       <span class="gdesc">Tout le monde connaît le lieu, sauf l'espion.</span>
       <span class="gplayers">3 à 12 joueurs</span>
     </a>
+    <a class="game" href="milieu/" style="--g1:#0ea5e9;--g2:#6366f1">
+      <span class="gicon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 36a18 18 0 0 1 36 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M24 36 32 18" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="24" cy="36" r="4" fill="#fff"/></svg></span>
+      <span class="gname">Juste Milieu</span>
+      <span class="gdesc">Un indice, un cadran : trouvez où il pense.</span>
+      <span class="gplayers">4 et plus joueurs</span>
+    </a>
     <a class="game" href="time/" style="--g1:#10b981;--g2:#0891b2">
       <span class="gicon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 6h20M14 42h20" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M16 6c0 10 8 12 8 18s-8 8-8 18h16c0-10-8-12-8-18s8-8 8-18z" fill="none" stroke="#fff" stroke-width="3.5" stroke-linejoin="round"/><path d="M19 38c1-4 4-6 5-8 1 2 4 4 5 8z" fill="#fff"/></svg></span>
-      <span class="gname">Aura Time</span>
-      <span class="gdesc">Décris, un seul mot, puis mime. En équipes.</span>
+      <span class="gname">Trois Manches</span>
+      <span class="gdesc">Décris, un seul mot, puis mime, en équipes.</span>
       <span class="gplayers">4 et plus joueurs</span>
     </a>
     <a class="game" href="tete/" style="--g1:#d946ef;--g2:#ec4899">
       <span class="gicon"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="30" r="13" fill="none" stroke="#fff" stroke-width="3.5"/><rect x="13" y="4" width="22" height="14" rx="3" fill="#fff"/><circle cx="19" cy="29" r="2.2" fill="#fff"/><circle cx="29" cy="29" r="2.2" fill="#fff"/><path d="M19 35q5 4 10 0" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/></svg></span>
-      <span class="gname">Aura Tête</span>
-      <span class="gdesc">Le téléphone sur le front, les autres te font deviner.</span>
+      <span class="gname">Sur le Front</span>
+      <span class="gdesc">Le téléphone sur le front, les autres font deviner.</span>
       <span class="gplayers">2 et plus joueurs</span>
     </a>
     <a class="game" href="loup/" style="--g1:#f59e0b;--g2:#ea580c">
       <span class="gicon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M30 6a18 18 0 1 0 12 30A15 15 0 0 1 30 6z" fill="#fff"/><path d="M14 40l4-9 3 4 3-7 3 7 3-4 4 9z" fill="#fff" opacity=".85"/></svg></span>
-      <span class="gname">Aura Loup</span>
-      <span class="gdesc">Loup-Garou, le téléphone fait le narrateur.</span>
+      <span class="gname">Les Loups</span>
+      <span class="gdesc">Le Loup-Garou, avec le téléphone comme narrateur.</span>
       <span class="gplayers">5 à 18 joueurs</span>
     </a>
     <a class="game" href="apero/" style="--g1:#84cc16;--g2:#16a34a">
       <span class="gicon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 8h28l-12 16v14h7v3H15v-3h7V24z" fill="#fff"/><circle cx="34" cy="12" r="5" fill="none" stroke="#fff" stroke-width="3"/></svg></span>
-      <span class="gname">Aura Apéro</span>
+      <span class="gname">L'Apéro</span>
       <span class="gdesc">Défis, votes et « je n'ai jamais ».</span>
       <span class="gplayers">2 et plus joueurs</span>
     </a>
   </div>
   <div class="install" id="install" hidden></div>
-  <div class="hint" style="text-align:center">Les prénoms sont partagés entre tous les jeux, et chaque jeu garde ses stats.</div>
+  <div class="hint" style="text-align:center">Les prénoms sont partagés entre tous les jeux.</div>
 </div>
 <script>
-// aide à l'installation, seulement si l'appli n'est pas déjà installée
 const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
 if (!standalone) {
-  const ios = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const el = document.getElementById("install");
+  const ios = /iPad|iPhone|iPod/.test(navigator.userAgent), el = document.getElementById("install");
   el.innerHTML = ios ? "Pour l'avoir comme une appli : bouton <b>Partager</b> de Safari, puis <b>Sur l'écran d'accueil</b>."
     : "Pour l'avoir comme une appli : menu <b>⋮</b> de Chrome, puis <b>Installer l'application</b>.";
   el.hidden = false;
 }
-if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+document.querySelectorAll(".game").forEach((g, i) => g.style.animationDelay = (i * .04) + "s");
+</script>
+<script>
+// une seule appli : un seul service worker à la racine
+if ("serviceWorker" in navigator) addEventListener("load", async () => {
+  try { for (const r of await navigator.serviceWorker.getRegistrations()) if (r.scope !== new URL("", location).href) r.unregister(); } catch (e) {}
+  navigator.serviceWorker.register("sw.js", { scope: "" }).catch(() => {});
+});
 </script>
 </body>
 </html>

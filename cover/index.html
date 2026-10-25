@@ -7,11 +7,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Aura">
+<meta name="apple-mobile-web-app-title" content="Tablée">
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="icon" type="image/png" href="../icons/favicon-64.png">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
-<title>Aura Cover</title>
+<title>L'Intrus</title>
 <style>
 /* Application simple : fond uni, texte noir, une seule couleur vive (orange) pour l'action principale. Un écran = un titre, une consigne, un bouton. */
 :root {
@@ -314,7 +314,7 @@ function render() {
     case "home": {
       const [u, w] = rolesFor(S.n), known = Object.keys(S.people).length;
       h = `<a class="backmenu" href="../">‹ Menu</a><div class="spacer"></div>
-        <div class="brand"><span class="mark"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M4 22c6-6 12-8 20-8s14 2 20 8c-2 8-8 12-14 12-3 0-5-2-6-4-1 2-3 4-6 4-6 0-12-4-14-12z" fill="#fff"/><circle cx="15" cy="23" r="4" fill="#ff2e63"/><circle cx="33" cy="23" r="4" fill="#ff2e63"/></svg></span><div class="logo">Aura <i>Cover</i></div></div>
+        <div class="brand"><span class="mark"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M4 22c6-6 12-8 20-8s14 2 20 8c-2 8-8 12-14 12-3 0-5-2-6-4-1 2-3 4-6 4-6 0-12-4-14-12z" fill="#fff"/><circle cx="15" cy="23" r="4" fill="#ff2e63"/><circle cx="33" cy="23" r="4" fill="#ff2e63"/></svg></span><div class="logo">L'<i>Intrus</i></div></div>
         <div class="sub" style="margin-top:0">Trouvez l'imposteur avec un seul téléphone.</div>
         <div class="big"><div class="label">Joueurs</div>${step("n", S.n, "count")}</div>
         <div class="box">
