@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#84cc16">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Aura">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" type="image/png" href="../icons/favicon-64.png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<title>Aura Apéro</title>
+<style>
+
+/* Même mise en page qu'Aura Cover : un écran = un titre, une consigne, un bouton ; ici en citron vert. */
+:root {
+  --bg: #ffffff;
+  --surface: #f3f3f5;
+  --surface-2: #e9e9ed;
+  --ink: #111114;
+  --muted: #6e6e76;
+  --accent: #ff5a1f;
+  --accent-ink: #ffffff;
+  --civil: #16a34a;
+  --under: #e11d48;
+  --white: #71717a;
+  --font: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-weight: 500; font-size: 17px; line-height: 1.35;
+  -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+input { -webkit-user-select: text; user-select: text; }
+.app { max-width: 440px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; gap: 20px;
+  padding-block: 26px 28px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.logo { text-align: center; font-size: 2.6rem; font-weight: 700; line-height: 1; }
+.logo i { font-style: normal; color: var(--accent); }
+h2 { margin: 0; font-size: 1.8rem; font-weight: 700; line-height: 1.12; text-align: center; text-wrap: balance; }
+.sub { text-align: center; color: var(--muted); margin-top: -10px; text-wrap: balance; }
+.label { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.spacer { flex: 1; }
+.pop { animation: pop .3s ease-out backwards; }
+@keyframes pop { from { transform: translateY(8px); opacity: 0 } }
+
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
+.btn { width: 100%; min-height: 60px; border-radius: 16px; background: var(--accent); color: var(--accent-ink); font-size: 1.2rem; font-weight: 600; transition: transform .08s, opacity .15s; }
+.btn:active { transform: scale(.98); }
+.btn.alt, .btn.soft { background: var(--surface); color: var(--ink); }
+.btn:disabled { opacity: .35; }
+.link { color: var(--muted); font-weight: 500; font-size: .95rem; padding: 10px; }
+.links { display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 12px; }
+
+.box { background: var(--surface); border-radius: 18px; padding: 2px 16px; }
+.line { display: flex; align-items: center; gap: 12px; min-height: 62px; }
+.line + .line { border-top: 1px solid var(--surface-2); }
+.line .name { flex: 1; font-weight: 600; }
+.line .name small { display: block; color: var(--muted); font-size: .82rem; font-weight: 500; }
+.step { display: flex; align-items: center; gap: 4px; }
+.step button { width: 40px; height: 40px; border-radius: 50%; background: var(--bg); font-size: 1.3rem; font-weight: 600; }
+.step button:active { transform: scale(.9); }
+.step span { min-width: 54px; text-align: center; font-weight: 600; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.big { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.big .step { gap: 20px; }
+.big .step button { width: 56px; height: 56px; font-size: 1.7rem; background: var(--surface); }
+.big .step span.count { font-size: 4.2rem; font-weight: 700; min-width: 90px; line-height: 1; }
+.chips { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-top: -6px; }
+.chip { font-size: .88rem; font-weight: 600; padding: 4px 12px; border-radius: 99px; background: var(--surface); }
+.chip.civil { color: var(--civil); } .chip.undercover { color: var(--under); } .chip.white { color: var(--white); }
+
+/* cartes */
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.card { aspect-ratio: 3 / 4; border-radius: 16px; background: var(--accent); color: var(--accent-ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px;
+  animation: pop .3s ease-out backwards; transition: transform .1s; }
+.card .q { font-size: 2.4rem; font-weight: 700; line-height: 1; }
+.card .num { font-size: .8rem; font-weight: 600; opacity: .8; }
+.card:active { transform: scale(.95); }
+.card.taken { background: var(--surface); color: var(--muted); pointer-events: none; font-weight: 600; font-size: .95rem; text-align: center; overflow-wrap: anywhere; gap: 8px; }
+
+/* qui es-tu */
+input[type=text] { width: 100%; min-height: 58px; border-radius: 16px; border: 2px solid var(--surface-2); background: var(--bg); color: var(--ink);
+  font: inherit; font-size: 1.2rem; font-weight: 600; padding: 0 18px; }
+input[type=text]:focus { border-color: var(--accent); outline: none; }
+input::placeholder { color: var(--muted); font-weight: 500; }
+.list { display: flex; flex-direction: column; background: var(--surface); border-radius: 18px; overflow: hidden; }
+.list:empty { display: none; }
+.who { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 8px 14px; text-align: left; }
+.who + .who { border-top: 1px solid var(--surface-2); }
+.who:active { background: var(--surface-2); }
+.who .t { flex: 1; min-width: 0; font-weight: 600; font-size: 1.1rem; overflow-wrap: anywhere; }
+.who .t small { display: block; color: var(--muted); font-weight: 500; font-size: .82rem; }
+.who .go { color: var(--muted); font-size: 1.3rem; }
+.who.new { background: var(--accent); color: var(--accent-ink); }
+.who.new .t small, .who.new .go { color: var(--accent-ink); opacity: .85; }
+.who.sel { background: var(--ink); color: var(--bg); }
+.who.sel .t small, .who.sel .n { color: var(--bg); opacity: .7; }
+.who .n { width: 20px; text-align: center; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.av { --c: var(--accent); width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  background: var(--c); color: #fff; font-weight: 700; font-size: 1.05rem; }
+.av.dead { filter: grayscale(1); opacity: .5; }
+.av.xl { width: 84px; height: 84px; font-size: 2.2rem; }
+.empty { text-align: center; color: var(--muted); padding: 14px; font-size: .95rem; text-wrap: balance; }
+
+/* révélations */
+.reveal { background: var(--surface); border-radius: 24px; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  animation: pop .3s ease-out backwards; }
+.word { font-size: 2.9rem; font-weight: 700; line-height: 1.05; text-wrap: balance; max-width: 100%; }
+.role { font-size: 2.9rem; font-weight: 700; line-height: 1; }
+.role.civil { color: var(--civil); } .role.undercover { color: var(--under); } .role.white { color: var(--white); }
+.hint { color: var(--muted); font-size: .98rem; text-wrap: balance; }
+.reveal input[type=text] { text-align: center; }
+
+/* fin + stats */
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pair > div { background: var(--surface); border-radius: 18px; padding: 14px 10px; text-align: center; }
+.pair b { display: block; font-size: 1.15rem; font-weight: 700; overflow-wrap: anywhere; margin-top: 2px; }
+.res { display: flex; align-items: center; gap: 10px; min-height: 60px; font-variant-numeric: tabular-nums; }
+.res + .res { border-top: 1px solid var(--surface-2); }
+.res .t { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.res .t small { display: block; font-size: .8rem; font-weight: 600; }
+.res.dead .t > span { color: var(--muted); }
+.res .g { font-weight: 700; color: var(--civil); min-width: 34px; text-align: right; }
+.res .win { font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--accent); color: var(--accent-ink); }
+.r.civil { color: var(--civil); } .r.undercover { color: var(--under); } .r.white { color: var(--white); }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tile { background: var(--surface); border-radius: 16px; padding: 12px 6px; text-align: center; }
+.tile b { display: block; font-size: 1.7rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tile span { font-size: .78rem; color: var(--muted); font-weight: 500; }
+.bars { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; }
+.bar { display: grid; grid-template-columns: 96px 1fr 44px; align-items: center; gap: 10px; font-size: .95rem; font-weight: 600; }
+.bar .tr { height: 10px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.bar .tr i { display: block; height: 100%; border-radius: 99px; }
+.bar em { font-style: normal; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; font-size: .85rem; }
+.rank { width: 22px; text-align: center; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rank.top { color: var(--accent); }
+.statcard { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+
+.sheet { position: fixed; inset: 0; z-index: 10; background: rgba(0,0,0,.4); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s; }
+@keyframes fade { from { opacity: 0 } }
+.sheet > div { width: min(100%, 440px); background: var(--bg); border-radius: 24px 24px 0 0; display: flex; flex-direction: column; gap: 14px; max-height: 90%; overflow-y: auto;
+  animation: up .25s ease-out;
+  padding: 24px max(20px, env(safe-area-inset-right, 0px)) max(22px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)); }
+@keyframes up { from { transform: translateY(40px) } }
+.rules p { margin: 0 0 10px; }
+.rules b { font-weight: 700; }
+/* ---- couche "juste milieu" : relief, dégradés, motif sur les cartes */
+:root { --accent-2: #ff2e63; --glow: rgba(255, 90, 31, .35); --shadow: 0 1px 2px rgba(20,20,30,.06), 0 8px 24px rgba(20,20,30,.08); --panel: #ffffff; --bg-2: #fff1ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; } }
+:root[data-theme="dark"] { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; }
+body { background: radial-gradient(120% 60% at 50% -10%, var(--bg-2), var(--bg) 60%) fixed, var(--bg); }
+.brand { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.mark { width: 74px; height: 74px; border-radius: 22px; display: grid; place-items: center; transform: rotate(-6deg);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 10px 26px var(--glow); }
+.mark svg { width: 46px; height: 46px; }
+.logo { font-size: 2.7rem; }
+.logo i { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.btn { background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 8px 20px var(--glow); }
+.btn.alt, .btn.soft { background: var(--panel); box-shadow: var(--shadow); }
+.btn:disabled { box-shadow: none; }
+.box, .list, .pair > div, .tile { background: var(--panel); box-shadow: var(--shadow); }
+.who + .who, .line + .line, .res + .res { border-top-color: var(--surface); }
+.step button { background: var(--surface); }
+.big .step button { background: var(--panel); box-shadow: var(--shadow); }
+.big .step span.count { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.chip { background: var(--panel); box-shadow: var(--shadow); }
+.card { position: relative; overflow: hidden; border-radius: 18px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.09) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--accent), var(--accent-2));
+  box-shadow: 0 8px 18px var(--glow); }
+.card::before { content: ""; position: absolute; inset: 6px; border-radius: 13px; border: 2px solid rgba(255,255,255,.35); pointer-events: none; }
+.card .q { width: 54%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.22); display: grid; place-items: center; font-size: 2rem; }
+.card:nth-child(3n+1) { transform: rotate(-2deg); } .card:nth-child(3n) { transform: rotate(2deg); }
+.card:active { transform: scale(.94); }
+.card.taken { background: var(--panel); box-shadow: var(--shadow); transform: none; }
+.card.taken::before { border-color: var(--surface); }
+.av { background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 60%, #ff2e63)); box-shadow: 0 3px 8px color-mix(in srgb, var(--c) 35%, transparent); }
+.who.new { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.who.sel { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+.who.sel .t small, .who.sel .n { color: #fff; }
+.reveal { background: var(--panel); box-shadow: var(--shadow); position: relative; overflow: hidden; padding-top: 0; animation: flipIn .5s cubic-bezier(.2,1.2,.4,1) backwards; }
+@keyframes flipIn { from { transform: perspective(900px) rotateY(70deg); opacity: 0 } }
+.reveal::before { content: ""; display: block; align-self: stretch; height: 92px; margin: 0 -20px 4px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2))); }
+.reveal .av.xl { margin-top: -66px; box-shadow: 0 0 0 6px var(--panel), 0 8px 18px rgba(0,0,0,.18); }
+.reveal.civil { --band1: #22c55e; --band2: #0d9488; }
+.reveal.undercover { --band1: #f43f5e; --band2: #be123c; }
+.reveal.white { --band1: #a1a1aa; --band2: #52525b; }
+.reveal.wordcard .word { background: linear-gradient(135deg, var(--ink), color-mix(in srgb, var(--ink) 60%, var(--accent))); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 4px; }
+.res .win { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.tile b { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.endhead { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px; border-radius: 24px; color: #fff; text-align: center;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2)));
+  box-shadow: var(--shadow); animation: pop .4s ease-out backwards; }
+.endhead.civils { --band1: #22c55e; --band2: #0d9488; } .endhead.imposteurs { --band1: #f43f5e; --band2: #be123c; } .endhead.white { --band1: #71717a; --band2: #3f3f46; }
+.endhead h2 { color: #fff; }
+.endhead .label { color: rgba(255,255,255,.85); }
+.sheet > div { background: var(--bg); }
+canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ---- Aura Apéro : même famille, en citron vert ; chaque carte prend la couleur de son type */
+:root { --accent: #84cc16; --accent-2: #16a34a; --glow: rgba(132, 204, 22, .32); --bg-2: #f1fbe3; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent: #a3e635; --accent-2: #22c55e; --glow: rgba(163, 230, 53, .25); --bg-2: #142012; } }
+:root[data-theme="dark"] { --accent: #a3e635; --accent-2: #22c55e; --glow: rgba(163, 230, 53, .25); --bg-2: #142012; }
+.endhead.agents { --band1: var(--accent); --band2: var(--accent-2); }
+.teambox { background: var(--panel); box-shadow: var(--shadow); border-radius: 20px; overflow: hidden; }
+.teamhead { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 16px; color: #fff; font-weight: 700; font-size: 1.1rem;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.teamhead small { font-weight: 600; opacity: .9; }
+.chips2 { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; }
+.pchip { display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; border-radius: 99px; background: var(--surface); font-weight: 600; font-size: .98rem; }
+.pchip .av { width: 30px; height: 30px; font-size: .85rem; }
+.pchip i { font-style: normal; color: var(--muted); font-size: 1.2rem; margin-left: 2px; }
+.pchip.add { padding: 0 16px; min-height: 38px; color: var(--accent-2); background: transparent; box-shadow: inset 0 0 0 2px var(--surface-2); }
+.res .tot { font-weight: 700; font-size: 1.25rem; min-width: 32px; text-align: right; font-variant-numeric: tabular-nums; }
+.toggle { width: 100%; text-align: left; }
+.toggle .name { flex: 1; }
+.sw { width: 48px; height: 28px; border-radius: 99px; background: var(--surface-2); position: relative; transition: background .2s; flex: none; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.sw.on { background: var(--accent-2); } .sw.on::after { transform: translateX(20px); }
+body.full .app { max-width: none; padding: 0; min-height: 100%; }
+body.full { overflow: hidden; }
+.stage { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; color: #fff; text-align: center; cursor: pointer;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.08) 0 16px, transparent 16px 32px), linear-gradient(150deg, var(--band1), var(--band2));
+  padding: max(70px, env(safe-area-inset-top, 0px)) max(26px, env(safe-area-inset-right, 0px)) max(60px, env(safe-area-inset-bottom, 0px)) max(26px, env(safe-area-inset-left, 0px)); transition: background .3s; }
+.ptop { position: absolute; top: max(14px, env(safe-area-inset-top, 0px)); left: 0; right: 0; display: flex; justify-content: space-between; align-items: center;
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); font-weight: 700; font-variant-numeric: tabular-nums; }
+.pbtn { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,.2); color: #fff; font-size: 1.3rem; font-weight: 700; }
+.pbtn:disabled { opacity: .3; }
+.ptype { font-size: .9rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; background: rgba(255,255,255,.2); padding: 6px 16px; border-radius: 99px; }
+.ptext { font-weight: 700; line-height: 1.15; max-width: 600px; text-wrap: balance; text-shadow: 0 2px 0 rgba(0,0,0,.12); }
+.pnext { position: absolute; bottom: max(22px, env(safe-area-inset-bottom, 0px)); left: 0; right: 0; font-size: .9rem; opacity: .75; font-weight: 600; }
+
+</style>
+<style>
+@font-face { font-family: "Fredoka"; src: url("../Fredoka.ttf") format("truetype"); font-weight: 300 700; font-display: swap; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+html { overscroll-behavior: none; }
+body.full { overflow: hidden; }
+.backmenu { align-self: flex-start; color: var(--muted); font-weight: 600; text-decoration: none; padding: 6px 2px; margin-bottom: -12px; }
+</style>
+</head>
+<body>
+
+<div class="app" id="app"></div>
+<div id="sheet"></div>
+
+<script>
+// Cartes d'Aura Apéro. {A} {B} = joueurs tirés au hasard, {D} = « bois 2 gorgées » (ou un gage en version sans alcool), {G} = « distribue 3 gorgées »
+const CARDS = {
+  defi: [
+    "{A}, cite 5 marques de voiture en 10 secondes. Sinon, {D}.",
+    "{A}, imite quelqu'un de la soirée. Le premier qui devine qui c'est {G}. Personne ne trouve ? {D}.",
+    "{A}, fais un compliment sincère à {B}. Si ça sonne faux, {D}.",
+    "{A}, parle avec un accent anglais jusqu'à ton prochain tour. Si tu oublies, {D}.",
+    "{A}, cite 3 chansons de Jul. Sinon, {D}.",
+    "{A}, dis l'alphabet à l'envers à partir de la lettre M. Raté ? {D}.",
+    "{A}, montre la dernière photo de ta galerie, ou {D}.",
+    "{A}, fais 10 pompes. Si tu refuses, {D}.",
+    "{A}, raconte ta pire honte en une phrase, ou {D}.",
+    "{A}, chante le refrain d'une chanson choisie par {B}. Sinon, {D}.",
+    "{A}, tu as 15 secondes pour trouver un mot qui rime avec « orange ». Sinon, {D}.",
+    "{A}, fais le tour de la table en sautillant. Si tu refuses, {D}.",
+    "{A}, envoie « tu me manques » au 3e contact de ta liste, ou {D}.",
+    "{A}, montre ton dernier message envoyé, ou {D}.",
+    "{A}, fais deviner un film en mimant. Si personne ne trouve en 30 secondes, {D}.",
+    "{A}, cite un pays par lettre de ton prénom. Raté ? {D}.",
+    "{A}, garde ton sérieux pendant que {B} essaie de te faire rire 20 secondes. Tu craques ? {D}.",
+    "{A}, fais une déclaration d'amour à la bouteille la plus proche. Sinon, {D}.",
+    "{A}, parle à la troisième personne jusqu'à ton prochain tour. Oubli ? {D}.",
+    "{A}, nomme 4 joueurs de l'équipe de France de foot. Sinon, {D}.",
+    "{A}, laisse {B} écrire ton prochain statut. Tu refuses ? {D}.",
+    "{A}, fais ta meilleure imitation d'un animal. Si la table n'est pas convaincue, {D}.",
+    "{A}, raconte une blague. Si personne ne rit, {D}.",
+    "{A}, échange de place avec {B}. Le dernier assis {D3}.",
+    "{A}, tu dois dire « santé » avant chaque gorgée jusqu'à la fin de la partie. Sinon, {D}.",
+    "{A}, devine la couleur des chaussettes de {B}. Raté ? {D}. Bien vu ? {G}.",
+    "{A}, fais un selfie grimace avec {B}. Celui qui refuse {D3}.",
+    "{A} et {B}, faites un pierre-feuille-ciseaux. Le perdant {D3}.",
+    "{A}, donne un surnom à chaque joueur. Celui qui n'aime pas le sien {D3}.",
+    "{A}, tu as 10 secondes pour citer 5 fromages. Sinon, {D}.",
+    "Le dernier qui touche son nez {D3}.",
+    "Le dernier qui lève la main {D3}.",
+    "Le dernier à se lever {D3}.",
+    "Tous ceux qui portent du noir {Dp}.",
+    "Tous ceux qui ont un iPhone {Dp}.",
+    "Tous ceux qui sont célibataires {Dp}.",
+    "Tous ceux qui ont déjà dormi chez {A} {Dp}.",
+    "Le plus jeune de la table {D3}.",
+    "Le plus grand de la table {G}.",
+    "Celui qui a le moins de batterie {D3}.",
+    "Celui dont l'anniversaire est le plus proche {G}.",
+    "{A}, tu es le maître du pouce : quand tu poses ton pouce sur la table, le dernier qui t'imite {D3}. Valable jusqu'à la fin.",
+  ],
+  vote: [
+    "Qui est le plus susceptible de se perdre en rentrant ce soir ? Comptez jusqu'à 3 et pointez. Le plus désigné {D3}.",
+    "Qui a le plus de chances de devenir célèbre ? Le plus désigné {G}.",
+    "Qui serait le premier à mourir dans un film d'horreur ? Le plus désigné {D3}.",
+    "Qui envoie le plus de messages à 3 h du matin ? Le plus désigné {D3}.",
+    "Qui est le plus radin de la table ? Le plus désigné {D3}.",
+    "Qui a le meilleur style ? Le plus désigné {G}.",
+    "Qui ment le plus mal ? Le plus désigné {D3}.",
+    "Qui finira marié en premier ? Le plus désigné {D3}.",
+    "Qui est le plus en retard d'habitude ? Le plus désigné {D3}.",
+    "Qui survivrait le plus longtemps sur une île déserte ? Le plus désigné {G}.",
+    "Qui rit le plus fort ? Le plus désigné {D3}.",
+    "Qui a le pire goût musical ? Le plus désigné {D3}.",
+    "Qui serait le meilleur président ? Le plus désigné {G}.",
+    "Qui a le plus de chances de finir en garde à vue ce week-end ? Le plus désigné {D3}.",
+    "Qui passe le plus de temps sur son téléphone ? Le plus désigné {D3}.",
+    "Qui est le plus drôle de la table ? Le plus désigné {G}.",
+    "Qui serait le pire colocataire ? Le plus désigné {D3}.",
+    "Qui danse le plus mal ? Le plus désigné {D3}.",
+    "Qui a le plus gros ego ? Le plus désigné {D3}.",
+    "Qui garde le mieux un secret ? Le plus désigné {G}.",
+  ],
+  jamais: [
+    "Je n'ai jamais menti sur mon âge. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais dormi dehors. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais pleuré devant un film Disney. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais envoyé un message à la mauvaise personne. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais fait semblant d'être malade pour éviter quelque chose. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais oublié l'anniversaire d'un proche. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais chanté sous la douche. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais stalké un ex. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais raté un avion ou un train. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais mangé quelque chose tombé par terre. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais dit « je t'aime » sans le penser. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais été viré d'un cours. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais fait une nuit blanche. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais triché à un examen. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais ghosté quelqu'un. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais pris un fou rire à un enterrement ou dans un moment sérieux. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais cassé un téléphone. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais fait la bise à quelqu'un par erreur. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais dansé sur une table. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais lu les messages de quelqu'un en cachette. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais fait un régime qui a duré moins d'une semaine. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais perdu mes clés en soirée. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais dormi plus de 14 heures d'affilée. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais fait de karaoké. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais été pris en photo à mon insu dans une situation gênante. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais mangé un kebab après 3 h du matin. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais eu un crush sur quelqu'un de cette table. Ceux qui l'ont eu {Dp}.",
+    "Je n'ai jamais oublié le prénom de quelqu'un en pleine conversation. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais fait semblant de connaître une chanson. Ceux qui l'ont fait {Dp}.",
+    "Je n'ai jamais appelé un prof « maman » ou « papa ». Ceux qui l'ont fait {Dp}.",
+  ],
+  duel: [
+    "Duel : {A} contre {B}. Le premier qui cite 3 fruits rouges gagne. Le perdant {D3}.",
+    "Duel de regard : {A} contre {B}. Le premier qui cligne des yeux {D3}.",
+    "Duel : {A} contre {B}, bras de fer. Le perdant {D3}.",
+    "Duel : {A} contre {B}. Qui connaît le mieux l'autre ? Posez-vous une question chacun. Celui qui se trompe {D3}.",
+    "Duel : {A} contre {B}. Le premier à trouver un objet rouge dans la pièce gagne. Le perdant {D3}.",
+    "Duel : {A} contre {B}. Pierre-feuille-ciseaux en 3 manches. Le perdant {D3}.",
+    "Duel : {A} contre {B}. Chacun dit un nom de rappeur français, chacun son tour. Le premier qui sèche {D3}.",
+    "Duel : {A} contre {B}. Le premier qui rit {D3}. Interdit de se toucher.",
+    "Duel : {A} contre {B}. Qui tient le plus longtemps sur un pied ? Le perdant {D3}.",
+    "Duel : {A} contre {B}. La table vote pour la meilleure imitation de Johnny Hallyday. Le perdant {D3}.",
+    "Duel : {A} contre {B}. Le premier à dire le prénom de la mère de l'autre gagne. Le perdant {D3}.",
+    "Duel : {A} contre {B}. Chacun cite une marque de vêtements, chacun son tour. Le premier qui sèche {D3}.",
+  ],
+  jeu: [
+    "Thème : les marques de voiture. Chacun en cite une à son tour, en commençant par {A}. Le premier qui sèche ou répète {D3}.",
+    "Thème : les pays d'Afrique. On commence par {A}. Le premier qui sèche {D3}.",
+    "Thème : les joueurs de foot. On commence par {A}. Le premier qui sèche {D3}.",
+    "Thème : les films Disney. On commence par {A}. Le premier qui sèche {D3}.",
+    "Thème : les fromages. On commence par {A}. Le premier qui sèche {D3}.",
+    "Thème : les rappeurs français. On commence par {A}. Le premier qui sèche {D3}.",
+    "Thème : les marques de vêtements. On commence par {A}. Le premier qui sèche {D3}.",
+    "Thème : les capitales. On commence par {A}. Le premier qui sèche {D3}.",
+    "Thème : les Pokémon. On commence par {A}. Le premier qui sèche {D3}.",
+    "Thème : les mots qui finissent en « -tion ». On commence par {A}. Le premier qui sèche {D3}.",
+    "Thème : les cocktails. On commence par {A}. Le premier qui sèche {D3}.",
+    "Thème : les jeux vidéo. On commence par {A}. Le premier qui sèche {D3}.",
+    "Thème : les séries Netflix. On commence par {A}. Le premier qui sèche {D3}.",
+    "Thème : les animaux de la ferme. On commence par {A}. Le premier qui sèche {D3}.",
+    "Thème : les chanteuses. On commence par {A}. Le premier qui sèche {D3}.",
+    "Jeu du « ni oui ni non » : {A} pose des questions à {B} pendant 30 secondes. Si {B} dit oui ou non, {B} {D3}.",
+    "Jeu du « je vais à la plage et j'emporte… » : on commence par {A}, chacun répète la liste et ajoute un objet. Le premier qui se trompe {D3}.",
+    "Jeu du « 1, 2, 3, Biz » : on compte chacun son tour en commençant par {A}, on dit « Biz » à la place des multiples de 3. Le premier qui se trompe {D3}.",
+    "Jeu du mot interdit : jusqu'à la prochaine carte, interdit de dire « je ». Ceux qui le disent {Dp}.",
+    "Jeu des syllabes : {A} dit un mot, le suivant commence par la dernière syllabe. Le premier qui sèche {D3}.",
+  ],
+  distribue: [
+    "{A}, {G}.",
+    "{A} et {B}, vous trinquez et vous {Dv}.",
+    "Tout le monde {D3}. Santé !",
+    "{A}, choisis un partenaire de boisson : jusqu'à la fin, quand l'un boit, l'autre aussi.",
+    "{A}, {G} à la personne que tu connais depuis le plus longtemps.",
+    "{A}, {G} à la personne qui te fait le plus rire.",
+    "Les filles {Dp}.",
+    "Les garçons {Dp}.",
+    "{A}, tu es le roi des toilettes : personne ne peut y aller sans ta permission, jusqu'à la fin de la partie.",
+    "Tous ceux dont le prénom commence par la même lettre que {A} {Dp}.",
+  ],
+  regle: [
+    ["Nouvelle règle : interdit de dire « boire » ou « bois ». Ceux qui le disent {Dp}.", "Fin de la règle : vous pouvez de nouveau dire « boire »."],
+    ["Nouvelle règle : interdit de dire les prénoms. Ceux qui le font {Dp}.", "Fin de la règle : vous pouvez de nouveau dire les prénoms."],
+    ["Nouvelle règle : on boit avec la main gauche uniquement. Ceux qui oublient {Dp}.", "Fin de la règle de la main gauche."],
+    ["Nouvelle règle : {A} est le maître des questions. Ceux qui répondent à ses questions {Dp}.", "{A} n'est plus le maître des questions."],
+    ["Nouvelle règle : avant de parler, il faut lever la main. Ceux qui oublient {Dp}.", "Fin de la règle : plus besoin de lever la main."],
+    ["Nouvelle règle : interdit de montrer du doigt. Ceux qui le font {Dp}.", "Fin de la règle : vous pouvez de nouveau pointer du doigt."],
+    ["Nouvelle règle : {A} et {B} doivent finir toutes leurs phrases par « mon capitaine ». Oubli ? {D}.", "{A} et {B} peuvent arrêter de dire « mon capitaine »."],
+    ["Nouvelle règle : chaque fois que quelqu'un rit, {A} {D3}.", "{A} est libéré de la règle du rire."],
+    ["Nouvelle règle : interdit de dire « oui » ou « non ». Ceux qui le disent {Dp}.", "Fin du « ni oui ni non »."],
+    ["Nouvelle règle : {A} doit parler en rimes. Chaque phrase sans rime, {D}.", "{A} peut arrêter les rimes."],
+    ["Nouvelle règle : interdit de toucher son téléphone. Ceux qui le touchent {Dp}.", "Fin de la règle : vous pouvez reprendre vos téléphones."],
+    ["Nouvelle règle : {A} est le serpent. Si tu croises son regard, {D}.", "{A} n'est plus le serpent."],
+  ],
+  virus: [
+    ["Virus : {A} ne peut plus dire de gros mot. Chaque gros mot, {D}.", "{A} est guéri : les gros mots sont de retour."],
+    ["Virus : {A} et {B} ne peuvent plus se parler. Ceux qui craquent {Dp}.", "{A} et {B} peuvent de nouveau se parler."],
+    ["Virus : {A} doit imiter tout ce que fait {B}. Oubli ? {D}.", "{A} n'est plus le miroir de {B}."],
+    ["Virus : {A} doit appeler tout le monde « chef ». Oubli ? {D}.", "{A} peut arrêter de dire « chef »."],
+    ["Virus : {A} doit répondre à chaque question par une question. Raté ? {D}.", "{A} peut de nouveau répondre normalement."],
+    ["Virus : {A} parle comme un robot. Chaque oubli, {D}.", "{A} redevient humain."],
+    ["Virus : {A} a le hoquet imaginaire, il doit faire « hic » toutes les 3 phrases. Oubli ? {D}.", "{A} n'a plus le hoquet."],
+    ["Virus : {A} doit se lever à chaque fois qu'il boit.", "{A} peut de nouveau boire assis."],
+  ],
+};
+const TYPES = {
+  defi: { n: "Défi", c: "#f97316", c2: "#ef4444" },
+  vote: { n: "Vote", c: "#3b82f6", c2: "#8b5cf6" },
+  jamais: { n: "Je n'ai jamais", c: "#ec4899", c2: "#d946ef" },
+  duel: { n: "Duel", c: "#ef4444", c2: "#b91c1c" },
+  jeu: { n: "Jeu", c: "#14b8a6", c2: "#0284c7" },
+  distribue: { n: "Santé", c: "#84cc16", c2: "#16a34a" },
+  regle: { n: "Nouvelle règle", c: "#6366f1", c2: "#4338ca" },
+  virus: { n: "Virus", c: "#22c55e", c2: "#15803d" },
+  fin: { n: "Fin", c: "#64748b", c2: "#334155" },
+};
+const KEY = "auraapero1";
+const BODY = ["#3b5bff", "#ff5a1f", "#16a34a", "#9333ea", "#db2777", "#0891b2", "#ca8a04", "#4f46e5", "#ea580c", "#0d9488"];
+const MARK = `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 8h28l-12 16v14h7v3H15v-3h7V24z" fill="#fff"/><circle cx="34" cy="12" r="5" fill="none" stroke="#fff" stroke-width="3"/></svg>`;
+const LENGTHS = [30, 50, 70, 100];
+
+let S = { screen: "home", players: [], soft: false, len: 50, people: {}, game: null };
+function load() {
+  let d = null; try { d = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
+  if (d) for (const k of Object.keys(S)) if (d[k] !== undefined) S[k] = d[k];
+  if (!S.game && S.screen !== "home") S.screen = "home";
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function knownNames() {
+  const set = new Set(Object.keys(S.people));
+  for (const k of ["auracover_poche5", "auraspy1", "auratime1", "auratete1", "auraloup2"]) try { const c = JSON.parse(localStorage.getItem(k) || "{}"); for (const n of Object.keys(c.people || {})) set.add(n); } catch (e) {}
+  return [...set];
+}
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+const fold = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+function seedOf(s) { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+const av = (nm, cls = "") => `<span class="av ${cls}" style="--c:${BODY[seedOf(nm || "?") % BODY.length]}" aria-hidden="true">${esc((nm.trim()[0] || "?").toUpperCase())}</span>`;
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const rnd = n => Math.random() * n | 0;
+function person(nm) { return S.people[nm] || (S.people[nm] = { games: 0, picked: 0, last: 0 }); }
+
+// gorgées (ou pompes en version sans alcool)
+function drink(form) {
+  const n = 1 + rnd(3) + (Math.random() < .15 ? 1 : 0), s = n > 1 ? "s" : "";
+  const what = S.soft ? `${n} pompe${s}` : `${n} gorgée${s}`;
+  const verb = S.soft ? { D: "fais", D3: "fait", Dp: "font", Dv: "faites", G: "donne" } : { D: "bois", D3: "boit", Dp: "boivent", Dv: "buvez", G: "distribue" };
+  return `${verb[form]} ${what}`;
+}
+// on tire en priorité ceux qui ont été le moins désignés
+function pickPlayers(k, count) {
+  const ps = shuffle(S.players).sort((a, b) => (count[a] || 0) - (count[b] || 0));
+  return ps.slice(0, k);
+}
+function fill(text, g) {
+  const [a, b] = pickPlayers(2, g.count);
+  let used = [];
+  const t = text.replace(/\{A\}/g, () => (used.push(a), a)).replace(/\{B\}/g, () => (used.push(b), b))
+    .replace(/\{(D3|Dp|Dv|D|G)\}/g, (_, f) => drink(f));
+  for (const u of new Set(used)) g.count[u] = (g.count[u] || 0) + 1;
+  return t.replace(/([?.!] )([a-zà-ÿ])/g, (_, p, c) => p + c.toUpperCase());
+}
+function newGame() {
+  const g = { cards: [], i: 0, count: {}, ended: false };
+  const pools = {}; for (const k of Object.keys(CARDS)) pools[k] = shuffle(CARDS[k]);
+  const weights = [["defi", 30], ["vote", 14], ["jamais", 16], ["duel", 10], ["jeu", 10], ["distribue", 8], ["regle", 7], ["virus", 5]];
+  const total = weights.reduce((a, w) => a + w[1], 0);
+  const pending = []; // fins de règles / virus à placer plus tard
+  const draw = type => { if (!pools[type].length) pools[type] = shuffle(CARDS[type]); return pools[type].pop(); };
+  for (let k = 0; g.cards.length < S.len; k++) {
+    const due = pending.findIndex(p => p.at <= g.cards.length);
+    if (due >= 0) { const p = pending.splice(due, 1)[0]; g.cards.push({ type: "fin", text: p.text }); continue; }
+    let r = Math.random() * total, type = "defi";
+    for (const [t, w] of weights) { if ((r -= w) < 0) { type = t; break; } }
+    if ((type === "regle" || type === "virus") && (pending.length >= 2 || g.cards.length > S.len - 8)) type = "defi";
+    if (type === "duel" && S.players.length < 2) type = "defi";
+    const c = draw(type);
+    if (Array.isArray(c)) {
+      const [a, b] = pickPlayers(2, g.count); const sub = t => t.replace(/\{A\}/g, a).replace(/\{B\}/g, b);
+      g.count[a] = (g.count[a] || 0) + 1; if (c[0].includes("{B}")) g.count[b] = (g.count[b] || 0) + 1;
+      g.cards.push({ type, text: fill(sub(c[0]), g) });
+      pending.push({ at: g.cards.length + 6 + rnd(8), text: sub(c[1]) });
+    } else g.cards.push({ type, text: fill(c, g) });
+  }
+  for (const p of pending) g.cards.push({ type: "fin", text: p.text });
+  S.game = g;
+  for (const p of S.players) { const pp = person(p); pp.games++; pp.last = Date.now(); }
+  go("play");
+}
+
+// ---------- écrans
+const app = document.getElementById("app"), sheet = document.getElementById("sheet");
+function go(s) { S.screen = s; save(); render(); scrollTo(0, 0); }
+
+function render() {
+  const g = S.game; let h = "";
+  document.body.classList.toggle("full", S.screen === "play");
+  switch (S.screen) {
+    case "home": {
+      const ok = S.players.length >= 2;
+      h = `<a class="backmenu" href="../">‹ Menu</a><div class="brand"><span class="mark">${MARK}</span><div class="logo">Aura <i>Apéro</i></div></div>
+        <div class="sub" style="margin-top:0">Défis, votes, « je n'ai jamais »… une carte après l'autre.</div>
+        <div class="teambox"><div class="teamhead"><span>Les joueurs</span><small>${S.players.length}</small></div>
+          <div class="chips2">${S.players.map((nm, k) => `<button class="pchip" data-a="rm" data-v="${k}">${av(nm)}<span>${esc(nm)}</span><i aria-label="Retirer">×</i></button>`).join("")}
+            <button class="pchip add" data-a="add">+ Ajouter</button></div></div>
+        <div class="box">
+          <div class="line"><div class="name">Longueur<small>Nombre de cartes</small></div><div class="step"><button data-a="len" data-v="-1" aria-label="Moins">−</button><span>${S.len}</span><button data-a="len" data-v="1" aria-label="Plus">+</button></div></div>
+          <button class="line toggle" data-a="soft"><span class="name">Sans alcool<small>Des pompes à la place des gorgées</small></span><i class="sw ${S.soft ? "on" : ""}"></i></button>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="play" ${ok ? "" : "disabled"}>${ok ? "C'est parti" : "Ajoute au moins 2 joueurs"}</button>
+        ${g && !g.ended ? `<button class="btn soft" data-a="resume">Reprendre la partie (carte ${g.i + 1} / ${g.cards.length})</button>` : ""}
+        <div class="links"><a class="link" href="../" style="text-decoration:none">‹ Menu</a></div>
+        <div class="hint" style="text-align:center">L'abus d'alcool est dangereux pour la santé. Personne n'est obligé de boire : un gage fait très bien l'affaire.</div>`;
+      break;
+    }
+    case "play": {
+      const c = g.cards[g.i], t = TYPES[c.type];
+      h = `<div class="stage" style="--band1:${t.c};--band2:${t.c2}" data-a="next">
+          <div class="ptop"><button class="pbtn" data-a="quit" aria-label="Quitter">✕</button><span>${g.i + 1} / ${g.cards.length}</span><button class="pbtn" data-a="prev" aria-label="Carte précédente" ${g.i ? "" : "disabled"}>‹</button></div>
+          <div class="ptype">${t.n}</div>
+          <div class="ptext fit pop" id="pt">${esc(c.text)}</div>
+          <div class="pnext">Touche pour continuer</div>
+        </div>`;
+      break;
+    }
+    case "end": {
+      const top = Object.entries(g.count).sort((a, b) => b[1] - a[1]);
+      h = `<div class="endhead agents"><div class="label">Partie terminée</div><h2>Santé à tous !</h2></div>
+        <div class="box">${top.map(([nm, n], k) => `<div class="res">${av(nm)}<span class="t"><span>${esc(nm)}</span><small style="color:var(--muted)">${k === 0 ? "Le plus visé de la soirée" : ""}</small></span><span class="tot">${n}</span></div>`).join("")}</div>
+        <div class="hint" style="text-align:center">Nombre de cartes où chacun a été désigné.</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="play">Rejouer</button>
+        <div class="links"><button class="link" data-a="home">Changer les joueurs</button></div>`;
+      break;
+    }
+  }
+  app.innerHTML = h;
+  const pt = document.getElementById("pt");
+  if (pt) { let s = Math.min(46, Math.max(24, 1500 / Math.max(30, pt.textContent.length))); pt.style.fontSize = s + "px";
+    while (s > 18 && pt.scrollHeight > innerHeight * .62) pt.style.fontSize = (s -= 1) + "px"; }
+}
+
+// ajout de joueurs
+let addQ = "";
+function addList() {
+  const q = fold(addQ), used = new Set(S.players), all = knownNames();
+  const list = all.filter(n => !used.has(n) && fold(n).includes(q)).sort((a, b) => ((S.people[b] || {}).last || 0) - ((S.people[a] || {}).last || 0) || a.localeCompare(b)).slice(0, 30);
+  const exact = all.some(n => fold(n) === q) || S.players.some(n => fold(n) === q);
+  let h = list.map(n => `<button class="who" data-a="addName" data-v="${esc(n)}">${av(n)}<span class="t">${esc(n)}</span><span class="go">＋</span></button>`).join("");
+  if (addQ.trim() && !exact) h = `<button class="who new" data-a="addName" data-v="${esc(addQ.trim().slice(0, 16))}">${av(addQ.trim())}<span class="t">Ajouter ${esc(addQ.trim())}<small>Nouveau joueur</small></span><span class="go">＋</span></button>` + h;
+  return h || `<div class="empty">Écris un prénom pour l'ajouter.</div>`;
+}
+function openSheet(kind) {
+  if (!kind) { sheet.innerHTML = ""; return; }
+  sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true"><h2>Ajouter des joueurs</h2>
+    <input id="aq" type="text" maxlength="16" placeholder="Cherche ou écris un prénom" value="${esc(addQ)}" autocomplete="off" autocapitalize="words" enterkeyhint="done">
+    <div class="list" id="al">${addList()}</div>
+    <button class="btn" data-a="close">OK</button></div></div>`;
+  const aq = document.getElementById("aq");
+  aq.oninput = () => { addQ = aq.value; document.getElementById("al").innerHTML = addList(); };
+  aq.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); const v = aq.value.trim(); if (v) addName(knownNames().find(n => fold(n) === fold(v)) || v.slice(0, 16)); } };
+}
+function addName(nm) { if (!S.players.includes(nm)) S.players.push(nm); person(nm); addQ = ""; save(); render(); openSheet("add"); const aq = document.getElementById("aq"); if (aq) aq.focus(); }
+
+const A = {
+  add: () => { addQ = ""; openSheet("add"); },
+  addName: v => addName(v),
+  rm: v => { S.players.splice(+v, 1); save(); render(); },
+  len: d => { const i = LENGTHS.indexOf(S.len); S.len = LENGTHS[Math.max(0, Math.min(LENGTHS.length - 1, (i < 0 ? 1 : i) + +d))]; save(); render(); },
+  soft: () => { S.soft = !S.soft; save(); render(); },
+  play: () => { if (S.players.length < 2) return; wake(); newGame(); },
+  resume: () => { wake(); go("play"); },
+  next: (v, e) => { if (e.target.closest(".pbtn")) return; const g = S.game; buzz(10); if (g.i >= g.cards.length - 1) { g.ended = true; go("end"); return; } g.i++; save(); render(); },
+  prev: () => { const g = S.game; if (g.i > 0) { g.i--; save(); render(); } },
+  quit: (v, e) => { if (!S.sureQuit) { S.sureQuit = true; e.target.closest("button").textContent = "?"; setTimeout(() => { S.sureQuit = false; if (S.screen === "play") render(); }, 2500); return; } S.sureQuit = false; go("home"); },
+  home: () => go("home"),
+  close: () => openSheet(null),
+  bg: (v, e) => { if (e.target.classList.contains("sheet")) openSheet(null); },
+};
+document.addEventListener("click", e => { const el = e.target.closest("[data-a]"); if (!el || el.disabled) return; const f = A[el.dataset.a]; if (f) f(el.dataset.v, e); });
+
+let lock = null;
+async function wake() { try { if ("wakeLock" in navigator && !lock) { lock = await navigator.wakeLock.request("screen"); lock.addEventListener("release", () => lock = null); } } catch (e) {} }
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.screen === "play") wake(); });
+
+load();
+render();
+</script>
+
+<script>
+// une seule appli : un seul service worker à la racine
+if ("serviceWorker" in navigator) addEventListener("load", async () => {
+  try { for (const r of await navigator.serviceWorker.getRegistrations()) if (!/\/undercovertelephone\/$/.test(r.scope) && r.scope !== new URL("../", location).href) r.unregister(); } catch (e) {}
+  navigator.serviceWorker.register("../sw.js", { scope: "../" }).catch(() => {});
+});
+</script>
+</body>
+</html>

@@ -4,14 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#10b981">
-<meta name="description" content="Décris, un seul mot, puis mime : le jeu de devinettes en équipes.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Aura Time">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" href="icons/favicon-64.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Aura">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" type="image/png" href="../icons/favicon-64.png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <title>Aura Time</title>
 <style>
 
@@ -241,6 +240,8 @@ canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events
 @font-face { font-family: "Fredoka"; src: url("../Fredoka.ttf") format("truetype"); font-weight: 300 700; font-display: swap; }
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 html { overscroll-behavior: none; }
+body.full { overflow: hidden; }
+.backmenu { align-self: flex-start; color: var(--muted); font-weight: 600; text-decoration: none; padding: 6px 2px; margin-bottom: -12px; }
 </style>
 </head>
 <body>
@@ -362,7 +363,7 @@ function render() {
   const g = S.game; let h = "";
   switch (S.screen) {
     case "home": {
-      h = `<div class="spacer"></div>
+      h = `<a class="backmenu" href="../">‹ Menu</a><div class="spacer"></div>
         <div class="brand"><span class="mark">${MARK}</span><div class="logo">Aura <i>Time</i></div></div>
         <div class="sub" style="margin-top:0">Décris, un seul mot, puis mime. En équipes, contre la montre.</div>
         <div class="big"><div class="label">Équipes</div>${step("nTeams", S.nTeams, "count")}</div>
@@ -373,7 +374,7 @@ function render() {
         <div class="spacer"></div>
         <button class="btn" data-a="toTeams">Faire les équipes</button>
         <button class="btn alt" data-a="board">Joueurs et stats</button>
-        <div class="links"><button class="link" data-a="rules">Règles</button><a class="link" href="../" style="text-decoration:none">Aura Cover</a><a class="link" href="../spy/" style="text-decoration:none">Aura Spy</a><a class="link" href="../tete/" style="text-decoration:none">Aura Tête</a><a class="link" href="../loup/" style="text-decoration:none">Aura Loup</a></div>`;
+        <div class="links"><button class="link" data-a="rules">Règles</button><a class="link" href="../" style="text-decoration:none">‹ Menu</a></div>`;
       break;
     }
     case "teams": {
@@ -605,8 +606,13 @@ load();
 render();
 </script>
 
+
 <script>
-if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+// une seule appli : un seul service worker à la racine
+if ("serviceWorker" in navigator) addEventListener("load", async () => {
+  try { for (const r of await navigator.serviceWorker.getRegistrations()) if (!/\/undercovertelephone\/$/.test(r.scope) && r.scope !== new URL("../", location).href) r.unregister(); } catch (e) {}
+  navigator.serviceWorker.register("../sw.js", { scope: "../" }).catch(() => {});
+});
 </script>
 </body>
 </html>

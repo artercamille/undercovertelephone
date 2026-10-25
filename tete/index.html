@@ -4,14 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#d946ef">
-<meta name="description" content="Le téléphone sur le front, les autres te font deviner.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Aura Tête">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" href="icons/favicon-64.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Aura">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" type="image/png" href="../icons/favicon-64.png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <title>Aura Tête</title>
 <style>
 
@@ -252,8 +251,9 @@ body.full .app { max-width: none; padding: 0; min-height: 100%; }
 <style>
 @font-face { font-family: "Fredoka"; src: url("../Fredoka.ttf") format("truetype"); font-weight: 300 700; font-display: swap; }
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
-body.full { overflow: hidden; }
 html { overscroll-behavior: none; }
+body.full { overflow: hidden; }
+.backmenu { align-self: flex-start; color: var(--muted); font-weight: 600; text-decoration: none; padding: 6px 2px; margin-bottom: -12px; }
 </style>
 </head>
 <body>
@@ -385,14 +385,14 @@ function render() {
   document.body.classList.toggle("full", ["count", "playing"].includes(S.screen));
   switch (S.screen) {
     case "home": {
-      h = `<div class="brand"><span class="mark">${MARK}</span><div class="logo">Aura <i>Tête</i></div></div>
+      h = `<a class="backmenu" href="../">‹ Menu</a><div class="brand"><span class="mark">${MARK}</span><div class="logo">Aura <i>Tête</i></div></div>
         <div class="sub" style="margin-top:0">Le téléphone sur le front, les autres te font deviner.</div>
         <div class="label" style="text-align:center">Choisis un thème</div>
         <div class="cats">${CATS.map(c => `<button class="cat ${S.cat === c.id ? "on" : ""}" data-a="cat" data-v="${c.id}"><b>${esc(c.name)}</b><small>${esc(c.desc)}</small></button>`).join("")}</div>
         <div class="box"><div class="line"><div class="name">Temps</div>${step("secs", S.secs + " s")}</div></div>
         <button class="btn" data-a="who">Jouer</button>
         <button class="btn alt" data-a="board">Joueurs et stats</button>
-        <div class="links"><button class="link" data-a="rules">Règles</button><a class="link" href="../" style="text-decoration:none">Aura Cover</a><a class="link" href="../spy/" style="text-decoration:none">Aura Spy</a><a class="link" href="../time/" style="text-decoration:none">Aura Time</a><a class="link" href="../loup/" style="text-decoration:none">Aura Loup</a></div>`;
+        <div class="links"><button class="link" data-a="rules">Règles</button><a class="link" href="../" style="text-decoration:none">‹ Menu</a></div>`;
       break;
     }
     case "who": {
@@ -582,8 +582,13 @@ load();
 render();
 </script>
 
+
 <script>
-if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+// une seule appli : un seul service worker à la racine
+if ("serviceWorker" in navigator) addEventListener("load", async () => {
+  try { for (const r of await navigator.serviceWorker.getRegistrations()) if (!/\/undercovertelephone\/$/.test(r.scope) && r.scope !== new URL("../", location).href) r.unregister(); } catch (e) {}
+  navigator.serviceWorker.register("../sw.js", { scope: "../" }).catch(() => {});
+});
 </script>
 </body>
 </html>

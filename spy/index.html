@@ -4,14 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3b5bff">
-<meta name="description" content="Trouvez l'espion avec un seul téléphone.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Aura Spy">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" href="icons/favicon-64.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Aura">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" type="image/png" href="../icons/favicon-64.png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <title>Aura Spy</title>
 <style>
 
@@ -239,6 +238,8 @@ details.box .places { padding: 0 0 12px; }
 @font-face { font-family: "Fredoka"; src: url("../Fredoka.ttf") format("truetype"); font-weight: 300 700; font-display: swap; }
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 html { overscroll-behavior: none; }
+body.full { overflow: hidden; }
+.backmenu { align-self: flex-start; color: var(--muted); font-weight: 600; text-decoration: none; padding: 6px 2px; margin-bottom: -12px; }
 </style>
 </head>
 <body>
@@ -366,7 +367,7 @@ function render() {
   switch (S.screen) {
     case "home": {
       const k = Math.min(S.spies, maxSpies(S.n));
-      h = `<div class="spacer"></div>
+      h = `<a class="backmenu" href="../">‹ Menu</a><div class="spacer"></div>
         <div class="brand"><span class="mark">${MARK}</span><div class="logo">Aura <i>Spy</i></div></div>
         <div class="sub" style="margin-top:0">Tout le monde connaît le lieu… sauf l'espion.</div>
         <div class="big"><div class="label">Joueurs</div>${step("n", S.n, "count")}</div>
@@ -377,7 +378,7 @@ function render() {
         <div class="spacer"></div>
         <button class="btn" data-a="play">Jouer</button>
         <button class="btn alt" data-a="board">Joueurs et stats</button>
-        <div class="links"><button class="link" data-a="rules">Règles</button><a class="link" href="../" style="text-decoration:none">Aura Cover</a><a class="link" href="../time/" style="text-decoration:none">Aura Time</a><a class="link" href="../tete/" style="text-decoration:none">Aura Tête</a><a class="link" href="../loup/" style="text-decoration:none">Aura Loup</a></div>`;
+        <div class="links"><button class="link" data-a="rules">Règles</button><a class="link" href="../" style="text-decoration:none">‹ Menu</a></div>`;
       break;
     }
     case "cards": {
@@ -642,8 +643,13 @@ if (S.game && !S.game.paused) { tick(); }
 render();
 </script>
 
+
 <script>
-if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+// une seule appli : un seul service worker à la racine
+if ("serviceWorker" in navigator) addEventListener("load", async () => {
+  try { for (const r of await navigator.serviceWorker.getRegistrations()) if (!/\/undercovertelephone\/$/.test(r.scope) && r.scope !== new URL("../", location).href) r.unregister(); } catch (e) {}
+  navigator.serviceWorker.register("../sw.js", { scope: "../" }).catch(() => {});
+});
 </script>
 </body>
 </html>

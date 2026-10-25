@@ -4,14 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f59e0b">
-<meta name="description" content="Loup-Garou avec le téléphone comme narrateur.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Aura Loup">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" href="icons/favicon-64.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Aura">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" type="image/png" href="../icons/favicon-64.png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <title>Aura Loup</title>
 <style>
 
@@ -244,6 +243,8 @@ details.box .line:first-of-type { border-top: 1px solid var(--surface); }
 @font-face { font-family: "Fredoka"; src: url("../Fredoka.ttf") format("truetype"); font-weight: 300 700; font-display: swap; }
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 html { overscroll-behavior: none; }
+body.full { overflow: hidden; }
+.backmenu { align-self: flex-start; color: var(--muted); font-weight: 600; text-decoration: none; padding: 6px 2px; margin-bottom: -12px; }
 </style>
 </head>
 <body>
@@ -589,7 +590,7 @@ function render() {
   switch (S.screen) {
     case "home": {
       const { deck, dropped } = deckInfo(S.n), counts = deck.reduce((m, r) => (m[r] = (m[r] || 0) + 1, m), {});
-      h = `<div class="brand"><span class="mark">${MARK}</span><div class="logo">Aura <i>Loup</i></div></div>
+      h = `<a class="backmenu" href="../">‹ Menu</a><div class="brand"><span class="mark">${MARK}</span><div class="logo">Aura <i>Loup</i></div></div>
         <div class="sub" style="margin-top:0">Loup-Garou, et c'est le téléphone qui fait le narrateur.</div>
         <div class="big"><div class="label">Joueurs</div>${step("n", S.n, "count")}</div>
         <div class="box">
@@ -604,7 +605,7 @@ function render() {
         ${dropped.length ? `<div class="hint" style="text-align:center">Pas assez de joueurs pour : ${dropped.map(r => R[r].n).join(", ")}.</div>` : ""}
         <button class="btn" data-a="play">Jouer</button>
         <button class="btn alt" data-a="board">Joueurs et stats</button>
-        <div class="links"><button class="link" data-a="rules">Règles</button><a class="link" href="../" style="text-decoration:none">Aura Cover</a><a class="link" href="../spy/" style="text-decoration:none">Spy</a><a class="link" href="../time/" style="text-decoration:none">Time</a><a class="link" href="../tete/" style="text-decoration:none">Tête</a></div>`;
+        <div class="links"><button class="link" data-a="rules">Règles</button><a class="link" href="../" style="text-decoration:none">‹ Menu</a></div>`;
       break;
     }
     case "cards": {
@@ -891,8 +892,13 @@ load();
 render();
 </script>
 
+
 <script>
-if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+// une seule appli : un seul service worker à la racine
+if ("serviceWorker" in navigator) addEventListener("load", async () => {
+  try { for (const r of await navigator.serviceWorker.getRegistrations()) if (!/\/undercovertelephone\/$/.test(r.scope) && r.scope !== new URL("../", location).href) r.unregister(); } catch (e) {}
+  navigator.serviceWorker.register("../sw.js", { scope: "../" }).catch(() => {});
+});
 </script>
 </body>
 </html>
