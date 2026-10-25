@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#d946ef">
+<meta name="description" content="Le téléphone sur le front, les autres te font deviner.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Aura Tête">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Aura Tête</title>
+<style>
+
+/* Même mise en page qu'Aura Cover : un écran = un titre, une consigne, un bouton ; ici en fuchsia. */
+:root {
+  --bg: #ffffff;
+  --surface: #f3f3f5;
+  --surface-2: #e9e9ed;
+  --ink: #111114;
+  --muted: #6e6e76;
+  --accent: #ff5a1f;
+  --accent-ink: #ffffff;
+  --civil: #16a34a;
+  --under: #e11d48;
+  --white: #71717a;
+  --font: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-weight: 500; font-size: 17px; line-height: 1.35;
+  -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+input { -webkit-user-select: text; user-select: text; }
+.app { max-width: 440px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; gap: 20px;
+  padding-block: 26px 28px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.logo { text-align: center; font-size: 2.6rem; font-weight: 700; line-height: 1; }
+.logo i { font-style: normal; color: var(--accent); }
+h2 { margin: 0; font-size: 1.8rem; font-weight: 700; line-height: 1.12; text-align: center; text-wrap: balance; }
+.sub { text-align: center; color: var(--muted); margin-top: -10px; text-wrap: balance; }
+.label { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.spacer { flex: 1; }
+.pop { animation: pop .3s ease-out backwards; }
+@keyframes pop { from { transform: translateY(8px); opacity: 0 } }
+
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
+.btn { width: 100%; min-height: 60px; border-radius: 16px; background: var(--accent); color: var(--accent-ink); font-size: 1.2rem; font-weight: 600; transition: transform .08s, opacity .15s; }
+.btn:active { transform: scale(.98); }
+.btn.alt, .btn.soft { background: var(--surface); color: var(--ink); }
+.btn:disabled { opacity: .35; }
+.link { color: var(--muted); font-weight: 500; font-size: .95rem; padding: 10px; }
+.links { display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 12px; }
+
+.box { background: var(--surface); border-radius: 18px; padding: 2px 16px; }
+.line { display: flex; align-items: center; gap: 12px; min-height: 62px; }
+.line + .line { border-top: 1px solid var(--surface-2); }
+.line .name { flex: 1; font-weight: 600; }
+.line .name small { display: block; color: var(--muted); font-size: .82rem; font-weight: 500; }
+.step { display: flex; align-items: center; gap: 4px; }
+.step button { width: 40px; height: 40px; border-radius: 50%; background: var(--bg); font-size: 1.3rem; font-weight: 600; }
+.step button:active { transform: scale(.9); }
+.step span { min-width: 54px; text-align: center; font-weight: 600; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.big { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.big .step { gap: 20px; }
+.big .step button { width: 56px; height: 56px; font-size: 1.7rem; background: var(--surface); }
+.big .step span.count { font-size: 4.2rem; font-weight: 700; min-width: 90px; line-height: 1; }
+.chips { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-top: -6px; }
+.chip { font-size: .88rem; font-weight: 600; padding: 4px 12px; border-radius: 99px; background: var(--surface); }
+.chip.civil { color: var(--civil); } .chip.undercover { color: var(--under); } .chip.white { color: var(--white); }
+
+/* cartes */
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.card { aspect-ratio: 3 / 4; border-radius: 16px; background: var(--accent); color: var(--accent-ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px;
+  animation: pop .3s ease-out backwards; transition: transform .1s; }
+.card .q { font-size: 2.4rem; font-weight: 700; line-height: 1; }
+.card .num { font-size: .8rem; font-weight: 600; opacity: .8; }
+.card:active { transform: scale(.95); }
+.card.taken { background: var(--surface); color: var(--muted); pointer-events: none; font-weight: 600; font-size: .95rem; text-align: center; overflow-wrap: anywhere; gap: 8px; }
+
+/* qui es-tu */
+input[type=text] { width: 100%; min-height: 58px; border-radius: 16px; border: 2px solid var(--surface-2); background: var(--bg); color: var(--ink);
+  font: inherit; font-size: 1.2rem; font-weight: 600; padding: 0 18px; }
+input[type=text]:focus { border-color: var(--accent); outline: none; }
+input::placeholder { color: var(--muted); font-weight: 500; }
+.list { display: flex; flex-direction: column; background: var(--surface); border-radius: 18px; overflow: hidden; }
+.list:empty { display: none; }
+.who { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 8px 14px; text-align: left; }
+.who + .who { border-top: 1px solid var(--surface-2); }
+.who:active { background: var(--surface-2); }
+.who .t { flex: 1; min-width: 0; font-weight: 600; font-size: 1.1rem; overflow-wrap: anywhere; }
+.who .t small { display: block; color: var(--muted); font-weight: 500; font-size: .82rem; }
+.who .go { color: var(--muted); font-size: 1.3rem; }
+.who.new { background: var(--accent); color: var(--accent-ink); }
+.who.new .t small, .who.new .go { color: var(--accent-ink); opacity: .85; }
+.who.sel { background: var(--ink); color: var(--bg); }
+.who.sel .t small, .who.sel .n { color: var(--bg); opacity: .7; }
+.who .n { width: 20px; text-align: center; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.av { --c: var(--accent); width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  background: var(--c); color: #fff; font-weight: 700; font-size: 1.05rem; }
+.av.dead { filter: grayscale(1); opacity: .5; }
+.av.xl { width: 84px; height: 84px; font-size: 2.2rem; }
+.empty { text-align: center; color: var(--muted); padding: 14px; font-size: .95rem; text-wrap: balance; }
+
+/* révélations */
+.reveal { background: var(--surface); border-radius: 24px; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  animation: pop .3s ease-out backwards; }
+.word { font-size: 2.9rem; font-weight: 700; line-height: 1.05; text-wrap: balance; max-width: 100%; }
+.role { font-size: 2.9rem; font-weight: 700; line-height: 1; }
+.role.civil { color: var(--civil); } .role.undercover { color: var(--under); } .role.white { color: var(--white); }
+.hint { color: var(--muted); font-size: .98rem; text-wrap: balance; }
+.reveal input[type=text] { text-align: center; }
+
+/* fin + stats */
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pair > div { background: var(--surface); border-radius: 18px; padding: 14px 10px; text-align: center; }
+.pair b { display: block; font-size: 1.15rem; font-weight: 700; overflow-wrap: anywhere; margin-top: 2px; }
+.res { display: flex; align-items: center; gap: 10px; min-height: 60px; font-variant-numeric: tabular-nums; }
+.res + .res { border-top: 1px solid var(--surface-2); }
+.res .t { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.res .t small { display: block; font-size: .8rem; font-weight: 600; }
+.res.dead .t > span { color: var(--muted); }
+.res .g { font-weight: 700; color: var(--civil); min-width: 34px; text-align: right; }
+.res .win { font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--accent); color: var(--accent-ink); }
+.r.civil { color: var(--civil); } .r.undercover { color: var(--under); } .r.white { color: var(--white); }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tile { background: var(--surface); border-radius: 16px; padding: 12px 6px; text-align: center; }
+.tile b { display: block; font-size: 1.7rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tile span { font-size: .78rem; color: var(--muted); font-weight: 500; }
+.bars { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; }
+.bar { display: grid; grid-template-columns: 96px 1fr 44px; align-items: center; gap: 10px; font-size: .95rem; font-weight: 600; }
+.bar .tr { height: 10px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.bar .tr i { display: block; height: 100%; border-radius: 99px; }
+.bar em { font-style: normal; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; font-size: .85rem; }
+.rank { width: 22px; text-align: center; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rank.top { color: var(--accent); }
+.statcard { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+
+.sheet { position: fixed; inset: 0; z-index: 10; background: rgba(0,0,0,.4); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s; }
+@keyframes fade { from { opacity: 0 } }
+.sheet > div { width: min(100%, 440px); background: var(--bg); border-radius: 24px 24px 0 0; display: flex; flex-direction: column; gap: 14px; max-height: 90%; overflow-y: auto;
+  animation: up .25s ease-out;
+  padding: 24px max(20px, env(safe-area-inset-right, 0px)) max(22px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)); }
+@keyframes up { from { transform: translateY(40px) } }
+.rules p { margin: 0 0 10px; }
+.rules b { font-weight: 700; }
+/* ---- couche "juste milieu" : relief, dégradés, motif sur les cartes */
+:root { --accent-2: #ff2e63; --glow: rgba(255, 90, 31, .35); --shadow: 0 1px 2px rgba(20,20,30,.06), 0 8px 24px rgba(20,20,30,.08); --panel: #ffffff; --bg-2: #fff1ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; } }
+:root[data-theme="dark"] { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; }
+body { background: radial-gradient(120% 60% at 50% -10%, var(--bg-2), var(--bg) 60%) fixed, var(--bg); }
+.brand { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.mark { width: 74px; height: 74px; border-radius: 22px; display: grid; place-items: center; transform: rotate(-6deg);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 10px 26px var(--glow); }
+.mark svg { width: 46px; height: 46px; }
+.logo { font-size: 2.7rem; }
+.logo i { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.btn { background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 8px 20px var(--glow); }
+.btn.alt, .btn.soft { background: var(--panel); box-shadow: var(--shadow); }
+.btn:disabled { box-shadow: none; }
+.box, .list, .pair > div, .tile { background: var(--panel); box-shadow: var(--shadow); }
+.who + .who, .line + .line, .res + .res { border-top-color: var(--surface); }
+.step button { background: var(--surface); }
+.big .step button { background: var(--panel); box-shadow: var(--shadow); }
+.big .step span.count { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.chip { background: var(--panel); box-shadow: var(--shadow); }
+.card { position: relative; overflow: hidden; border-radius: 18px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.09) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--accent), var(--accent-2));
+  box-shadow: 0 8px 18px var(--glow); }
+.card::before { content: ""; position: absolute; inset: 6px; border-radius: 13px; border: 2px solid rgba(255,255,255,.35); pointer-events: none; }
+.card .q { width: 54%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.22); display: grid; place-items: center; font-size: 2rem; }
+.card:nth-child(3n+1) { transform: rotate(-2deg); } .card:nth-child(3n) { transform: rotate(2deg); }
+.card:active { transform: scale(.94); }
+.card.taken { background: var(--panel); box-shadow: var(--shadow); transform: none; }
+.card.taken::before { border-color: var(--surface); }
+.av { background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 60%, #ff2e63)); box-shadow: 0 3px 8px color-mix(in srgb, var(--c) 35%, transparent); }
+.who.new { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.who.sel { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+.who.sel .t small, .who.sel .n { color: #fff; }
+.reveal { background: var(--panel); box-shadow: var(--shadow); position: relative; overflow: hidden; padding-top: 0; animation: flipIn .5s cubic-bezier(.2,1.2,.4,1) backwards; }
+@keyframes flipIn { from { transform: perspective(900px) rotateY(70deg); opacity: 0 } }
+.reveal::before { content: ""; display: block; align-self: stretch; height: 92px; margin: 0 -20px 4px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2))); }
+.reveal .av.xl { margin-top: -66px; box-shadow: 0 0 0 6px var(--panel), 0 8px 18px rgba(0,0,0,.18); }
+.reveal.civil { --band1: #22c55e; --band2: #0d9488; }
+.reveal.undercover { --band1: #f43f5e; --band2: #be123c; }
+.reveal.white { --band1: #a1a1aa; --band2: #52525b; }
+.reveal.wordcard .word { background: linear-gradient(135deg, var(--ink), color-mix(in srgb, var(--ink) 60%, var(--accent))); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 4px; }
+.res .win { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.tile b { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.endhead { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px; border-radius: 24px; color: #fff; text-align: center;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2)));
+  box-shadow: var(--shadow); animation: pop .4s ease-out backwards; }
+.endhead.civils { --band1: #22c55e; --band2: #0d9488; } .endhead.imposteurs { --band1: #f43f5e; --band2: #be123c; } .endhead.white { --band1: #71717a; --band2: #3f3f46; }
+.endhead h2 { color: #fff; }
+.endhead .label { color: rgba(255,255,255,.85); }
+.sheet > div { background: var(--bg); }
+canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ---- Aura Tête : même famille, en fuchsia ; pendant le jeu, plein écran géant lisible de loin */
+:root { --accent: #d946ef; --accent-2: #ec4899; --glow: rgba(217, 70, 239, .32); --bg-2: #fbeefe; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent: #e879f9; --accent-2: #f472b6; --glow: rgba(232, 121, 249, .28); --bg-2: #22102a; } }
+:root[data-theme="dark"] { --accent: #e879f9; --accent-2: #f472b6; --glow: rgba(232, 121, 249, .28); --bg-2: #22102a; }
+.reveal.place { --band1: var(--accent); --band2: var(--accent-2); }
+.endhead.agents { --band1: var(--accent); --band2: var(--accent-2); }
+.place-name { font-size: 2.4rem; font-weight: 700; line-height: 1.08; text-wrap: balance; max-width: 100%; }
+.cats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.cat { background: var(--panel); box-shadow: var(--shadow); border-radius: 18px; padding: 14px 12px; text-align: left; display: flex; flex-direction: column; gap: 2px; min-height: 76px; transition: transform .08s; }
+.cat:active { transform: scale(.97); }
+.cat b { font-size: 1.05rem; font-weight: 700; }
+.cat small { color: var(--muted); font-size: .8rem; line-height: 1.2; }
+.cat.on { background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; box-shadow: 0 8px 20px var(--glow); }
+.cat.on small { color: rgba(255,255,255,.85); }
+.howto { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+.howto > div { background: var(--surface); border-radius: 16px; padding: 12px 8px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.howto small { color: var(--muted); font-size: .8rem; text-align: center; }
+.arrow { font-size: 1.8rem; font-weight: 700; line-height: 1; }
+.arrow.down { color: var(--civil); } .arrow.up { color: #f59e0b; }
+.toggle { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 56px; padding: 0 16px; text-align: left; font-weight: 600; }
+.toggle span { flex: 1; }
+.sw { width: 48px; height: 28px; border-radius: 99px; background: var(--surface-2); position: relative; transition: background .2s; flex: none; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.sw.on { background: var(--accent); } .sw.on::after { transform: translateX(20px); }
+/* plein écran de jeu */
+body.full .app { max-width: none; padding: 0; min-height: 100%; }
+.stage { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; text-align: center; overflow: hidden;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.08) 0 16px, transparent 16px 32px), linear-gradient(150deg, var(--accent), var(--accent-2));
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+.countnum { font-size: min(45vw, 45vh); font-weight: 700; line-height: 1; animation: pop .4s ease-out; }
+.stagehint { font-size: 1.6rem; font-weight: 600; opacity: .9; }
+.pword { font-weight: 700; line-height: 1.02; max-width: 92vw; text-wrap: balance; text-shadow: 0 4px 0 rgba(0,0,0,.12); }
+.ptop { position: absolute; top: max(14px, env(safe-area-inset-top, 0px)); left: 0; right: 0; display: flex; justify-content: space-between;
+  padding: 0 max(22px, env(safe-area-inset-right, 0px)) 0 max(22px, env(safe-area-inset-left, 0px)); font-size: 2.4rem; font-weight: 700; font-variant-numeric: tabular-nums; pointer-events: none; }
+.ptop #pc::before { content: "✓ "; }
+.ptop .low { color: #fff200; animation: pulse .5s infinite alternate; }
+@keyframes pulse { to { transform: scale(1.15) } }
+.tap { position: absolute; top: 0; bottom: 0; width: 50%; }
+.tap.left { left: 0; } .tap.right { right: 0; }
+.flashbox { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; color: #fff; font-size: min(18vw, 22vh); font-weight: 700; opacity: 0; pointer-events: none; }
+.flashbox.ok { background: #16a34a; } .flashbox.no { background: #f59e0b; }
+.flashbox.go { animation: fl .7s ease-out; }
+@keyframes fl { 0% { opacity: 1 } 70% { opacity: 1 } 100% { opacity: 0 } }
+
+</style>
+<style>
+@font-face { font-family: "Fredoka"; src: url("../Fredoka.ttf") format("truetype"); font-weight: 300 700; font-display: swap; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body.full { overflow: hidden; }
+html { overscroll-behavior: none; }
+</style>
+</head>
+<body>
+
+<canvas id="fx"></canvas>
+<div class="app" id="app"></div>
+<div class="flashbox" id="flash"></div>
+<div id="sheet"></div>
+
+<script>
+// Cartes d'Aura Time : des noms que tout le monde connaît (personnes et personnages)
+const DECK = ["Napoléon", "Albert Einstein", "Zinédine Zidane", "Kylian Mbappé", "Lionel Messi", "Cristiano Ronaldo", "Michael Jordan", "Usain Bolt", "Roger Federer", "Serena Williams",
+  "Teddy Riner", "Tony Parker", "Antoine Griezmann", "Neymar", "Muhammad Ali", "Mike Tyson", "Michael Jackson", "Madonna", "Beyoncé", "Rihanna",
+  "Elvis Presley", "Johnny Hallyday", "Céline Dion", "Stromae", "Aya Nakamura", "Jul", "Eminem", "Shakira", "Lady Gaga", "Taylor Swift",
+  "Freddie Mercury", "Bob Marley", "Édith Piaf", "Daft Punk", "David Guetta", "Angèle", "Orelsan", "Booba", "Ed Sheeran", "Justin Bieber",
+  "Louis de Funès", "Omar Sy", "Jean Dujardin", "Gad Elmaleh", "Kev Adams", "Brad Pitt", "Leonardo DiCaprio", "Tom Cruise", "Jackie Chan", "Arnold Schwarzenegger",
+  "Charlie Chaplin", "Marilyn Monroe", "Johnny Depp", "Will Smith", "Dwayne Johnson", "Angelina Jolie", "Scarlett Johansson", "Jim Carrey", "Morgan Freeman", "Vin Diesel",
+  "Harry Potter", "Hermione Granger", "Voldemort", "Dark Vador", "Yoda", "Luke Skywalker", "Gandalf", "Frodon", "Gollum", "James Bond",
+  "Sherlock Holmes", "Batman", "Superman", "Spider-Man", "Iron Man", "Hulk", "Wonder Woman", "Le Joker", "Thor", "Captain America",
+  "Mickey Mouse", "Donald Duck", "Bugs Bunny", "Bob l'éponge", "Homer Simpson", "Bart Simpson", "Pikachu", "Mario", "Luigi", "Sonic",
+  "Shrek", "L'Âne de Shrek", "Simba", "Le Roi Lion (Mufasa)", "Nemo", "Buzz l'Éclair", "Woody", "Elsa", "Olaf", "Aladdin",
+  "Blanche-Neige", "Cendrillon", "La Belle au bois dormant", "Peter Pan", "Le Capitaine Crochet", "Pinocchio", "Le Petit Prince", "Astérix", "Obélix", "Tintin",
+  "Milou", "Lucky Luke", "Les Schtroumpfs", "Garfield", "Scooby-Doo", "Winnie l'Ourson", "Dracula", "Frankenstein", "Le Père Noël", "La Petite Sirène",
+  "Cléopâtre", "Jules César", "Jeanne d'Arc", "Louis XIV", "Marie-Antoinette", "Charles de Gaulle", "Abraham Lincoln", "Barack Obama", "Martin Luther King", "Nelson Mandela",
+  "Gandhi", "La reine Élisabeth II", "Christophe Colomb", "Léonard de Vinci", "Picasso", "Van Gogh", "Mozart", "Beethoven", "Victor Hugo", "Molière",
+  "Shakespeare", "Isaac Newton", "Marie Curie", "Thomas Edison", "Steve Jobs", "Bill Gates", "Elon Musk", "Mark Zuckerberg", "Neil Armstrong", "Thomas Pesquet",
+  "Robin des Bois", "Le roi Arthur", "Merlin l'Enchanteur", "Zorro", "Tarzan", "King Kong", "Godzilla", "E.T.", "Rocky Balboa", "Indiana Jones",
+  "Jack Sparrow", "Terminator", "Forrest Gump", "Rambo", "Hannibal Lecter", "Chucky", "Freddy Krueger", "Ghostface (Scream)", "Mister Bean", "Le Marsupilami",
+  "Ratatouille", "Les Minions", "Gru", "Stitch", "Mowgli", "Baloo", "Dumbo", "Bambi", "Le Grinch", "Casper",
+  "Zeus", "Hercule", "Ulysse", "Achille", "Méduse", "Cupidon", "Le Chat Botté", "Le Petit Chaperon rouge", "Le Grand Méchant Loup", "Hansel et Gretel",
+  "Squeezie", "Inoxtag", "Norman", "Cyprien", "Michou", "MrBeast", "Kendji Girac", "Vianney", "Soprano", "Ninho",
+  "Kim Kardashian", "Paris Hilton", "Cristina Cordula", "Cyril Hanouna", "Nabilla", "Philippe Etchebest", "Mike Horn", "Bear Grylls", "Le pape", "Le président de la République"];
+const CATS = [
+  { id: "stars", name: "Célébrités", desc: "Stars, sportifs, personnages", words: DECK },
+  { id: "animaux", name: "Animaux", desc: "Du chat au dinosaure", words: ["Chat", "Chien", "Lion", "Tigre", "Éléphant", "Girafe", "Zèbre", "Singe", "Gorille", "Kangourou", "Koala", "Panda", "Ours polaire", "Pingouin", "Dauphin", "Requin", "Baleine", "Pieuvre", "Méduse", "Crabe", "Tortue", "Crocodile", "Serpent", "Grenouille", "Lapin", "Hamster", "Souris", "Cochon", "Vache", "Cheval", "Mouton", "Chèvre", "Poule", "Canard", "Hibou", "Aigle", "Perroquet", "Flamant rose", "Paon", "Chauve-souris", "Abeille", "Fourmi", "Araignée", "Papillon", "Moustique", "Escargot", "Loup", "Renard", "Écureuil", "Hérisson", "Chameau", "Hippopotame", "Rhinocéros", "Paresseux", "Dinosaure", "Licorne"] },
+  { id: "films", name: "Films et séries", desc: "Au cinéma et sur Netflix", words: ["Titanic", "Le Roi Lion", "Harry Potter", "Star Wars", "Avatar", "Avengers", "Spider-Man", "Le Seigneur des anneaux", "Pirates des Caraïbes", "Jurassic Park", "Fast and Furious", "Les Bronzés", "Bienvenue chez les Ch'tis", "Intouchables", "Astérix et Obélix", "La Reine des neiges", "Toy Story", "Shrek", "Le Monde de Nemo", "Les Minions", "Moi, moche et méchant", "Ratatouille", "Cars", "Matrix", "Retour vers le futur", "E.T.", "Rocky", "Le Parrain", "Scream", "Ça", "Squid Game", "Stranger Things", "La Casa de Papel", "Game of Thrones", "Breaking Bad", "Friends", "Les Simpson", "Bob l'éponge", "Lupin", "Kaamelott", "Dragon Ball", "One Piece", "Naruto", "Pokémon", "Barbie", "Oppenheimer", "Top Gun", "Mission impossible", "James Bond", "Le Fabuleux Destin d'Amélie Poulain", "La Haine", "OSS 117", "Les Visiteurs", "Taxi"] },
+  { id: "metiers", name: "Métiers", desc: "Qu'est-ce que je fais dans la vie ?", words: ["Pompier", "Policier", "Médecin", "Infirmier", "Dentiste", "Vétérinaire", "Boulanger", "Boucher", "Cuisinier", "Serveur", "Pilote d'avion", "Hôtesse de l'air", "Astronaute", "Professeur", "Facteur", "Plombier", "Électricien", "Maçon", "Coiffeur", "Avocat", "Juge", "Journaliste", "Photographe", "Acteur", "Chanteur", "DJ", "Footballeur", "Arbitre", "Agriculteur", "Pêcheur", "Chauffeur de taxi", "Caissier", "Vendeur", "Banquier", "Architecte", "Magicien", "Clown", "Youtubeur", "Mannequin", "Détective", "Militaire", "Maître-nageur", "Jardinier", "Mécanicien"] },
+  { id: "objets", name: "Objets", desc: "Tout ce qui traîne à la maison", words: ["Téléphone", "Ordinateur", "Télévision", "Télécommande", "Frigo", "Micro-ondes", "Aspirateur", "Machine à laver", "Lit", "Canapé", "Chaise", "Table", "Lampe", "Parapluie", "Lunettes", "Montre", "Clé", "Brosse à dents", "Dentifrice", "Savon", "Serviette", "Sèche-cheveux", "Miroir", "Peigne", "Ciseaux", "Stylo", "Cahier", "Sac à dos", "Valise", "Chaussure", "Casquette", "Écharpe", "Gants", "Ballon", "Vélo", "Trottinette", "Voiture", "Avion", "Bateau", "Guitare", "Piano", "Micro", "Casque audio", "Manette", "Appareil photo", "Bougie", "Horloge", "Réveil", "Poubelle", "Balai", "Marteau", "Tournevis", "Échelle"] },
+  { id: "lieux", name: "Pays et villes", desc: "Fais le tour du monde", words: ["France", "Espagne", "Italie", "Allemagne", "Angleterre", "Portugal", "Belgique", "Suisse", "Maroc", "Algérie", "Tunisie", "Sénégal", "Égypte", "États-Unis", "Canada", "Mexique", "Brésil", "Argentine", "Japon", "Chine", "Inde", "Australie", "Russie", "Grèce", "Turquie", "Paris", "Marseille", "Lyon", "Nice", "Londres", "New York", "Los Angeles", "Las Vegas", "Rome", "Venise", "Barcelone", "Madrid", "Dubaï", "Tokyo", "Pékin", "Le Caire", "Rio de Janeiro", "Hawaï", "Bali", "Le pôle Nord", "Le désert du Sahara", "La tour Eiffel", "Disneyland", "La Lune", "Mars"] },
+  { id: "sports", name: "Sports", desc: "À mimer ou à décrire", words: ["Football", "Basket", "Tennis", "Rugby", "Handball", "Volley", "Natation", "Boxe", "Judo", "Karaté", "Golf", "Ski", "Snowboard", "Surf", "Skateboard", "Vélo", "Course à pied", "Marathon", "Saut en hauteur", "Saut à la perche", "Lancer de javelot", "Gymnastique", "Danse classique", "Escalade", "Équitation", "Escrime", "Tir à l'arc", "Bowling", "Billard", "Pétanque", "Ping-pong", "Badminton", "Padel", "Musculation", "Yoga", "Patinage artistique", "Hockey sur glace", "Formule 1", "Plongée", "Parachute"] },
+  { id: "mimes", name: "Actions", desc: "Parfait pour mimer", words: ["Se brosser les dents", "Faire la vaisselle", "Conduire", "Nager", "Danser", "Dormir", "Ronfler", "Éternuer", "Bâiller", "Pleurer", "Rire", "Applaudir", "Faire un selfie", "Prendre une douche", "Se raser", "Se maquiller", "Cuisiner", "Manger des spaghettis", "Boire un café", "Faire du vélo", "Promener son chien", "Tondre la pelouse", "Pêcher", "Jouer de la guitare", "Jouer aux jeux vidéo", "Taper à l'ordinateur", "Faire des pompes", "Sauter à la corde", "Monter à cheval", "Escalader", "Porter un bébé", "Changer une couche", "Faire ses courses", "Attendre le bus", "Glisser sur une banane", "Faire un câlin", "Se faire piquer par une abeille", "Ouvrir un cadeau", "Gonfler un ballon", "Faire un dab"] },
+  { id: "bouffe", name: "Nourriture", desc: "Attention, ça donne faim", words: ["Pizza", "Burger", "Kebab", "Tacos", "Frites", "Sushi", "Pâtes carbonara", "Lasagnes", "Raclette", "Fondue", "Croissant", "Pain au chocolat", "Baguette", "Crêpe", "Gaufre", "Croque-monsieur", "Omelette", "Steak frites", "Poulet rôti", "Couscous", "Paella", "Ratatouille", "Bouillabaisse", "Salade", "Soupe", "Banane", "Pomme", "Fraise", "Pastèque", "Ananas", "Citron", "Avocat", "Tomate", "Carotte", "Brocoli", "Champignon", "Fromage", "Yaourt", "Chocolat", "Glace", "Bonbon", "Barbe à papa", "Pop-corn", "Nutella", "Macaron", "Tarte aux pommes", "Gâteau d'anniversaire", "Café", "Coca", "Jus d'orange"] },
+];
+CATS.push({ id: "mix", name: "Tout mélangé", desc: "Un peu de tout", words: [...new Set(CATS.flatMap(c => c.words))] });
+const KEY = "auratete1";
+const BODY = ["#3b5bff", "#ff5a1f", "#16a34a", "#9333ea", "#db2777", "#0891b2", "#ca8a04", "#4f46e5", "#ea580c", "#0d9488"];
+const MARK = `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="30" r="13" fill="none" stroke="#fff" stroke-width="3.5"/><rect x="13" y="4" width="22" height="14" rx="3" fill="#fff"/><text x="24" y="15" text-anchor="middle" font-size="10" font-weight="700" fill="#d946ef" font-family="Fredoka, sans-serif">?</text><circle cx="19" cy="29" r="2.2" fill="#fff"/><circle cx="29" cy="29" r="2.2" fill="#fff"/><path d="M19 35q5 4 10 0" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
+const IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+let S = { screen: "home", secs: 60, cat: "stars", player: "", people: {}, recent: {}, game: null, invert: false };
+function load() {
+  let d = null; try { d = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
+  if (d) for (const k of Object.keys(S)) if (d[k] !== undefined) S[k] = d[k];
+  if (["count", "playing"].includes(S.screen)) S.screen = S.game && S.game.done ? "result" : "home";
+  if (!["home", "board", "stats", "result"].includes(S.screen)) S.screen = "home";
+  if (S.screen === "result" && !S.game) S.screen = "home";
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function knownNames() {
+  const set = new Set(Object.keys(S.people));
+  for (const k of ["auracover_poche5", "auraspy1", "auratime1"]) try { const c = JSON.parse(localStorage.getItem(k) || "{}"); for (const n of Object.keys(c.people || {})) set.add(n); } catch (e) {}
+  return [...set];
+}
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+const fold = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+function seedOf(s) { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+const av = (nm, cls = "") => `<span class="av ${cls}" style="--c:${BODY[seedOf(nm || "?") % BODY.length]}" aria-hidden="true">${esc((nm.trim()[0] || "?").toUpperCase())}</span>`;
+const plural = (n, w) => `${n} ${w}${n > 1 ? "s" : ""}`;
+function person(nm) { return S.people[nm] || (S.people[nm] = { games: 0, found: 0, passed: 0, best: 0, last: 0 }); }
+const statLine = p => p && p.games ? `${plural(p.games, "partie")} · record ${p.best}` : "Nouveau ici";
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const catOf = id => CATS.find(c => c.id === id) || CATS[0];
+
+function newGame() {
+  const cat = catOf(S.cat), seen = new Set(S.recent[cat.id] || []);
+  let pool = cat.words.filter(w => !seen.has(w));
+  if (pool.length < 25) { S.recent[cat.id] = []; pool = cat.words.slice(); }
+  S.game = { deck: shuffle(pool), cur: null, log: [], end: 0, done: false, player: S.player, cat: cat.id };
+}
+function next() { const g = S.game; g.cur = g.deck.length ? g.deck.shift() : null; if (g.cur === null) finish(); }
+function answer(ok) {
+  const g = S.game; if (!g || S.screen !== "playing" || g.cur === null || lockUntil > Date.now()) return;
+  g.log.push([g.cur, ok]); (S.recent[g.cat] = S.recent[g.cat] || []).push(g.cur);
+  lockUntil = Date.now() + 700;
+  flash(ok); buzz(ok ? 40 : [20, 40, 20]);
+  next(); if (S.screen === "playing") paintWord();
+}
+function finish() {
+  const g = S.game; if (g.done) return;
+  g.done = true; stopMotion();
+  if (g.cur !== null && S.screen === "playing") g.log.push([g.cur, false]);
+  g.cur = null;
+  const found = g.log.filter(x => x[1]).length;
+  if (g.player) { const p = person(g.player); p.games++; p.found += found; p.passed += g.log.length - found; p.best = Math.max(p.best, found); p.last = Date.now(); }
+  buzz([300, 100, 300]);
+  go("result");
+  if (found >= 5) confetti();
+}
+
+// ---------- mouvements : penché vers le bas = trouvé, vers le haut = passer
+let motionOn = false, neutral = true, lockUntil = 0;
+function onMotion(e) {
+  if (S.screen !== "playing") return;
+  const a = e.accelerationIncludingGravity; if (!a || a.z === null) return;
+  let z = a.z; if (IOS) z = -z;          // même sens sur iPhone et Android : z > 0 = écran vers le ciel
+  if (S.invert) z = -z;
+  if (Math.abs(z) < 3.5) { neutral = true; return; }
+  if (!neutral || lockUntil > Date.now()) return;
+  if (z < -6.5) { neutral = false; answer(true); }      // écran vers le sol : trouvé
+  else if (z > 6.5) { neutral = false; answer(false); } // écran vers le ciel : passer
+}
+let motionOk = typeof DeviceMotionEvent !== "undefined";
+async function askMotion() {
+  try {
+    if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") motionOk = (await DeviceMotionEvent.requestPermission()) === "granted";
+  } catch (e) { motionOk = false; }
+}
+function startMotion() { if (motionOn || !motionOk) return; motionOn = true; neutral = true; addEventListener("devicemotion", onMotion); }
+function stopMotion() { motionOn = false; removeEventListener("devicemotion", onMotion); }
+
+// ---------- écrans
+const app = document.getElementById("app"), sheet = document.getElementById("sheet");
+function go(s) { S.screen = s; save(); render(); scrollTo(0, 0); }
+const step = (act, val) => `<div class="step"><button data-a="${act}" data-v="-1" aria-label="Moins">−</button><span>${val}</span><button data-a="${act}" data-v="1" aria-label="Plus">+</button></div>`;
+
+function render() {
+  const g = S.game; let h = "";
+  document.body.classList.toggle("full", ["count", "playing"].includes(S.screen));
+  switch (S.screen) {
+    case "home": {
+      h = `<div class="brand"><span class="mark">${MARK}</span><div class="logo">Aura <i>Tête</i></div></div>
+        <div class="sub" style="margin-top:0">Le téléphone sur le front, les autres te font deviner.</div>
+        <div class="label" style="text-align:center">Choisis un thème</div>
+        <div class="cats">${CATS.map(c => `<button class="cat ${S.cat === c.id ? "on" : ""}" data-a="cat" data-v="${c.id}"><b>${esc(c.name)}</b><small>${esc(c.desc)}</small></button>`).join("")}</div>
+        <div class="box"><div class="line"><div class="name">Temps</div>${step("secs", S.secs + " s")}</div></div>
+        <button class="btn" data-a="who">Jouer</button>
+        <button class="btn alt" data-a="board">Joueurs et stats</button>
+        <div class="links"><button class="link" data-a="rules">Règles</button><a class="link" href="../" style="text-decoration:none">Aura Cover</a><a class="link" href="../spy/" style="text-decoration:none">Aura Spy</a><a class="link" href="../time/" style="text-decoration:none">Aura Time</a></div>`;
+      break;
+    }
+    case "who": {
+      h = `<h2>Qui devine ?</h2>
+        <input id="q" type="text" maxlength="16" placeholder="Cherche ou écris ton prénom" value="${esc(S.q || "")}" enterkeyhint="done" autocomplete="off" autocapitalize="words">
+        <div class="list" id="wl">${whoList()}</div>
+        <div class="spacer"></div>
+        <div class="links"><button class="link" data-a="home">Retour</button></div>`;
+      break;
+    }
+    case "ready": {
+      const cat = catOf(S.cat);
+      h = `<div class="label" style="text-align:center">${esc(cat.name)} · ${S.secs} s</div>
+        <div class="reveal place">
+          ${av(S.player, "xl")}
+          <div class="label">À toi ${esc(S.player)} !</div>
+          <div class="place-name" style="font-size:1.9rem">Mets le téléphone sur ton front</div>
+          <div class="howto">
+            <div><span class="arrow down">↓</span><b>Trouvé</b><small>Penche l'écran vers le sol</small></div>
+            <div><span class="arrow up">↑</span><b>Passer</b><small>Penche l'écran vers le ciel</small></div>
+          </div>
+          <div class="hint">Tiens le téléphone à l'horizontale, l'écran tourné vers les autres. Tu peux aussi toucher la droite de l'écran pour « trouvé » et la gauche pour « passer ».</div>
+        </div>
+        ${motionOk ? "" : `<div class="hint" style="text-align:center">Mouvements bloqués : touche l'écran pour répondre.</div>`}
+        <button class="toggle box" data-a="invert"><span>Trouvé et passer sont inversés ?</span><i class="sw ${S.invert ? "on" : ""}"></i></button>
+        <div class="spacer"></div>
+        <button class="btn" data-a="start">C'est parti</button>
+        <div class="links"><button class="link" data-a="who">Changer de joueur</button><button class="link" data-a="home">Accueil</button></div>`;
+      break;
+    }
+    case "count": {
+      h = `<div class="stage"><div class="countnum" id="cn">3</div><div class="stagehint">Sur le front !</div></div>`;
+      break;
+    }
+    case "playing": {
+      h = `<div class="stage" id="stage">
+          <div class="tap left" data-a="pass" aria-label="Passer"></div><div class="tap right" data-a="ok" aria-label="Trouvé"></div>
+          <div class="ptop"><span id="pt">${S.secs}</span><span id="pc">0</span></div>
+          <div class="pword" id="pw"></div>
+        </div>`;
+      break;
+    }
+    case "result": {
+      const found = g.log.filter(x => x[1]).length, p = g.player ? person(g.player) : null;
+      h = `<div class="endhead agents"><div class="label">${esc(catOf(g.cat).name)}${g.player ? " · " + esc(g.player) : ""}</div><h2>${plural(found, "mot")} trouvé${found > 1 ? "s" : ""} !</h2>
+          ${p && found === p.best && found > 0 ? `<div class="label">Nouveau record</div>` : ""}</div>
+        <div class="list">${g.log.map(([w, ok]) => `<div class="who"><span class="t" style="${ok ? "" : "color:var(--muted)"}">${esc(w)}</span><span class="go" style="color:${ok ? "var(--civil)" : "var(--muted)"}">${ok ? "✓" : "✗"}</span></div>`).join("") || `<div class="empty">Aucun mot.</div>`}</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="who">Joueur suivant</button>
+        <button class="btn soft" data-a="again">Rejouer (${esc(g.player || "même joueur")})</button>
+        <div class="links"><button class="link" data-a="board">Classement</button><button class="link" data-a="home">Accueil</button></div>`;
+      break;
+    }
+    case "board": {
+      const q = fold(S.bq || "");
+      const list = Object.entries(S.people).filter(([n]) => fold(n).includes(q)).sort((a, b) => b[1].best - a[1].best || b[1].found - a[1].found || a[0].localeCompare(b[0]));
+      h = `<h2>Joueurs et stats</h2>
+        <input id="bq" type="text" maxlength="16" placeholder="Cherche un prénom" value="${esc(S.bq || "")}" autocomplete="off">
+        <div class="list" id="bl">${boardList(list)}</div>
+        <div class="spacer"></div>
+        <button class="btn soft" data-a="home">Retour</button>`;
+      break;
+    }
+    case "stats": {
+      const name = S.statOf, p = person(name);
+      const ranked = Object.entries(S.people).sort((a, b) => b[1].best - a[1].best || b[1].found - a[1].found).map(x => x[0]);
+      h = `<div class="statcard">${av(name, "xl")}<h2>${esc(name)}</h2>
+          <div class="hint">${p.games ? `${ranked.indexOf(name) + 1}${ranked.indexOf(name) ? "e" : "er"} du classement` : "Pas encore de partie"}</div></div>
+        <div class="tiles">
+          <div class="tile"><b>${p.games}</b><span>parties</span></div>
+          <div class="tile"><b>${p.best}</b><span>record</span></div>
+          <div class="tile"><b>${p.games ? (p.found / p.games).toFixed(1) : 0}</b><span>par partie</span></div>
+          <div class="tile"><b>${p.found}</b><span>mots trouvés</span></div>
+          <div class="tile"><b>${p.passed}</b><span>mots passés</span></div>
+          <div class="tile"><b>${p.found + p.passed ? Math.round(100 * p.found / (p.found + p.passed)) : 0}%</b><span>de réussite</span></div>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn soft" data-a="board">Retour au classement</button>
+        <div class="links"><button class="link" data-a="delP">${S.sureDel ? "Sûr ? Retouche pour supprimer" : "Supprimer ce joueur"}</button></div>`;
+      break;
+    }
+  }
+  app.innerHTML = h;
+  const q = document.getElementById("q");
+  if (q) { q.oninput = () => { S.q = q.value; document.getElementById("wl").innerHTML = whoList(); };
+    q.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); const v = q.value.trim(); if (v) choose(knownNames().find(n => fold(n) === fold(v)) || v.slice(0, 16)); } }; }
+  const bq = document.getElementById("bq");
+  if (bq) bq.oninput = () => { S.bq = bq.value; const qq = fold(bq.value);
+    document.getElementById("bl").innerHTML = boardList(Object.entries(S.people).filter(([n]) => fold(n).includes(qq)).sort((a, b) => b[1].best - a[1].best || b[1].found - a[1].found)); };
+  if (S.screen === "playing") paintWord();
+}
+function paintWord() {
+  const g = S.game, el = document.getElementById("pw"); if (!el) return;
+  el.textContent = g.cur || "";
+  let s = Math.min(innerWidth, innerHeight) * .22; el.style.fontSize = s + "px";
+  while (s > 22 && (el.scrollWidth > innerWidth * .92 || el.scrollHeight > innerHeight * .62)) el.style.fontSize = (s -= 3) + "px";
+  const pc = document.getElementById("pc"); if (pc) pc.textContent = g.log.filter(x => x[1]).length;
+}
+function whoList() {
+  const q = fold(S.q || ""), all = knownNames();
+  const list = all.filter(n => fold(n).includes(q)).sort((a, b) => ((S.people[b] || {}).last || 0) - ((S.people[a] || {}).last || 0) || a.localeCompare(b)).slice(0, 30);
+  const exact = all.some(n => fold(n) === q);
+  let h = list.map(n => `<button class="who" data-a="me" data-v="${esc(n)}">${av(n)}<span class="t">${esc(n)}<small>${statLine(S.people[n])}</small></span><span class="go">›</span></button>`).join("");
+  if ((S.q || "").trim() && !exact) h = `<button class="who new" data-a="me" data-v="${esc(S.q.trim().slice(0, 16))}">${av(S.q.trim())}<span class="t">C'est moi : ${esc(S.q.trim())}<small>Nouveau joueur</small></span><span class="go">＋</span></button>` + h;
+  return h || `<div class="empty">Écris ton prénom, le jeu s'en souviendra.</div>`;
+}
+function boardList(list) {
+  if (!list.length) return `<div class="empty">${Object.keys(S.people).length ? "Personne avec ce nom." : "Personne pour l'instant. Jouez une partie et vos stats apparaîtront ici."}</div>`;
+  return list.map(([n, p], k) => `<button class="who" data-a="stat" data-v="${esc(n)}"><span class="rank ${k < 3 && p.best ? "top" : ""}">${k + 1}</span>${av(n)}
+    <span class="t">${esc(n)}<small>${statLine(p)} · ${p.found} mots</small></span><span class="go">›</span></button>`).join("");
+}
+function choose(name) { S.player = name; S.q = ""; person(name); go("ready"); }
+
+function countdown() {
+  newGame(); go("count"); startMotion();
+  let n = 3; buzz(30);
+  const t = setInterval(() => {
+    n--; const el = document.getElementById("cn");
+    if (n > 0) { if (el) el.textContent = n; buzz(30); return; }
+    clearInterval(t); S.game.end = Date.now() + S.secs * 1000; next(); if (!S.game.done) go("playing");
+  }, 1000);
+}
+setInterval(() => {
+  const g = S.game; if (!g || S.screen !== "playing" || g.done) return;
+  const left = Math.max(0, Math.ceil((g.end - Date.now()) / 1000)), el = document.getElementById("pt");
+  if (el) { el.textContent = left; el.classList.toggle("low", left <= 5); }
+  if (left <= 0) finish();
+}, 200);
+function flash(ok) {
+  const f = document.getElementById("flash");
+  f.className = "flashbox " + (ok ? "ok" : "no"); f.textContent = ok ? "Trouvé !" : "Passé";
+  void f.offsetWidth; f.classList.add("go");
+}
+
+function openSheet(kind) {
+  if (!kind) { sheet.innerHTML = ""; return; }
+  sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true"><h2>Les règles</h2><div class="rules">
+      <p>Un joueur pose le téléphone sur son front, l'écran tourné vers les autres. Il ne voit pas le mot, les autres oui.</p>
+      <p>Les autres le lui font deviner en parlant, en mimant ou en chantant, comme ils veulent, mais sans dire le mot.</p>
+      <p>Il a trouvé ? Il <b>penche l'écran vers le sol</b>. Il veut passer ? Il <b>penche l'écran vers le ciel</b>. On peut aussi toucher la droite ou la gauche de l'écran.</p>
+      <p>Le plus de mots possible avant la fin du chrono, puis on passe le téléphone au suivant. Le meilleur score est gardé dans les stats.</p></div>
+      <button class="btn" data-a="close">Compris</button></div></div>`;
+}
+
+const A = {
+  cat: v => { S.cat = v; save(); render(); },
+  secs: d => { S.secs = Math.max(30, Math.min(120, S.secs + 15 * d)); save(); render(); },
+  who: () => { S.q = ""; go("who"); },
+  me: v => choose(v),
+  invert: () => { S.invert = !S.invert; save(); render(); },
+  start: async () => { wake(); await askMotion(); countdown(); },
+  again: async () => { wake(); await askMotion(); countdown(); },
+  ok: () => answer(true),
+  pass: () => answer(false),
+  home: () => go("home"),
+  board: () => { S.bq = ""; go("board"); },
+  stat: v => { S.statOf = v; S.sureDel = false; go("stats"); },
+  delP: () => { if (!S.sureDel) { S.sureDel = true; render(); return; } delete S.people[S.statOf]; S.sureDel = false; go("board"); },
+  rules: () => openSheet("rules"),
+  close: () => openSheet(null),
+  bg: (v, e) => { if (e.target.classList.contains("sheet")) openSheet(null); },
+};
+document.addEventListener("click", e => { const el = e.target.closest("[data-a]"); if (!el || el.disabled) return; const f = A[el.dataset.a]; if (f) f(el.dataset.v, e); });
+
+function confetti() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c = document.getElementById("fx"), x = c.getContext("2d"), dpr = devicePixelRatio || 1;
+  c.width = innerWidth * dpr; c.height = innerHeight * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const P = [...Array(130)].map(() => ({ x: innerWidth / 2 + (Math.random() - .5) * 80, y: innerHeight * .3, vx: (Math.random() - .5) * 13, vy: -Math.random() * 14 - 4,
+    w: 6 + Math.random() * 6, h: 8 + Math.random() * 8, a: Math.random() * 6, va: (Math.random() - .5) * .4, c: BODY[Math.random() * BODY.length | 0] }));
+  const t0 = performance.now(), W = innerWidth, H = innerHeight;
+  (function f(t) {
+    if (innerWidth !== W || innerHeight !== H) { c.width = c.width; return; }
+    x.clearRect(0, 0, innerWidth, innerHeight);
+    for (const p of P) { p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.a += p.va;
+      x.save(); x.translate(p.x, p.y); x.rotate(p.a); x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); x.restore(); }
+    if (t - t0 < 3200) requestAnimationFrame(f); else x.clearRect(0, 0, innerWidth, innerHeight);
+  })(t0);
+}
+
+let lock = null;
+async function wake() { try { if ("wakeLock" in navigator && !lock) { lock = await navigator.wakeLock.request("screen"); lock.addEventListener("release", () => lock = null); } } catch (e) {} }
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") wake(); });
+addEventListener("resize", () => { if (S.screen === "playing") paintWord(); });
+
+load();
+render();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+</script>
+</body>
+</html>

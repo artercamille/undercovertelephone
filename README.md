@@ -1,10 +1,11 @@
-# Aura Cover, Aura Spy & Aura Time (téléphone)
+# Les jeux Aura (téléphone)
 
-Trois jeux de soirée avec **un seul téléphone** qui tourne autour de la table.
+Quatre jeux de soirée avec **un seul téléphone** qui tourne autour de la table.
 
 - **Aura Cover** (Undercover) : https://artercamille.github.io/undercovertelephone/
 - **Aura Spy** (trouvez l'espion) : https://artercamille.github.io/undercovertelephone/spy/
 - **Aura Time** (décris, un mot, mime, en équipes) : https://artercamille.github.io/undercovertelephone/time/
+- **Aura Tête** (le téléphone sur le front) : https://artercamille.github.io/undercovertelephone/tete/
 
 ## Les installer comme des applis
 
