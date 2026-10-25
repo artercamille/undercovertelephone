@@ -222,6 +222,10 @@ canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events
 .howto small { color: var(--muted); font-size: .8rem; text-align: center; }
 .arrow { font-size: 1.8rem; font-weight: 700; line-height: 1; }
 .arrow.down { color: var(--civil); } .arrow.up { color: #f59e0b; }
+.sensbox { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; text-align: center; }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: var(--surface); border-radius: 14px; padding: 4px; }
+.seg button { min-height: 42px; border-radius: 11px; font-weight: 600; color: var(--muted); }
+.seg button.on { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; box-shadow: 0 4px 12px var(--glow); }
 .toggle { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 56px; padding: 0 16px; text-align: left; font-weight: 600; }
 .toggle span { flex: 1; }
 .sw { width: 48px; height: 28px; border-radius: 99px; background: var(--surface-2); position: relative; transition: background .2s; flex: none; }
@@ -303,7 +307,7 @@ const BODY = ["#3b5bff", "#ff5a1f", "#16a34a", "#9333ea", "#db2777", "#0891b2", 
 const MARK = `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="30" r="13" fill="none" stroke="#fff" stroke-width="3.5"/><rect x="13" y="4" width="22" height="14" rx="3" fill="#fff"/><text x="24" y="15" text-anchor="middle" font-size="10" font-weight="700" fill="#d946ef" font-family="Fredoka, sans-serif">?</text><circle cx="19" cy="29" r="2.2" fill="#fff"/><circle cx="29" cy="29" r="2.2" fill="#fff"/><path d="M19 35q5 4 10 0" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
 const IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
-let S = { screen: "home", secs: 60, cat: "stars", player: "", people: {}, recent: {}, game: null, invert: false };
+let S = { screen: "home", secs: 60, cat: "stars", player: "", people: {}, recent: {}, game: null, invert: false, sens: 1 };
 function load() {
   let d = null; try { d = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
   if (d) for (const k of Object.keys(S)) if (d[k] !== undefined) S[k] = d[k];
@@ -338,7 +342,7 @@ function next() { const g = S.game; g.cur = g.deck.length ? g.deck.shift() : nul
 function answer(ok) {
   const g = S.game; if (!g || S.screen !== "playing" || g.cur === null || lockUntil > Date.now()) return;
   g.log.push([g.cur, ok]); (S.recent[g.cat] = S.recent[g.cat] || []).push(g.cur);
-  lockUntil = Date.now() + 700;
+  lockUntil = Date.now() + 900;
   flash(ok); buzz(ok ? 40 : [20, 40, 20]);
   next(); if (S.screen === "playing") paintWord();
 }
@@ -355,16 +359,25 @@ function finish() {
 }
 
 // ---------- mouvements : penché vers le bas = trouvé, vers le haut = passer
-let motionOn = false, neutral = true, lockUntil = 0;
+let motionOn = false, neutral = true, lockUntil = 0, grav = null, heldSince = 0, heldDir = 0;
+const SENS = [["Faible", 62], ["Normale", 48], ["Forte", 34]];   // angle à atteindre, en degrés
 function onMotion(e) {
   if (S.screen !== "playing") return;
   const a = e.accelerationIncludingGravity; if (!a || a.z === null) return;
-  let z = a.z; if (IOS) z = -z;          // même sens sur iPhone et Android : z > 0 = écran vers le ciel
+  // filtre : on garde la gravité et on ignore les secousses (rires, mouvements de tête)
+  if (!grav) grav = { x: a.x, y: a.y, z: a.z };
+  const k = 0.18; grav.x += (a.x - grav.x) * k; grav.y += (a.y - grav.y) * k; grav.z += (a.z - grav.z) * k;
+  let z = grav.z; if (IOS) z = -z;          // même sens sur iPhone et Android : z > 0 = écran vers le ciel
   if (S.invert) z = -z;
-  if (Math.abs(z) < 3.5) { neutral = true; return; }
-  if (!neutral || lockUntil > Date.now()) return;
-  if (z < -6.5) { neutral = false; answer(true); }      // écran vers le sol : trouvé
-  else if (z > 6.5) { neutral = false; answer(false); } // écran vers le ciel : passer
+  const angle = Math.atan2(z, Math.hypot(grav.x, grav.y)) * 180 / Math.PI;   // 0° = téléphone droit sur le front
+  const limit = SENS[S.sens ?? 1][1], now = Date.now();
+  if (Math.abs(angle) < 22) { neutral = true; heldDir = 0; return; }
+  if (!neutral || lockUntil > now) return;
+  const dir = angle <= -limit ? 1 : angle >= limit ? -1 : 0;   // 1 = vers le sol (trouvé), -1 = vers le ciel (passer)
+  if (!dir) { heldDir = 0; return; }
+  if (dir !== heldDir) { heldDir = dir; heldSince = now; return; }
+  if (now - heldSince < 160) return;        // il faut tenir la position un court instant
+  neutral = false; heldDir = 0; answer(dir === 1);
 }
 let motionOk = typeof DeviceMotionEvent !== "undefined";
 async function askMotion() {
@@ -372,7 +385,7 @@ async function askMotion() {
     if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") motionOk = (await DeviceMotionEvent.requestPermission()) === "granted";
   } catch (e) { motionOk = false; }
 }
-function startMotion() { if (motionOn || !motionOk) return; motionOn = true; neutral = true; addEventListener("devicemotion", onMotion); }
+function startMotion() { if (motionOn || !motionOk) return; motionOn = true; neutral = true; grav = null; heldDir = 0; addEventListener("devicemotion", onMotion); }
 function stopMotion() { motionOn = false; removeEventListener("devicemotion", onMotion); }
 
 // ---------- écrans
@@ -417,6 +430,9 @@ function render() {
           <div class="hint">Tiens le téléphone à l'horizontale, l'écran tourné vers les autres. Tu peux aussi toucher la droite de l'écran pour « trouvé » et la gauche pour « passer ».</div>
         </div>
         ${motionOk ? "" : `<div class="hint" style="text-align:center">Mouvements bloqués : touche l'écran pour répondre.</div>`}
+        <div class="box sensbox"><div class="label">Sensibilité de l'inclinaison</div>
+          <div class="seg">${SENS.map(([n], i) => `<button class="${(S.sens ?? 1) === i ? "on" : ""}" data-a="sens" data-v="${i}">${n}</button>`).join("")}</div>
+          <div class="hint">${["Il faut bien pencher le téléphone.", "Réglage conseillé.", "Un petit mouvement suffit."][S.sens ?? 1]}</div></div>
         <button class="toggle box" data-a="invert"><span>Trouvé et passer sont inversés ?</span><i class="sw ${S.invert ? "on" : ""}"></i></button>
         <div class="spacer"></div>
         <button class="btn" data-a="start">C'est parti</button>
@@ -543,6 +559,7 @@ const A = {
   who: () => { S.q = ""; go("who"); },
   me: v => choose(v),
   invert: () => { S.invert = !S.invert; save(); render(); },
+  sens: v => { S.sens = +v; save(); render(); },
   start: async () => { wake(); await askMotion(); countdown(); },
   again: async () => { wake(); await askMotion(); countdown(); },
   ok: () => answer(true),
