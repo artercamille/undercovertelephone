@@ -1061,5 +1061,35 @@ if ("serviceWorker" in navigator) addEventListener("load", async () => {
   navigator.serviceWorker.register("../sw.js", { scope: "../" }).catch(() => {});
 });
 </script>
+<!-- xq: bouton quitter commun -->
+<button id="xq" type="button" aria-label="Quitter la partie" hidden>✕</button>
+<style>
+#xq { position: fixed; z-index: 60; top: calc(env(safe-area-inset-top, 0px) + 10px); left: 12px; height: 38px; min-width: 38px; padding: 0 12px; border: 0; border-radius: 99px;
+  background: color-mix(in srgb, var(--surface, #fff) 88%, transparent); color: var(--ink, #111); font: 600 1rem Fredoka, system-ui, sans-serif;
+  box-shadow: 0 2px 10px rgba(0,0,0,.14); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); cursor: pointer; }
+#xq.sure { background: #ef4444; color: #fff; font-size: .9rem; }
+#xq[hidden] { display: none; }
+</style>
+<script>
+(() => {
+  const b = document.getElementById("xq"), app = document.getElementById("app");
+  const SKIP = ["home", "board", "stats", "rules", "playing", "count"];
+  let t;
+  const reset = () => { b.classList.remove("sure"); b.textContent = "✕"; };
+  function upd() {
+    const sc = typeof S !== "undefined" ? S.screen : "home";
+    const has = app.querySelector('[data-a="quit"], [data-a="home"], a[href="../"]');
+    b.hidden = SKIP.includes(sc) || !!has;
+    if (b.hidden) reset();
+  }
+  b.addEventListener("click", () => {
+    if (!b.classList.contains("sure")) { b.classList.add("sure"); b.textContent = "Quitter la partie ?"; clearTimeout(t); t = setTimeout(reset, 3000); return; }
+    try { S.game = null; S.screen = "home"; save(); } catch (e) {}
+    location.reload();
+  });
+  new MutationObserver(upd).observe(app, { childList: true, subtree: true });
+  upd();
+})();
+</script>
 </body>
 </html>
