@@ -13,6 +13,7 @@ Des jeux de soirée dans une seule appli, avec **un seul téléphone** pour tout
 | **Tu Préfères** | Deux choix impossibles, tout le monde vote | 2 et plus | 829 questions |
 | **Le Faux Artiste** | Tout le monde dessine, un seul fait semblant | 3 à 10 | 1275 mots |
 | **La Question Piège** | Un seul joueur n'a pas eu la même question | 4 à 12 | 483 paires |
+| **La Règle** | Une règle secrète, un enquêteur, un chrono | 3 et plus | 98 règles |
 | **Mot de Passe** | Un mot par indice pour faire trouver le mot | 4 et plus | 2403 mots |
 | **Le Dernier Mot** | Trouvez le mot secret, puis le complice | 4 à 10 | 2885 mots |
 | **Trois Manches** | Décris, un seul mot, puis mime, en équipes | 4 et plus | 2094 cartes |

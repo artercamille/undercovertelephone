@@ -459,12 +459,14 @@ function render() {
   if (gf) gf.onsubmit = e => { e.preventDefault(); const v = document.getElementById("guess").value.trim(); if (!v) return;
     if (normalize(v) === normalize(g.pair[0])) endGame("white"); else { g.missed = v; g.alive = g.alive.filter(x => x !== g.out); buzz(200); save(); render(); } };
 }
-function exactOr(v) { return Object.keys(S.people).find(n => fold(n) === fold(v)) || v.slice(0, 16); }
+function extPeople() { const o = {}; for (const k of ["auracover_poche5", "auraspy1", "auratime1", "auratete1", "auraloup2", "auraapero1", "tablee_milieu", "tablee_codes", "tablee_preferes", "tablee_artiste", "tablee_motcache", "tablee_piege", "tablee_mdp", "tablee_regle"]) try { const c = JSON.parse(localStorage.getItem(k) || "{}"); for (const n of Object.keys(c.people || {})) if (!S.people[n]) o[n] = { games: 0, wins: 0, last: 0 }; } catch (e) {} return Object.assign(o, S.people); }
+function exactOr(v) { return Object.keys(extPeople()).find(n => fold(n) === fold(v)) || v.slice(0, 16); }
 function whoList() {
   const g = S.game, q = fold(g.q), used = new Set(g.names.filter(Boolean));
-  const list = Object.entries(S.people).filter(([n]) => !used.has(n) && fold(n).includes(q))
+  const all = extPeople();
+  const list = Object.entries(all).filter(([n]) => !used.has(n) && fold(n).includes(q))
     .sort((a, b) => b[1].last - a[1].last || b[1].games - a[1].games || a[0].localeCompare(b[0])).slice(0, 30);
-  const exact = Object.keys(S.people).some(n => fold(n) === q);
+  const exact = Object.keys(all).some(n => fold(n) === q);
   let h = list.map(([n, p]) => `<button class="who" data-a="me" data-v="${esc(n)}">${av(n)}<span class="t">${esc(n)}<small>${statLine(p)}</small></span><span class="go">›</span></button>`).join("");
   if (g.q.trim() && !exact) h = `<button class="who new" data-a="me" data-v="${esc(g.q.trim().slice(0, 16))}">${av(g.q.trim())}<span class="t">C'est moi : ${esc(g.q.trim())}<small>Nouveau joueur</small></span><span class="go">＋</span></button>` + h;
   if (!h) h = `<div class="empty">${Object.keys(S.people).length ? "Personne avec ce nom. Écris ton prénom en entier." : "Écris ton prénom, le jeu s'en souviendra pour les prochaines parties."}</div>`;

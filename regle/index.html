@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#dc2626">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tablée">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" type="image/png" href="../icons/favicon-64.png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<title>La Règle</title>
+<style>
+
+/* Tablée : un écran = un titre, une consigne, un bouton ; chaque jeu a sa couleur. */
+:root {
+  --bg: #ffffff;
+  --surface: #f3f3f5;
+  --surface-2: #e9e9ed;
+  --ink: #111114;
+  --muted: #6e6e76;
+  --accent: #ff5a1f;
+  --accent-ink: #ffffff;
+  --civil: #16a34a;
+  --under: #e11d48;
+  --white: #71717a;
+  --font: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-weight: 500; font-size: 17px; line-height: 1.35;
+  -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+input { -webkit-user-select: text; user-select: text; }
+.app { max-width: 440px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; gap: 20px;
+  padding-block: 26px 28px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.logo { text-align: center; font-size: 2.6rem; font-weight: 700; line-height: 1; }
+.logo i { font-style: normal; color: var(--accent); }
+h2 { margin: 0; font-size: 1.8rem; font-weight: 700; line-height: 1.12; text-align: center; text-wrap: balance; }
+.sub { text-align: center; color: var(--muted); margin-top: -10px; text-wrap: balance; }
+.label { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.spacer { flex: 1; }
+.pop { animation: pop .3s ease-out backwards; }
+@keyframes pop { from { transform: translateY(8px); opacity: 0 } }
+
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
+.btn { width: 100%; min-height: 60px; border-radius: 16px; background: var(--accent); color: var(--accent-ink); font-size: 1.2rem; font-weight: 600; transition: transform .08s, opacity .15s; }
+.btn:active { transform: scale(.98); }
+.btn.alt, .btn.soft { background: var(--surface); color: var(--ink); }
+.btn:disabled { opacity: .35; }
+.link { color: var(--muted); font-weight: 500; font-size: .95rem; padding: 10px; }
+.links { display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 12px; }
+
+.box { background: var(--surface); border-radius: 18px; padding: 2px 16px; }
+.line { display: flex; align-items: center; gap: 12px; min-height: 62px; }
+.line + .line { border-top: 1px solid var(--surface-2); }
+.line .name { flex: 1; font-weight: 600; }
+.line .name small { display: block; color: var(--muted); font-size: .82rem; font-weight: 500; }
+.step { display: flex; align-items: center; gap: 4px; }
+.step button { width: 40px; height: 40px; border-radius: 50%; background: var(--bg); font-size: 1.3rem; font-weight: 600; }
+.step button:active { transform: scale(.9); }
+.step span { min-width: 54px; text-align: center; font-weight: 600; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.big { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.big .step { gap: 20px; }
+.big .step button { width: 56px; height: 56px; font-size: 1.7rem; background: var(--surface); }
+.big .step span.count { font-size: 4.2rem; font-weight: 700; min-width: 90px; line-height: 1; }
+.chips { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-top: -6px; }
+.chip { font-size: .88rem; font-weight: 600; padding: 4px 12px; border-radius: 99px; background: var(--surface); }
+.chip.civil { color: var(--civil); } .chip.undercover { color: var(--under); } .chip.white { color: var(--white); }
+
+/* cartes */
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.card { aspect-ratio: 3 / 4; border-radius: 16px; background: var(--accent); color: var(--accent-ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px;
+  animation: pop .3s ease-out backwards; transition: transform .1s; }
+.card .q { font-size: 2.4rem; font-weight: 700; line-height: 1; }
+.card .num { font-size: .8rem; font-weight: 600; opacity: .8; }
+.card:active { transform: scale(.95); }
+.card.taken { background: var(--surface); color: var(--muted); pointer-events: none; font-weight: 600; font-size: .95rem; text-align: center; overflow-wrap: anywhere; gap: 8px; }
+
+/* qui es-tu */
+input[type=text] { width: 100%; min-height: 58px; border-radius: 16px; border: 2px solid var(--surface-2); background: var(--bg); color: var(--ink);
+  font: inherit; font-size: 1.2rem; font-weight: 600; padding: 0 18px; }
+input[type=text]:focus { border-color: var(--accent); outline: none; }
+input::placeholder { color: var(--muted); font-weight: 500; }
+.list { display: flex; flex-direction: column; background: var(--surface); border-radius: 18px; overflow: hidden; }
+.list:empty { display: none; }
+.who { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 8px 14px; text-align: left; }
+.who + .who { border-top: 1px solid var(--surface-2); }
+.who:active { background: var(--surface-2); }
+.who .t { flex: 1; min-width: 0; font-weight: 600; font-size: 1.1rem; overflow-wrap: anywhere; }
+.who .t small { display: block; color: var(--muted); font-weight: 500; font-size: .82rem; }
+.who .go { color: var(--muted); font-size: 1.3rem; }
+.who.new { background: var(--accent); color: var(--accent-ink); }
+.who.new .t small, .who.new .go { color: var(--accent-ink); opacity: .85; }
+.who.sel { background: var(--ink); color: var(--bg); }
+.who.sel .t small, .who.sel .n { color: var(--bg); opacity: .7; }
+.who .n { width: 20px; text-align: center; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.av { --c: var(--accent); width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  background: var(--c); color: #fff; font-weight: 700; font-size: 1.05rem; }
+.av.dead { filter: grayscale(1); opacity: .5; }
+.av.xl { width: 84px; height: 84px; font-size: 2.2rem; }
+.empty { text-align: center; color: var(--muted); padding: 14px; font-size: .95rem; text-wrap: balance; }
+
+/* révélations */
+.reveal { background: var(--surface); border-radius: 24px; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  animation: pop .3s ease-out backwards; }
+.word { font-size: 2.9rem; font-weight: 700; line-height: 1.05; text-wrap: balance; max-width: 100%; }
+.role { font-size: 2.9rem; font-weight: 700; line-height: 1; }
+.role.civil { color: var(--civil); } .role.undercover { color: var(--under); } .role.white { color: var(--white); }
+.hint { color: var(--muted); font-size: .98rem; text-wrap: balance; }
+.reveal input[type=text] { text-align: center; }
+
+/* fin + stats */
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pair > div { background: var(--surface); border-radius: 18px; padding: 14px 10px; text-align: center; }
+.pair b { display: block; font-size: 1.15rem; font-weight: 700; overflow-wrap: anywhere; margin-top: 2px; }
+.res { display: flex; align-items: center; gap: 10px; min-height: 60px; font-variant-numeric: tabular-nums; }
+.res + .res { border-top: 1px solid var(--surface-2); }
+.res .t { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.res .t small { display: block; font-size: .8rem; font-weight: 600; }
+.res.dead .t > span { color: var(--muted); }
+.res .g { font-weight: 700; color: var(--civil); min-width: 34px; text-align: right; }
+.res .win { font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--accent); color: var(--accent-ink); }
+.r.civil { color: var(--civil); } .r.undercover { color: var(--under); } .r.white { color: var(--white); }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tile { background: var(--surface); border-radius: 16px; padding: 12px 6px; text-align: center; }
+.tile b { display: block; font-size: 1.7rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tile span { font-size: .78rem; color: var(--muted); font-weight: 500; }
+.bars { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; }
+.bar { display: grid; grid-template-columns: 96px 1fr 44px; align-items: center; gap: 10px; font-size: .95rem; font-weight: 600; }
+.bar .tr { height: 10px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.bar .tr i { display: block; height: 100%; border-radius: 99px; }
+.bar em { font-style: normal; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; font-size: .85rem; }
+.rank { width: 22px; text-align: center; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rank.top { color: var(--accent); }
+.statcard { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+
+.sheet { position: fixed; inset: 0; z-index: 10; background: rgba(0,0,0,.4); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s; }
+@keyframes fade { from { opacity: 0 } }
+.sheet > div { width: min(100%, 440px); background: var(--bg); border-radius: 24px 24px 0 0; display: flex; flex-direction: column; gap: 14px; max-height: 90%; overflow-y: auto;
+  animation: up .25s ease-out;
+  padding: 24px max(20px, env(safe-area-inset-right, 0px)) max(22px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)); }
+@keyframes up { from { transform: translateY(40px) } }
+.rules p { margin: 0 0 10px; }
+.rules b { font-weight: 700; }
+/* ---- couche "juste milieu" : relief, dégradés, motif sur les cartes */
+:root { --accent-2: #ff2e63; --glow: rgba(255, 90, 31, .35); --shadow: 0 1px 2px rgba(20,20,30,.06), 0 8px 24px rgba(20,20,30,.08); --panel: #ffffff; --bg-2: #fff1ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; } }
+:root[data-theme="dark"] { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; }
+body { background: radial-gradient(120% 60% at 50% -10%, var(--bg-2), var(--bg) 60%) fixed, var(--bg); }
+.brand { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.mark { width: 74px; height: 74px; border-radius: 22px; display: grid; place-items: center; transform: rotate(-6deg);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 10px 26px var(--glow); }
+.mark svg { width: 46px; height: 46px; }
+.logo { font-size: 2.7rem; }
+.logo i { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.btn { background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 8px 20px var(--glow); }
+.btn.alt, .btn.soft { background: var(--panel); box-shadow: var(--shadow); }
+.btn:disabled { box-shadow: none; }
+.box, .list, .pair > div, .tile { background: var(--panel); box-shadow: var(--shadow); }
+.who + .who, .line + .line, .res + .res { border-top-color: var(--surface); }
+.step button { background: var(--surface); }
+.big .step button { background: var(--panel); box-shadow: var(--shadow); }
+.big .step span.count { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.chip { background: var(--panel); box-shadow: var(--shadow); }
+.card { position: relative; overflow: hidden; border-radius: 18px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.09) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--accent), var(--accent-2));
+  box-shadow: 0 8px 18px var(--glow); }
+.card::before { content: ""; position: absolute; inset: 6px; border-radius: 13px; border: 2px solid rgba(255,255,255,.35); pointer-events: none; }
+.card .q { width: 54%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.22); display: grid; place-items: center; font-size: 2rem; }
+.card:nth-child(3n+1) { transform: rotate(-2deg); } .card:nth-child(3n) { transform: rotate(2deg); }
+.card:active { transform: scale(.94); }
+.card.taken { background: var(--panel); box-shadow: var(--shadow); transform: none; }
+.card.taken::before { border-color: var(--surface); }
+.av { background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 60%, #ff2e63)); box-shadow: 0 3px 8px color-mix(in srgb, var(--c) 35%, transparent); }
+.who.new { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.who.sel { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+.who.sel .t small, .who.sel .n { color: #fff; }
+.reveal { background: var(--panel); box-shadow: var(--shadow); position: relative; overflow: hidden; padding-top: 0; animation: flipIn .5s cubic-bezier(.2,1.2,.4,1) backwards; }
+@keyframes flipIn { from { transform: perspective(900px) rotateY(70deg); opacity: 0 } }
+.reveal::before { content: ""; display: block; align-self: stretch; height: 92px; margin: 0 -20px 4px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2))); }
+.reveal .av.xl { margin-top: -66px; box-shadow: 0 0 0 6px var(--panel), 0 8px 18px rgba(0,0,0,.18); }
+.reveal.civil { --band1: #22c55e; --band2: #0d9488; }
+.reveal.undercover { --band1: #f43f5e; --band2: #be123c; }
+.reveal.white { --band1: #a1a1aa; --band2: #52525b; }
+.reveal.wordcard .word { background: linear-gradient(135deg, var(--ink), color-mix(in srgb, var(--ink) 60%, var(--accent))); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 4px; }
+.res .win { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.tile b { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.endhead { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px; border-radius: 24px; color: #fff; text-align: center;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2)));
+  box-shadow: var(--shadow); animation: pop .4s ease-out backwards; }
+.endhead.civils { --band1: #22c55e; --band2: #0d9488; } .endhead.imposteurs { --band1: #f43f5e; --band2: #be123c; } .endhead.white { --band1: #71717a; --band2: #3f3f46; }
+.endhead h2 { color: #fff; }
+.endhead .label { color: rgba(255,255,255,.85); }
+.sheet > div { background: var(--bg); }
+canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ---- La Règle : rouge ; la règle secrète est le texte principal */
+:root { --accent: #dc2626; --accent-2: #9f1239; --glow: rgba(220, 38, 38, .26); --bg-2: #fdf0f0; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent: #f87171; --accent-2: #fb7185; --glow: rgba(248, 113, 113, .22); --bg-2: #1f1012; } }
+:root[data-theme="dark"] { --accent: #f87171; --accent-2: #fb7185; --glow: rgba(248, 113, 113, .22); --bg-2: #1f1012; }
+/* ---- éléments communs aux nouveaux jeux */
+.endhead.main { --band1: var(--accent); --band2: var(--accent-2); }
+.reveal.main { --band1: var(--accent); --band2: var(--accent-2); }
+.place-name { font-size: 2.2rem; font-weight: 700; line-height: 1.08; text-wrap: balance; max-width: 100%; }
+.teambox { background: var(--panel); box-shadow: var(--shadow); border-radius: 20px; overflow: hidden; }
+.teamhead { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 16px; color: #fff; font-weight: 700; font-size: 1.1rem;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(135deg, var(--band1, var(--accent)), var(--band2, var(--accent-2))); }
+.teamhead small { font-weight: 600; opacity: .9; font-size: .85rem; }
+.chips2 { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; }
+.pchip { display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; border-radius: 99px; background: var(--surface); font-weight: 600; font-size: .98rem; }
+.pchip .av { width: 30px; height: 30px; font-size: .85rem; }
+.pchip i { font-style: normal; color: var(--muted); font-size: 1.2rem; margin-left: 2px; }
+.pchip.add { padding: 0 16px; min-height: 38px; color: var(--accent); background: transparent; box-shadow: inset 0 0 0 2px var(--surface-2); }
+.res .tot { font-weight: 700; font-size: 1.25rem; min-width: 32px; text-align: right; font-variant-numeric: tabular-nums; }
+.tdot { width: 22px; height: 22px; border-radius: 50%; flex: none; background: linear-gradient(135deg, var(--band1), var(--band2)); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.two .btn { font-size: 1.05rem; min-height: 56px; }
+.toggle { width: 100%; text-align: left; }
+.toggle .name { flex: 1; }
+.sw { width: 48px; height: 28px; border-radius: 99px; background: var(--surface-2); position: relative; transition: background .2s; flex: none; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.sw.on { background: var(--accent); } .sw.on::after { transform: translateX(20px); }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; background: var(--surface); border-radius: 14px; padding: 4px; }
+.seg button { min-height: 44px; border-radius: 11px; font-weight: 600; color: var(--muted); padding: 0 6px; }
+.seg button.on { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; box-shadow: 0 4px 12px var(--glow); }
+.rolebox { background: var(--surface); border-radius: 14px; padding: 10px 16px; font-weight: 600; }
+.rolebox small { display: block; color: var(--muted); font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
+.clock { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 16px; }
+.clock b { font-size: 3.4rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.clock.low b { background: none; color: var(--under); animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: .4 } }
+.clock .row { display: flex; gap: 8px; margin-top: 8px; }
+.clock .row button { padding: 8px 16px; border-radius: 99px; background: var(--surface); font-weight: 600; font-size: .95rem; }
+
+.qtext { font-size: 1.55rem; font-weight: 700; line-height: 1.2; text-wrap: balance; }
+.endhead.imp { --band1: #334155; --band2: #0f172a; }
+.who .ans { font-size: 1.1rem; max-width: 50%; text-align: right; overflow-wrap: anywhere; }
+.res .g { font-weight: 700; color: var(--civil); min-width: 30px; text-align: right; }
+.rules p { margin: 0 0 10px; }
+
+</style>
+<style>
+@font-face { font-family: "Fredoka"; src: url("../Fredoka.ttf") format("truetype"); font-weight: 300 700; font-display: swap; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+html { overscroll-behavior: none; }
+body.full { overflow: hidden; }
+.backmenu { align-self: flex-start; color: var(--muted); font-weight: 600; text-decoration: none; padding: 6px 2px; margin-bottom: -12px; }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div id="sheet"></div>
+<script>
+// ---------- outils communs à tous les jeux Tablée
+const BODY = ["#3b5bff", "#ff5a1f", "#16a34a", "#9333ea", "#db2777", "#0891b2", "#ca8a04", "#4f46e5", "#ea580c", "#0d9488"];
+const NAME_KEYS = ["auracover_poche5", "auraspy1", "auratime1", "auratete1", "auraloup2", "auraapero1", "tablee_milieu", "tablee_codes", "tablee_preferes", "tablee_artiste", "tablee_motcache", "tablee_piege", "tablee_mdp", "tablee_regle"];
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+const fold = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+function seedOf(s) { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+const av = (nm, cls = "") => `<span class="av ${cls}" style="--c:${BODY[seedOf(nm || "?") % BODY.length]}" aria-hidden="true">${esc((nm.trim()[0] || "?").toUpperCase())}</span>`;
+const plural = (n, w) => `${n} ${w}${n > 1 ? "s" : ""}`;
+const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const rnd = n => Math.random() * n | 0;
+function knownNames(own) {
+  const set = new Set(Object.keys(own || {}));
+  for (const k of NAME_KEYS) try { const c = JSON.parse(localStorage.getItem(k) || "{}"); for (const n of Object.keys(c.people || {})) set.add(n); } catch (e) {}
+  return [...set];
+}
+// liste « qui es-tu ? » : prénoms connus filtrés + « nouveau joueur »
+function nameList(q, exclude, people, act) {
+  const f = fold(q), all = knownNames(people), used = new Set(exclude);
+  const list = all.filter(n => !used.has(n) && fold(n).includes(f)).sort((a, b) => ((people[b] || {}).last || 0) - ((people[a] || {}).last || 0) || a.localeCompare(b)).slice(0, 30);
+  const exact = all.some(n => fold(n) === f) || [...used].some(n => fold(n) === f);
+  let h = list.map(n => `<button class="who" data-a="${act}" data-v="${esc(n)}">${av(n)}<span class="t">${esc(n)}</span><span class="go">＋</span></button>`).join("");
+  if (q.trim() && !exact) h = `<button class="who new" data-a="${act}" data-v="${esc(q.trim().slice(0, 16))}">${av(q.trim())}<span class="t">${esc(q.trim())}<small>Nouveau joueur</small></span><span class="go">＋</span></button>` + h;
+  return h || `<div class="empty">Écris un prénom, le jeu s'en souviendra.</div>`;
+}
+const exactName = (v, people) => knownNames(people).find(n => fold(n) === fold(v)) || v.slice(0, 16);
+function confetti() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  let c = document.getElementById("fx"); if (!c) { c = document.createElement("canvas"); c.id = "fx"; document.body.appendChild(c); }
+  const x = c.getContext("2d"), dpr = devicePixelRatio || 1;
+  c.width = innerWidth * dpr; c.height = innerHeight * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const P = [...Array(130)].map(() => ({ x: innerWidth / 2 + (Math.random() - .5) * 80, y: innerHeight * .3, vx: (Math.random() - .5) * 13, vy: -Math.random() * 14 - 4,
+    w: 6 + Math.random() * 6, h: 8 + Math.random() * 8, a: Math.random() * 6, va: (Math.random() - .5) * .4, c: BODY[Math.random() * BODY.length | 0] }));
+  const t0 = performance.now(), W = innerWidth, H = innerHeight;
+  (function f(t) {
+    if (innerWidth !== W || innerHeight !== H) { c.width = c.width; return; }
+    x.clearRect(0, 0, innerWidth, innerHeight);
+    for (const p of P) { p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.a += p.va;
+      x.save(); x.translate(p.x, p.y); x.rotate(p.a); x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); x.restore(); }
+    if (t - t0 < 3200) requestAnimationFrame(f); else x.clearRect(0, 0, innerWidth, innerHeight);
+  })(t0);
+}
+let wakeLock = null;
+async function wake() { try { if ("wakeLock" in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request("screen"); wakeLock.addEventListener("release", () => wakeLock = null); } } catch (e) {} }
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") wake(); });
+const step = (act, val, cls = "") => `<div class="step"><button data-a="${act}" data-v="-1" aria-label="Moins">−</button><span class="${cls}">${val}</span><button data-a="${act}" data-v="1" aria-label="Plus">+</button></div>`;
+
+// [question des joueurs, question piège] : les réponses doivent se ressembler pour que l'imposteur puisse se cacher
+const RULES = [["F", "Chaque réponse commence par « Alors ».", "« Tu aimes le foot ? » → « Alors, oui, j'adore. »", "Écoute bien le premier mot de chaque réponse."], ["F", "Chaque réponse finit par « tu vois ».", "« Tu as un chat ? » → « Non, je préfère les chiens, tu vois. »", "Écoute bien la fin des réponses."], ["F", "On répond toujours en chuchotant.", "Tout le monde parle tout bas en répondant.", "Ce n'est pas ce qu'ils disent, c'est comment ils le disent."], ["F", "On se touche le nez avant de répondre.", "Un petit geste discret avant chaque réponse.", "Regarde leurs mains avant qu'ils parlent."], ["F", "On se touche les cheveux en répondant.", "Un geste discret pendant la réponse.", "Regarde ce que font leurs mains."], ["F", "On croise les bras pour répondre.", "On croise les bras, on répond, on décroise.", "Regarde leur posture quand ils répondent."], ["F", "On regarde le plafond en répondant.", "Les yeux en l'air pendant toute la réponse.", "Regarde leurs yeux."], ["F", "On répond en un seul mot.", "« Tu fais quoi ce week-end ? » → « Plage. »", "Compte les mots."], ["F", "Chaque réponse contient un animal.", "« Tu bois quoi ? » → « Un jus, comme un singe. »", "Il y a un thème caché dans chaque réponse."], ["F", "Chaque réponse contient une couleur.", "« Tu manges quoi ce soir ? » → « Des pâtes, avec une sauce rouge. »", "Il y a un thème caché dans chaque réponse."], ["F", "Chaque réponse contient un chiffre.", "« Tu aimes le ski ? » → « J'en ai fait 2 fois. »", "Il y a un thème caché dans chaque réponse."], ["F", "Chaque réponse contient un fruit.", "« Tu es fatigué ? » → « Un peu, comme une banane écrasée. »", "Il y a un thème caché dans chaque réponse."], ["F", "Chaque réponse contient le prénom de l'enquêteur.", "« Tu as faim ? » → « Oui Léa, très faim. »", "Écoute si un mot revient dans chaque réponse."], ["F", "On commence chaque réponse par le prénom de l'enquêteur.", "« Tu aimes le rap ? » → « Max, oui, beaucoup. »", "Écoute bien le premier mot."], ["F", "On répond en souriant énormément.", "Grand sourire forcé à chaque réponse.", "Regarde leur visage."], ["F", "On cligne deux fois des yeux avant de répondre.", "Deux clignements, puis la réponse.", "Regarde leurs yeux juste avant qu'ils parlent."], ["F", "On tape une fois dans ses mains avant de répondre.", "Clap, puis la réponse.", "Écoute ce qui se passe juste avant chaque réponse."], ["F", "On répond en parlant de soi à la troisième personne.", "« Tu aimes nager ? » → « Tom adore nager. »", "Écoute comment ils parlent d'eux-mêmes."], ["F", "On répond toujours par une question.", "« Tu as un frère ? » → « Pourquoi tu demandes ? »", "Personne ne te donne vraiment de réponse…"], ["F", "On répond avec un accent anglais.", "Tout le monde prend l'accent anglais.", "Écoute leur façon de parler."], ["F", "On répond en anglais.", "« Tu es fatigué ? » → « Yes, a little bit. »", "Écoute la langue."], ["F", "On répond toujours « oui », peu importe la question.", "« Tu détestes les pizzas ? » → « Oui. »", "Pose une question dont la réponse évidente est « non »."], ["F", "On répond toujours « non », peu importe la question.", "« Tu respires ? » → « Non. »", "Pose une question dont la réponse évidente est « oui »."], ["F", "On lève la main avant de répondre.", "Main levée, puis réponse.", "Regarde ce qu'ils font avant de parler."], ["F", "On répond en se levant.", "On se lève, on répond, on se rassoit.", "Regarde ce que fait leur corps."], ["F", "On répond très fort, presque en criant.", "Tout le monde répond à fond.", "Ce n'est pas ce qu'ils disent, c'est comment ils le disent."], ["F", "On répond en chantant.", "Chaque réponse est chantée.", "Ce n'est pas ce qu'ils disent, c'est comment ils le disent."], ["F", "On répond très lentement.", "Chaque mot est étiré.", "Ce n'est pas ce qu'ils disent, c'est comment ils le disent."], ["F", "On répond en regardant l'enquêteur droit dans les yeux, sans cligner.", "Regard fixe et intense à chaque réponse.", "Regarde leurs yeux."], ["F", "On répond en fermant les yeux.", "Yeux fermés pendant toute la réponse.", "Regarde leurs yeux."], ["F", "On répond en vouvoyant l'enquêteur.", "« Tu as faim ? » → « Oui, et vous ? »", "Écoute comment ils s'adressent à toi."], ["F", "On répond en ajoutant « mon capitaine » à la fin.", "« Tu dors bien ? » → « Très bien, mon capitaine. »", "Écoute bien la fin des réponses."], ["F", "Chaque réponse contient le mot « banane ».", "« Tu fais du sport ? » → « Oui, et je mange une banane après. »", "Un mot revient sans arrêt."], ["F", "Chaque réponse contient une marque.", "« Tu aimes cuisiner ? » → « Oui, avec mon tablier Nike. »", "Il y a un thème caché dans chaque réponse."], ["F", "Chaque réponse contient un pays ou une ville.", "« Tu as froid ? » → « Un peu, comme en Norvège. »", "Il y a un thème caché dans chaque réponse."], ["F", "On imite la position de l'enquêteur.", "Si l'enquêteur croise les jambes, tout le monde les croise.", "Fais un geste bizarre et regarde autour de toi."], ["F", "On se gratte la tête avant de répondre.", "Un petit grattage, puis la réponse.", "Regarde leurs mains avant qu'ils parlent."], ["F", "On commence chaque réponse par « Ah bah ».", "« Tu aimes les chats ? » → « Ah bah oui ! »", "Écoute bien le premier mot."], ["M", "Chacun répond comme s'il était la personne à sa droite.", "Si Tom est à droite de Léa, Léa répond comme si elle était Tom.", "Les réponses sont vraies… mais pas pour la bonne personne."], ["M", "Chacun répond comme s'il était la personne à sa gauche.", "Si Tom est à gauche de Léa, Léa répond comme si elle était Tom.", "Les réponses sont vraies… mais pas pour la bonne personne."], ["M", "Chacun répond comme s'il était l'enquêteur.", "Chacun répond à la place de l'enquêteur.", "Pose des questions dont toi seul connais la réponse."], ["M", "On répond comme si on avait 80 ans.", "« Tu sors ce soir ? » → « Oh non, je me couche à 20 h. »", "Tout le monde a l'air d'avoir le même âge…"], ["M", "On répond comme si on avait 5 ans.", "« Tu travailles où ? » → « À l'école, en grande section ! »", "Tout le monde a l'air d'avoir le même âge…"], ["M", "On répond comme si on était un chien.", "« Tu aimes la viande ? » → « J'adore, surtout les os. »", "Ils ont tous la même vie… pas très humaine."], ["M", "On répond comme si on était un chat.", "« Tu dors beaucoup ? » → « 16 heures par jour, sur le canapé. »", "Ils ont tous la même vie… pas très humaine."], ["M", "On répond comme si on vivait au Moyen Âge.", "« Tu as un téléphone ? » → « Un quoi ? »", "Ils vivent tous à une autre époque."], ["M", "On répond comme si on était le président de la République.", "« Tu as une grosse semaine ? » → « Trois sommets internationaux. »", "Ils ont tous le même métier."], ["M", "On répond comme si on était une star de cinéma.", "« Tu vas où en vacances ? » → « Mon yacht à Cannes. »", "Ils ont tous la même vie de rêve."], ["M", "On répond comme si on était amoureux de l'enquêteur.", "« Tu fais quoi ce soir ? » → « J'espérais te voir… »", "Regarde comment ils te regardent."], ["M", "On répond comme si on détestait l'enquêteur.", "« Ça va ? » → « Ça allait avant que tu parles. »", "Ils ont tous le même problème avec toi."], ["M", "On ment à chaque réponse.", "« Tu as les cheveux bruns ? » (oui) → « Non, blonds. »", "Pose une question dont tu connais la réponse."], ["M", "On dit la vérité seulement si la question contient le mot « tu ». Sinon, on ment.", "« Tu as un chien ? » → vrai. « Ton frère s'appelle Tom ? » → mensonge.", "La vérité dépend de la façon dont tu poses la question."], ["M", "Chaque réponse commence par la dernière lettre de la question.", "« Tu aimes le foot ? » (T) → « Totalement ! »", "Écoute la première lettre de chaque réponse, puis relis ta question."], ["M", "Chaque réponse commence par la première lettre du prénom de l'enquêteur.", "Pour Max : « Moui, mais pas trop. »", "Écoute la première lettre de chaque réponse."], ["M", "On répond à la question d'avant, pas à celle qu'on vient de poser.", "Q1 « Ton plat préféré ? », Q2 « Ton âge ? » → la 2e personne répond « Les pâtes ».", "Les réponses ont toujours un temps de retard."], ["M", "Les garçons mentent, les filles disent la vérité.", "Les garçons inventent, les filles répondent normalement.", "Compare les garçons et les filles."], ["M", "Les filles mentent, les garçons disent la vérité.", "Les filles inventent, les garçons répondent normalement.", "Compare les garçons et les filles."], ["M", "On ne répond que si l'enquêteur dit notre prénom. Sinon, on fait comme si on n'avait rien entendu.", "« Tu aimes le ski ? » → silence. « Léa, tu aimes le ski ? » → « Oui. »", "Ils t'ignorent parfois… pourquoi ?"], ["M", "On ne répond que si l'enquêteur nous regarde dans les yeux.", "S'il regarde ailleurs, on attend sans rien dire.", "Ils t'ignorent parfois… regarde-toi."], ["M", "On répond comme si on était le personnage de Shrek.", "« Tu vis où ? » → « Dans un marais. »", "Ils sont tous le même personnage célèbre."], ["M", "On répond comme si on était Harry Potter.", "« Ton meilleur ami ? » → « Ron. »", "Ils sont tous le même personnage célèbre."], ["M", "On répond comme si on était Spider-Man.", "« Ton métier ? » → « Photographe… et un autre secret. »", "Ils sont tous le même personnage célèbre."], ["M", "On répond comme si on était la mère de l'enquêteur.", "« Tu as des enfants ? » → « Oui, toi ! »", "Les réponses te concernent toujours un peu…"], ["M", "On répond comme si on était en prison.", "« Tu fais quoi demain ? » → « Promenade dans la cour. »", "Ils sont tous au même endroit."], ["M", "On répond comme si on était sur une île déserte.", "« Tu as faim ? » → « Je pêche demain matin. »", "Ils sont tous au même endroit."], ["M", "On répond comme si on était dans l'espace.", "« Il fait beau ? » → « Il n'y a pas de météo ici. »", "Ils sont tous au même endroit."], ["M", "Chaque réponse a exactement trois mots.", "« Tu aimes le chocolat ? » → « Oui, vraiment beaucoup. »", "Compte les mots."], ["M", "On répond comme le ferait la personne la plus âgée du groupe.", "Tout le monde répond à la place du plus vieux.", "Ils parlent tous de la même personne."], ["M", "On répond comme le ferait la personne la plus jeune du groupe.", "Tout le monde répond à la place du plus jeune.", "Ils parlent tous de la même personne."], ["M", "On répond comme si on était le voisin d'en face.", "Chacun répond à la place de la personne assise en face.", "Les réponses sont vraies… mais pas pour la bonne personne."], ["M", "Ceux qui portent du noir mentent, les autres disent la vérité.", "Le noir sur soi = on ment.", "Regarde ce qu'ils portent."], ["M", "Ceux qui ont des lunettes ou des bijoux mentent.", "Lunettes ou bijoux = on ment.", "Regarde ce qu'ils portent."], ["M", "On répond comme si on avait gagné au loto hier.", "« Tu bosses demain ? » → « Plus jamais. »", "Ils ont tous vécu la même chose récemment."], ["M", "On répond comme si on était un robot.", "Voix monotone et réponses mécaniques.", "Ce n'est pas ce qu'ils disent, c'est comment ils le disent."], ["M", "Chaque réponse contient un mensonge et une vérité.", "« Tu as un chat ? » → « Oui, il s'appelle Pizza et il est bleu. »", "Il y a toujours un détail qui cloche."], ["M", "Si l'enquêteur sourit, on ment. Sinon, on dit la vérité.", "Sourire = mensonge.", "La vérité dépend de toi, pas d'eux."], ["M", "Si l'enquêteur pose une question en commençant par « Est-ce que », on ment.", "« Est-ce que tu as faim ? » → mensonge. « Tu as faim ? » → vérité.", "La vérité dépend de la façon dont tu poses la question."], ["M", "On répond comme si la question avait été posée à la personne à notre droite.", "Chacun répond pour son voisin de droite.", "Les réponses sont vraies… mais pas pour la bonne personne."], ["M", "On donne la réponse que l'enquêteur donnerait.", "Chacun essaie de répondre comme l'enquêteur.", "Pose des questions dont toi seul connais la réponse."], ["D", "Ce n'est pas la personne interrogée qui répond, mais celle à sa droite.", "L'enquêteur demande à Léa, c'est son voisin de droite qui répond.", "Regarde bien qui répond."], ["D", "Ce n'est pas la personne interrogée qui répond, mais celle qui a répondu juste avant.", "La dernière personne à avoir parlé répond toujours.", "Regarde bien qui répond."], ["D", "Chaque réponse commence par la lettre suivante de l'alphabet : A, puis B, puis C…", "1re réponse « Absolument », 2e « Bien sûr », 3e « Carrément »…", "Note la première lettre de chaque réponse, dans l'ordre."], ["D", "Chaque réponse rime avec le dernier mot de la question.", "« Tu aimes le chocolat ? » → « Oui, c'est mon combat. »", "Écoute la fin des réponses, puis la fin de ta question."], ["D", "Chaque réponse a autant de mots que la question.", "Question de 5 mots → réponse de 5 mots.", "Compte les mots… des deux côtés."], ["D", "On dit la vérité si la question est courte (5 mots ou moins), on ment si elle est longue.", "« Tu as faim ? » → vrai. « Est-ce que tu as déjà mangé des escargots ? » → mensonge.", "La vérité dépend de la façon dont tu poses la question."], ["D", "On ment si la réponse vraie est « oui », on dit la vérité si c'est « non ».", "« Tu as un frère ? » (oui) → « Non. » « Tu as un chat ? » (non) → « Non. »", "Pose des questions dont tu connais la réponse, et note quand ils mentent."], ["D", "On imite le dernier geste de la personne qui a répondu juste avant.", "Si Tom s'est gratté la tête, la suivante se gratte la tête en répondant.", "Regarde les gestes, d'une réponse à l'autre."], ["D", "Chaque réponse commence par le dernier mot de la réponse précédente.", "« … j'adore les pâtes. » → « Pâtes ? Non, moi c'est le riz. »", "Écoute comment les réponses s'enchaînent."], ["D", "On répond comme si on était la dernière personne qui a répondu.", "Chacun se met à la place de celui qui vient de parler.", "Les réponses sont vraies… mais pas pour la bonne personne."], ["D", "On parle de plus en plus fort à chaque réponse.", "Chuchoté au début, crié à la fin.", "Écoute le volume, d'une réponse à l'autre."], ["D", "On parle de plus en plus vite à chaque réponse.", "Lent au début, très rapide à la fin.", "Écoute le rythme, d'une réponse à l'autre."], ["D", "On répond avec un mot de plus que la réponse précédente.", "1 mot, puis 2 mots, puis 3…", "Compte les mots, d'une réponse à l'autre."], ["D", "Ceux qui sont assis disent la vérité, ceux qui sont debout mentent. On peut changer de position.", "Debout = mensonge.", "Regarde la position de chacun."], ["D", "On répond comme la personne dont le prénom vient juste après le nôtre dans l'alphabet.", "Léa répond comme Max, Max comme Tom…", "Les réponses sont vraies… mais pas pour la bonne personne."], ["D", "On dit la vérité seulement si l'enquêteur a les bras croisés.", "Bras croisés = vérité, sinon mensonge.", "La vérité dépend de toi, pas d'eux."], ["D", "On répond en commençant par le dernier mot de la question.", "« Tu aimes le foot ? » → « Foot ? Oui, j'adore. »", "Écoute le premier mot, puis relis ta question."], ["D", "On ment une réponse sur deux : vrai, faux, vrai, faux…", "La 1re réponse est vraie, la 2e fausse, la 3e vraie…", "Suis l'ordre des réponses de près."], ["D", "On répond comme si la question parlait de l'enquêteur, pas de nous.", "« Tu as un chien ? » → on répond pour l'enquêteur.", "Pose des questions dont toi seul connais la réponse."]];
+const LEVELS = { F: "Facile", M: "Moyen", D: "Difficile" };
+const KEY = "tablee_regle";
+const MARK = `<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="6" width="24" height="32" rx="4" fill="#fff" opacity=".75"/><path d="M13 14h14M13 20h14M13 26h8" stroke="#9f1239" stroke-width="3" stroke-linecap="round"/><circle cx="31" cy="30" r="8" fill="none" stroke="#fff" stroke-width="4"/><path d="M37 36l6 6" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg>`;
+
+let S = { screen: "home", players: [], level: "T", minutes: 5, people: {}, scores: {}, recent: [], turn: 0, game: null };
+function load() { let d = null; try { d = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {} if (d) for (const k of Object.keys(S)) if (d[k] !== undefined) S[k] = d[k]; if (!S.game && S.screen !== "home") S.screen = "home"; }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function person(nm) { return S.people[nm] || (S.people[nm] = { games: 0, det: 0, found: 0, best: 0, last: 0 }); }
+const clock = s => `${Math.floor(s / 60)}:${String(Math.max(0, s) % 60).padStart(2, "0")}`;
+const pool = () => RULES.map((_, i) => i).filter(i => S.level === "T" || RULES[i][0] === S.level);
+
+function pickRule() {
+  const all = pool(); let p = all.filter(i => !S.recent.includes(i)); if (!p.length) { S.recent = S.recent.filter(i => !all.includes(i)); p = all; }
+  const r = p[rnd(p.length)]; S.recent = [...S.recent, r].slice(-80); return r;
+}
+function newRound() {
+  const det = S.players[S.turn % S.players.length];
+  S.game = { det, rule: pickRule(), custom: "", hint: false, left: S.minutes * 60, total: S.minutes * 60, end: 0, running: false, ended: false, found: false, pts: {} };
+  go("out");
+}
+const ruleText = g => g.custom || RULES[g.rule][1];
+// ---------- chrono
+let timer = null;
+function left() { const g = S.game; return g.running ? Math.ceil((g.end - Date.now()) / 1000) : g.left; }
+function startClock() { const g = S.game; g.end = Date.now() + g.left * 1000; g.running = true; save(); loop(); }
+function pauseClock() { const g = S.game; g.left = Math.max(0, left()); g.running = false; save(); }
+function loop() {
+  clearInterval(timer);
+  timer = setInterval(() => {
+    const g = S.game; if (!g || !g.running || S.screen !== "play") { clearInterval(timer); return; }
+    const l = left(); const el = document.getElementById("clk");
+    if (el) { el.textContent = clock(l); el.parentElement.classList.toggle("low", l <= 30); }
+    if (l === 30 || l === 10) buzz(60);
+    if (l <= 0) { clearInterval(timer); finish(false); }
+  }, 250);
+}
+function finish(found) {
+  const g = S.game; if (g.ended) return;
+  if (g.running) pauseClock();
+  g.ended = true; g.found = found; g.time = g.total - g.left;
+  const now = Date.now(), pts = {};
+  for (const n of S.players) {
+    const p = person(n); p.games++; p.last = now;
+    if (n === g.det) { p.det++; if (found) { p.found++; if (!p.best || g.time < p.best) p.best = g.time; } pts[n] = found ? (g.hint ? 2 : 3) + (g.time <= g.total / 2 ? 1 : 0) : 0; }
+    else pts[n] = found ? 0 : 1;
+    S.scores[n] = (S.scores[n] || 0) + pts[n];
+  }
+  g.pts = pts; buzz(found ? [40, 60, 40] : [200]);
+  go("end"); if (found) confetti();
+}
+
+const app = document.getElementById("app"), sheet = document.getElementById("sheet");
+function go(s) { S.screen = s; save(); render(); scrollTo(0, 0); if (s === "play" && S.game && S.game.running) loop(); }
+function render() {
+  const g = S.game; let h = "";
+  switch (S.screen) {
+    case "home": {
+      const ok = S.players.length >= 3, n = pool().length;
+      h = `<a class="backmenu" href="../">‹ Menu</a><div class="brand"><span class="mark">${MARK}</span><div class="logo">La <i>Règle</i></div></div>
+        <div class="sub" style="margin-top:0">Un joueur sort. Les autres choisissent une règle secrète pour répondre. Il revient et doit la trouver avant la fin du chrono.</div>
+        <div class="teambox"><div class="teamhead"><span>Les joueurs</span><small>${S.players.length} / 16</small></div>
+          <div class="chips2">${S.players.map((n, k) => `<button class="pchip" data-a="rm" data-v="${k}">${av(n)}<span>${esc(n)}</span><i>×</i></button>`).join("")}${S.players.length < 16 ? `<button class="pchip add" data-a="add">+ Ajouter</button>` : ""}</div></div>
+        <div class="seg">${[["T", "Tout"], ["F", "Facile"], ["M", "Moyen"], ["D", "Difficile"]].map(([k, l]) => `<button class="${S.level === k ? "on" : ""}" data-a="level" data-v="${k}">${l}</button>`).join("")}</div>
+        <div class="box"><div class="line"><div class="name">Chrono<small>${n} règles dans ce niveau</small></div>${step("minutes", S.minutes + " min")}</div></div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="play" ${ok ? "" : "disabled"}>${ok ? `Jouer · ${esc(S.players[S.turn % Math.max(1, S.players.length)])} commence` : "Il faut au moins 3 joueurs"}</button>
+        <div class="links"><button class="link" data-a="board">Scores</button><button class="link" data-a="rules">Règles</button><a class="link" href="../" style="text-decoration:none">‹ Menu</a></div>`;
+      break;
+    }
+    case "out": {
+      h = `<div class="label" style="text-align:center">Manche de ${esc(g.det)}</div><div class="spacer"></div>
+        <div class="reveal main">${av(g.det, "xl")}<div class="label">C'est l'enquêteur</div><div class="place-name">${esc(g.det)}, sors de la pièce !</div>
+          <div class="hint">Ne regarde pas l'écran. On t'appelle quand la règle est choisie.</div></div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="toRule">${esc(g.det)} est sorti, voir la règle</button>`;
+      break;
+    }
+    case "rule": {
+      const r = RULES[g.rule];
+      h = `<div class="label" style="text-align:center">La règle secrète${g.custom ? " · la vôtre" : " · " + LEVELS[r[0]]}</div>
+        <div class="reveal main"><div class="qtext">${esc(ruleText(g))}</div></div>
+        ${g.custom ? "" : `<div class="rolebox"><small>Exemple</small>${esc(r[2])}</div>`}
+        <div class="hint" style="text-align:center">${esc(g.det)} va poser des questions à qui il veut. Répondez tous en suivant la règle. Si quelqu'un se trompe, criez « Règle ! ».</div>
+        <div class="two"><button class="btn soft" data-a="reroll">Une autre</button><button class="btn soft" data-a="custom">On invente</button></div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="toCall">C'est compris</button>`;
+      break;
+    }
+    case "call": {
+      h = `<div class="spacer"></div><div class="reveal main">${av(g.det, "xl")}<div class="place-name">Rappelez ${esc(g.det)} !</div>
+          <div class="hint">L'écran ne montre plus la règle. Lancez le chrono quand ${esc(g.det)} est prêt.</div></div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="start">Lancer le chrono · ${S.minutes} min</button>
+        <button class="btn soft" data-a="backRule">Revoir la règle</button>`;
+      break;
+    }
+    case "play": {
+      const l = left();
+      h = `<div class="label" style="text-align:center">${esc(g.det)} enquête</div>
+        <div class="clock ${l <= 30 ? "low" : ""}"><b id="clk">${clock(l)}</b><div class="row"><button data-a="pause">${g.running ? "Pause" : "Reprendre"}</button><button data-a="more">+1 min</button></div></div>
+        <div class="hint" style="text-align:center">Pose des questions à qui tu veux et propose des règles à voix haute. Le groupe dit si c'est la bonne.</div>
+        ${g.hint ? `<div class="rolebox"><small>Indice</small>${esc(g.custom ? "Pas d'indice pour une règle inventée." : RULES[g.rule][3])}</div>` : `<button class="btn soft" data-a="hint">Montrer un indice (–1 point)</button>`}
+        <div class="spacer"></div>
+        <button class="btn" data-a="found">${esc(g.det)} a trouvé !</button>
+        <button class="btn soft" data-a="giveup">Il donne sa langue au chat</button>`;
+      break;
+    }
+    case "end": {
+      const next = S.players[(S.turn + 1) % S.players.length];
+      h = `<div class="endhead ${g.found ? "main" : "imp"}"><div class="label">${g.found ? `Trouvé en ${clock(g.time)}` : "Le chrono a gagné"}</div><h2>${g.found ? `Bravo ${esc(g.det)} !` : "Le groupe gagne !"}</h2></div>
+        <div class="rolebox"><small>La règle</small>${esc(ruleText(g))}</div>
+        <div class="box">${S.players.map(n => `<div class="res">${av(n)}<span class="t"><span>${esc(n)}</span><small style="color:var(--muted)">${n === g.det ? "Enquêteur" : "Groupe"}</small></span><span class="g">${g.pts[n] ? "+" + g.pts[n] : ""}</span><span class="tot">${S.scores[n] || 0}</span></div>`).join("")}</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="next">Manche suivante · ${esc(next)}</button>
+        <div class="links"><button class="link" data-a="home">Accueil</button><a class="link" href="../" style="text-decoration:none">‹ Menu</a></div>`;
+      break;
+    }
+  }
+  app.innerHTML = h;
+  const cf = document.getElementById("cf");
+}
+let addQ = "";
+function openSheet(kind) {
+  if (!kind) { sheet.innerHTML = ""; return; }
+  if (kind === "rules") { sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true"><h2>Les règles</h2><div class="rules">
+    <p><b>Un joueur sort de la pièce</b> : c'est l'enquêteur. Le téléphone montre aux autres une <b>règle secrète</b> pour répondre aux questions (vous pouvez en tirer une autre ou inventer la vôtre).</p>
+    <p>L'enquêteur revient, on lance le chrono. Il pose des questions à qui il veut, tout le monde répond <b>en suivant la règle</b>. Si quelqu'un se trompe, les autres crient <b>« Règle ! »</b>.</p>
+    <p>L'enquêteur propose des règles à voix haute. S'il trouve avant la fin : <b>+3</b> (+1 s'il a trouvé en moins de la moitié du temps, –1 s'il a pris l'indice). Sinon, chaque joueur du groupe gagne <b>+1</b>. Puis c'est au suivant d'enquêter.</p></div><button class="btn" data-a="close">Compris</button></div></div>`; return; }
+  if (kind === "custom") { sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true"><h2>Votre règle</h2>
+    <form id="cf" style="display:flex;flex-direction:column;gap:12px" autocomplete="off"><input id="ci" type="text" maxlength="120" placeholder="Ex : on répond en se tenant l'oreille" enterkeyhint="done">
+    <button class="btn" type="submit">Valider</button></form><button class="btn soft" data-a="close">Annuler</button></div></div>`;
+    const ci = document.getElementById("ci"); setTimeout(() => ci.focus(), 60);
+    document.getElementById("cf").onsubmit = e => { e.preventDefault(); const v = ci.value.trim(); if (!v) return; S.game.custom = v.slice(0, 120); openSheet(null); save(); render(); };
+    return; }
+  if (kind === "board") { const list = Object.entries(S.scores).sort((a, b) => b[1] - a[1]);
+    sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true"><h2>Scores</h2><div class="box">${list.map(([n, s]) => { const p = S.people[n] || {}; return `<div class="res">${av(n)}<span class="t"><span>${esc(n)}</span><small style="color:var(--muted)">${p.found || 0} / ${p.det || 0} règles trouvées${p.best ? ` · record ${clock(p.best)}` : ""}</small></span><span class="tot">${s}</span></div>`; }).join("") || `<div class="empty">Pas encore de partie.</div>`}</div>
+    ${list.length ? `<button class="btn soft" data-a="resetScores">Remettre à zéro</button>` : ""}<button class="btn" data-a="close">OK</button></div></div>`; return; }
+  sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true"><h2>Ajouter des joueurs</h2>
+    <input id="aq" type="text" maxlength="16" placeholder="Cherche ou écris un prénom" value="${esc(addQ)}" autocomplete="off" autocapitalize="words" enterkeyhint="done">
+    <div class="list" id="al">${nameList(addQ, S.players, S.people, "addName")}</div><button class="btn" data-a="close">OK</button></div></div>`;
+  const aq = document.getElementById("aq");
+  aq.oninput = () => { addQ = aq.value; document.getElementById("al").innerHTML = nameList(addQ, S.players, S.people, "addName"); };
+  aq.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); if (aq.value.trim()) addName(exactName(aq.value.trim(), S.people)); } };
+}
+function addName(n) { if (S.players.length >= 16 || S.players.includes(n)) return; S.players.push(n); person(n).last = Date.now(); addQ = ""; save(); render(); openSheet("add"); const aq = document.getElementById("aq"); if (aq) aq.focus(); }
+const A = {
+  add: () => { addQ = ""; openSheet("add"); }, addName: v => addName(v),
+  rm: v => { S.players.splice(+v, 1); save(); render(); },
+  level: v => { S.level = v; save(); render(); },
+  minutes: d => { S.minutes = Math.max(1, Math.min(15, S.minutes + +d)); save(); render(); },
+  play: () => { if (S.players.length < 3) return; wake(); newRound(); },
+  toRule: () => { buzz(20); go("rule"); },
+  reroll: () => { S.game.custom = ""; S.game.rule = pickRule(); buzz(10); save(); render(); },
+  custom: () => openSheet("custom"),
+  toCall: () => go("call"), backRule: () => go("rule"),
+  start: () => { wake(); startClock(); go("play"); buzz(40); },
+  pause: () => { const g = S.game; if (g.running) pauseClock(); else startClock(); render(); },
+  more: () => { const g = S.game; if (g.running) g.end += 60000; else g.left += 60; g.total += 60; save(); render(); },
+  hint: () => { S.game.hint = true; save(); render(); },
+  found: () => finish(true),
+  giveup: () => finish(false),
+  next: () => { S.turn++; newRound(); },
+  home: () => go("home"),
+  board: () => openSheet("board"), resetScores: () => { S.scores = {}; save(); openSheet("board"); },
+  rules: () => openSheet("rules"), close: () => openSheet(null),
+  bg: (v, e) => { if (e.target.classList.contains("sheet")) openSheet(null); },
+};
+document.addEventListener("click", e => { const el = e.target.closest("[data-a]"); if (!el || el.disabled) return; const f = A[el.dataset.a]; if (f) f(el.dataset.v, e); });
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.screen === "play") render(); });
+load(); render(); if (S.screen === "play" && S.game && S.game.running) loop();
+
+
+</script>
+<script>
+// une seule appli : un seul service worker à la racine
+if ("serviceWorker" in navigator) addEventListener("load", async () => {
+  try { for (const r of await navigator.serviceWorker.getRegistrations()) if (r.scope !== new URL("../", location).href) r.unregister(); } catch (e) {}
+  navigator.serviceWorker.register("../sw.js", { scope: "../" }).catch(() => {});
+});
+</script>
+<!-- xq: bouton quitter commun -->
+<button id="xq" type="button" aria-label="Quitter la partie" hidden>✕</button>
+<style>
+#xq { position: fixed; z-index: 60; top: calc(env(safe-area-inset-top, 0px) + 10px); left: 12px; height: 38px; min-width: 38px; padding: 0 12px; border: 0; border-radius: 99px;
+  background: color-mix(in srgb, var(--surface, #fff) 88%, transparent); color: var(--ink, #111); font: 600 1rem Fredoka, system-ui, sans-serif;
+  box-shadow: 0 2px 10px rgba(0,0,0,.14); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); cursor: pointer; }
+#xq.sure { background: #ef4444; color: #fff; font-size: .9rem; }
+#xq[hidden] { display: none; }
+</style>
+<script>
+(() => {
+  const b = document.getElementById("xq"), app = document.getElementById("app");
+  const SKIP = ["home", "board", "stats", "rules", "playing", "count"];
+  let t;
+  const reset = () => { b.classList.remove("sure"); b.textContent = "✕"; };
+  function upd() {
+    const sc = typeof S !== "undefined" ? S.screen : "home";
+    const has = app.querySelector('[data-a="quit"], [data-a="home"], a[href="../"]');
+    b.hidden = SKIP.includes(sc) || !!has;
+    if (b.hidden) reset();
+  }
+  b.addEventListener("click", () => {
+    if (!b.classList.contains("sure")) { b.classList.add("sure"); b.textContent = "Quitter la partie ?"; clearTimeout(t); t = setTimeout(reset, 3000); return; }
+    try { S.game = null; S.screen = "home"; save(); } catch (e) {}
+    location.reload();
+  });
+  new MutationObserver(upd).observe(app, { childList: true, subtree: true });
+  upd();
+})();
+</script>
+</body>
+</html>
