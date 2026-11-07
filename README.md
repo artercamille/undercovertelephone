@@ -16,7 +16,7 @@ Des jeux de soirée dans une seule appli, avec **un seul téléphone** pour tout
 | **La Règle** | Une règle secrète, un enquêteur, un chrono | 3 et plus | 98 règles |
 | **Mot de Passe** | Un mot par indice pour faire trouver le mot | 4 et plus | 2403 mots |
 | **Le Dernier Mot** | Trouvez le mot secret, puis le complice | 4 à 10 | 2885 mots |
-| **Trois Manches** | Décris, un seul mot, puis mime, en équipes | 4 et plus | 2094 cartes |
+| **Time's Up** | Fais deviner des stars : décris, puis un seul mot | 4 et plus | 497 personnalités |
 | **Sur le Front** | Le téléphone sur le front, les autres font deviner | 2 et plus | 11 catégories |
 | **Les Loups** | Le Loup-Garou, avec le téléphone comme narrateur | 5 à 18 | 22 rôles |
 | **L'Apéro** | Défis, vérités, votes et « je n'ai jamais » | 2 et plus | 1463 cartes |
