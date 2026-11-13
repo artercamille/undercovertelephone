@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10b981">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tablée">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" type="image/png" href="../icons/favicon-64.png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<title>Burger Quiz</title>
+<style>
+
+/* Même mise en page que L'Intrus : un écran = un titre, une consigne, un bouton ; ici en vert. */
+:root {
+  --bg: #ffffff;
+  --surface: #f3f3f5;
+  --surface-2: #e9e9ed;
+  --ink: #111114;
+  --muted: #6e6e76;
+  --accent: #ff5a1f;
+  --accent-ink: #ffffff;
+  --civil: #16a34a;
+  --under: #e11d48;
+  --white: #71717a;
+  --font: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-weight: 500; font-size: 17px; line-height: 1.35;
+  -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+input { -webkit-user-select: text; user-select: text; }
+.app { max-width: 440px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; gap: 20px;
+  padding-block: 26px 28px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.logo { text-align: center; font-size: 2.6rem; font-weight: 700; line-height: 1; }
+.logo i { font-style: normal; color: var(--accent); }
+h2 { margin: 0; font-size: 1.8rem; font-weight: 700; line-height: 1.12; text-align: center; text-wrap: balance; }
+.sub { text-align: center; color: var(--muted); margin-top: -10px; text-wrap: balance; }
+.label { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.spacer { flex: 1; }
+.pop { animation: pop .3s ease-out backwards; }
+@keyframes pop { from { transform: translateY(8px); opacity: 0 } }
+
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
+.btn { width: 100%; min-height: 60px; border-radius: 16px; background: var(--accent); color: var(--accent-ink); font-size: 1.2rem; font-weight: 600; transition: transform .08s, opacity .15s; }
+.btn:active { transform: scale(.98); }
+.btn.alt, .btn.soft { background: var(--surface); color: var(--ink); }
+.btn:disabled { opacity: .35; }
+.link { color: var(--muted); font-weight: 500; font-size: .95rem; padding: 10px; }
+.links { display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 12px; }
+
+.box { background: var(--surface); border-radius: 18px; padding: 2px 16px; }
+.line { display: flex; align-items: center; gap: 12px; min-height: 62px; }
+.line + .line { border-top: 1px solid var(--surface-2); }
+.line .name { flex: 1; font-weight: 600; }
+.line .name small { display: block; color: var(--muted); font-size: .82rem; font-weight: 500; }
+.step { display: flex; align-items: center; gap: 4px; }
+.step button { width: 40px; height: 40px; border-radius: 50%; background: var(--bg); font-size: 1.3rem; font-weight: 600; }
+.step button:active { transform: scale(.9); }
+.step span { min-width: 54px; text-align: center; font-weight: 600; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.big { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.big .step { gap: 20px; }
+.big .step button { width: 56px; height: 56px; font-size: 1.7rem; background: var(--surface); }
+.big .step span.count { font-size: 4.2rem; font-weight: 700; min-width: 90px; line-height: 1; }
+.chips { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-top: -6px; }
+.chip { font-size: .88rem; font-weight: 600; padding: 4px 12px; border-radius: 99px; background: var(--surface); }
+.chip.civil { color: var(--civil); } .chip.undercover { color: var(--under); } .chip.white { color: var(--white); }
+
+/* cartes */
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.card { aspect-ratio: 3 / 4; border-radius: 16px; background: var(--accent); color: var(--accent-ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px;
+  animation: pop .3s ease-out backwards; transition: transform .1s; }
+.card .q { font-size: 2.4rem; font-weight: 700; line-height: 1; }
+.card .num { font-size: .8rem; font-weight: 600; opacity: .8; }
+.card:active { transform: scale(.95); }
+.card.taken { background: var(--surface); color: var(--muted); pointer-events: none; font-weight: 600; font-size: .95rem; text-align: center; overflow-wrap: anywhere; gap: 8px; }
+
+/* qui es-tu */
+input[type=text] { width: 100%; min-height: 58px; border-radius: 16px; border: 2px solid var(--surface-2); background: var(--bg); color: var(--ink);
+  font: inherit; font-size: 1.2rem; font-weight: 600; padding: 0 18px; }
+input[type=text]:focus { border-color: var(--accent); outline: none; }
+input::placeholder { color: var(--muted); font-weight: 500; }
+.list { display: flex; flex-direction: column; background: var(--surface); border-radius: 18px; overflow: hidden; }
+.list:empty { display: none; }
+.who { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 8px 14px; text-align: left; }
+.who + .who { border-top: 1px solid var(--surface-2); }
+.who:active { background: var(--surface-2); }
+.who .t { flex: 1; min-width: 0; font-weight: 600; font-size: 1.1rem; overflow-wrap: anywhere; }
+.who .t small { display: block; color: var(--muted); font-weight: 500; font-size: .82rem; }
+.who .go { color: var(--muted); font-size: 1.3rem; }
+.who.new { background: var(--accent); color: var(--accent-ink); }
+.who.new .t small, .who.new .go { color: var(--accent-ink); opacity: .85; }
+.who.sel { background: var(--ink); color: var(--bg); }
+.who.sel .t small, .who.sel .n { color: var(--bg); opacity: .7; }
+.who .n { width: 20px; text-align: center; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.av { --c: var(--accent); width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  background: var(--c); color: #fff; font-weight: 700; font-size: 1.05rem; }
+.av.dead { filter: grayscale(1); opacity: .5; }
+.av.xl { width: 84px; height: 84px; font-size: 2.2rem; }
+.empty { text-align: center; color: var(--muted); padding: 14px; font-size: .95rem; text-wrap: balance; }
+
+/* révélations */
+.reveal { background: var(--surface); border-radius: 24px; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  animation: pop .3s ease-out backwards; }
+.word { font-size: 2.9rem; font-weight: 700; line-height: 1.05; text-wrap: balance; max-width: 100%; }
+.role { font-size: 2.9rem; font-weight: 700; line-height: 1; }
+.role.civil { color: var(--civil); } .role.undercover { color: var(--under); } .role.white { color: var(--white); }
+.hint { color: var(--muted); font-size: .98rem; text-wrap: balance; }
+.reveal input[type=text] { text-align: center; }
+
+/* fin + stats */
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pair > div { background: var(--surface); border-radius: 18px; padding: 14px 10px; text-align: center; }
+.pair b { display: block; font-size: 1.15rem; font-weight: 700; overflow-wrap: anywhere; margin-top: 2px; }
+.res { display: flex; align-items: center; gap: 10px; min-height: 60px; font-variant-numeric: tabular-nums; }
+.res + .res { border-top: 1px solid var(--surface-2); }
+.res .t { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.res .t small { display: block; font-size: .8rem; font-weight: 600; }
+.res.dead .t > span { color: var(--muted); }
+.res .g { font-weight: 700; color: var(--civil); min-width: 34px; text-align: right; }
+.res .win { font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--accent); color: var(--accent-ink); }
+.r.civil { color: var(--civil); } .r.undercover { color: var(--under); } .r.white { color: var(--white); }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tile { background: var(--surface); border-radius: 16px; padding: 12px 6px; text-align: center; }
+.tile b { display: block; font-size: 1.7rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tile span { font-size: .78rem; color: var(--muted); font-weight: 500; }
+.bars { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; }
+.bar { display: grid; grid-template-columns: 96px 1fr 44px; align-items: center; gap: 10px; font-size: .95rem; font-weight: 600; }
+.bar .tr { height: 10px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.bar .tr i { display: block; height: 100%; border-radius: 99px; }
+.bar em { font-style: normal; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; font-size: .85rem; }
+.rank { width: 22px; text-align: center; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rank.top { color: var(--accent); }
+.statcard { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+
+.sheet { position: fixed; inset: 0; z-index: 10; background: rgba(0,0,0,.4); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s; }
+@keyframes fade { from { opacity: 0 } }
+.sheet > div { width: min(100%, 440px); background: var(--bg); border-radius: 24px 24px 0 0; display: flex; flex-direction: column; gap: 14px; max-height: 90%; overflow-y: auto;
+  animation: up .25s ease-out;
+  padding: 24px max(20px, env(safe-area-inset-right, 0px)) max(22px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)); }
+@keyframes up { from { transform: translateY(40px) } }
+.rules p { margin: 0 0 10px; }
+.rules b { font-weight: 700; }
+/* ---- couche "juste milieu" : relief, dégradés, motif sur les cartes */
+:root { --accent-2: #ff2e63; --glow: rgba(255, 90, 31, .35); --shadow: 0 1px 2px rgba(20,20,30,.06), 0 8px 24px rgba(20,20,30,.08); --panel: #ffffff; --bg-2: #fff1ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; } }
+:root[data-theme="dark"] { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; }
+body { background: radial-gradient(120% 60% at 50% -10%, var(--bg-2), var(--bg) 60%) fixed, var(--bg); }
+.brand { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.mark { width: 74px; height: 74px; border-radius: 22px; display: grid; place-items: center; transform: rotate(-6deg);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 10px 26px var(--glow); }
+.mark svg { width: 46px; height: 46px; }
+.logo { font-size: 2.7rem; }
+.logo i { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.btn { background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 8px 20px var(--glow); }
+.btn.alt, .btn.soft { background: var(--panel); box-shadow: var(--shadow); }
+.btn:disabled { box-shadow: none; }
+.box, .list, .pair > div, .tile { background: var(--panel); box-shadow: var(--shadow); }
+.who + .who, .line + .line, .res + .res { border-top-color: var(--surface); }
+.step button { background: var(--surface); }
+.big .step button { background: var(--panel); box-shadow: var(--shadow); }
+.big .step span.count { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.chip { background: var(--panel); box-shadow: var(--shadow); }
+.card { position: relative; overflow: hidden; border-radius: 18px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.09) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--accent), var(--accent-2));
+  box-shadow: 0 8px 18px var(--glow); }
+.card::before { content: ""; position: absolute; inset: 6px; border-radius: 13px; border: 2px solid rgba(255,255,255,.35); pointer-events: none; }
+.card .q { width: 54%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.22); display: grid; place-items: center; font-size: 2rem; }
+.card:nth-child(3n+1) { transform: rotate(-2deg); } .card:nth-child(3n) { transform: rotate(2deg); }
+.card:active { transform: scale(.94); }
+.card.taken { background: var(--panel); box-shadow: var(--shadow); transform: none; }
+.card.taken::before { border-color: var(--surface); }
+.av { background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 60%, #ff2e63)); box-shadow: 0 3px 8px color-mix(in srgb, var(--c) 35%, transparent); }
+.who.new { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.who.sel { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+.who.sel .t small, .who.sel .n { color: #fff; }
+.reveal { background: var(--panel); box-shadow: var(--shadow); position: relative; overflow: hidden; padding-top: 0; animation: flipIn .5s cubic-bezier(.2,1.2,.4,1) backwards; }
+@keyframes flipIn { from { transform: perspective(900px) rotateY(70deg); opacity: 0 } }
+.reveal::before { content: ""; display: block; align-self: stretch; height: 92px; margin: 0 -20px 4px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2))); }
+.reveal .av.xl { margin-top: -66px; box-shadow: 0 0 0 6px var(--panel), 0 8px 18px rgba(0,0,0,.18); }
+.reveal.civil { --band1: #22c55e; --band2: #0d9488; }
+.reveal.undercover { --band1: #f43f5e; --band2: #be123c; }
+.reveal.white { --band1: #a1a1aa; --band2: #52525b; }
+.reveal.wordcard .word { background: linear-gradient(135deg, var(--ink), color-mix(in srgb, var(--ink) 60%, var(--accent))); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 4px; }
+.res .win { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.tile b { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.endhead { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px; border-radius: 24px; color: #fff; text-align: center;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2)));
+  box-shadow: var(--shadow); animation: pop .4s ease-out backwards; }
+.endhead.civils { --band1: #22c55e; --band2: #0d9488; } .endhead.imposteurs { --band1: #f43f5e; --band2: #be123c; } .endhead.white { --band1: #71717a; --band2: #3f3f46; }
+.endhead h2 { color: #fff; }
+.endhead .label { color: rgba(255,255,255,.85); }
+.sheet > div { background: var(--bg); }
+canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ---- Burger Quiz : ketchup → moutarde */
+:root { --accent: #ef4444; --accent-2: #f59e0b; --glow: rgba(239, 68, 68, .3); --bg-2: #fff4ec; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent: #f87171; --accent-2: #fbbf24; --glow: rgba(248, 113, 113, .25); --bg-2: #20140f; } }
+:root[data-theme="dark"] { --accent: #f87171; --accent-2: #fbbf24; --glow: rgba(248, 113, 113, .25); --bg-2: #20140f; }
+.reveal.place { --band1: var(--accent); --band2: var(--accent-2); }
+
+.reveal.place { --band1: var(--accent); --band2: var(--accent-2); }
+.endhead.agents { --band1: var(--accent); --band2: var(--accent-2); }
+.place-name { font-size: 2.4rem; font-weight: 700; line-height: 1.05; text-wrap: balance; max-width: 100%; }
+.roundnum { margin-top: -62px; width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; font-size: 3rem; font-weight: 700; color: #fff;
+  background: linear-gradient(135deg, var(--band1, var(--accent)), var(--band2, var(--accent-2))); box-shadow: 0 0 0 6px var(--panel), 0 8px 18px rgba(0,0,0,.18); }
+.teambox { background: var(--panel); box-shadow: var(--shadow); border-radius: 20px; overflow: hidden; }
+.teamhead { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 16px; color: #fff; font-weight: 700; font-size: 1.1rem;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(135deg, var(--band1), var(--band2)); }
+.teamhead small { font-weight: 500; opacity: .9; font-size: .85rem; }
+.chips2 { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; }
+.pchip { display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; border-radius: 99px; background: var(--surface); font-weight: 600; font-size: .98rem; }
+.pchip .av { width: 30px; height: 30px; font-size: .85rem; }
+.pchip i { font-style: normal; color: var(--muted); font-size: 1.2rem; margin-left: 2px; }
+.pchip.add { padding: 0 16px; min-height: 38px; color: var(--accent); background: transparent; box-shadow: inset 0 0 0 2px var(--surface-2); }
+.tdot { width: 22px; height: 22px; border-radius: 50%; flex: none; background: linear-gradient(135deg, var(--band1), var(--band2)); }
+.res .tot { font-weight: 700; font-size: 1.25rem; min-width: 32px; text-align: right; font-variant-numeric: tabular-nums; }
+.turnhead { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.tbig { font-size: 3rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.tbig.low { color: var(--under); animation: pulse .5s infinite alternate; }
+@keyframes pulse { to { transform: scale(1.12) } }
+.tbar { height: 10px; border-radius: 99px; background: var(--surface); overflow: hidden; margin-top: -8px; }
+.tbar i { display: block; height: 100%; width: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--band1), var(--band2)); transition: width .1s linear; }
+.bigcard { min-height: 280px; border-radius: 28px; padding: 28px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; color: #fff;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.09) 0 12px, transparent 12px 24px), linear-gradient(150deg, var(--band1), var(--band2));
+  box-shadow: 0 14px 30px rgba(0,0,0,.18); }
+.bigcard .label { color: rgba(255,255,255,.85); }
+.btn.found { min-height: 76px; font-size: 1.5rem; background: linear-gradient(135deg, #22c55e, #059669); box-shadow: 0 10px 24px rgba(34,197,94,.35); }
+
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; background: var(--surface); border-radius: 14px; padding: 4px; }
+.seg button { min-height: 42px; border-radius: 11px; font-weight: 600; color: var(--muted); padding: 0 6px; font-size: .86rem; }
+.seg button.on { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+
+.sbar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sb { border-radius: 16px; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; color: #fff; font-weight: 600;
+  background: linear-gradient(135deg, var(--band1), var(--band2)); box-shadow: var(--shadow); }
+.sbar .sb:first-child { padding-left: 52px; }
+.sb b { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.qcard { border-radius: 24px; padding: 20px 18px; color: #fff; text-align: center; display: flex; flex-direction: column; gap: 8px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.09) 0 12px, transparent 12px 24px), linear-gradient(150deg, var(--band1), var(--band2)); box-shadow: 0 12px 26px rgba(0,0,0,.16); }
+.qcard .label { color: rgba(255,255,255,.85); }
+.qq { font-size: 1.45rem; font-weight: 700; line-height: 1.2; text-wrap: balance; }
+.qq.small { font-size: 1.05rem; font-weight: 600; opacity: .92; }
+.qq.big { font-size: 2.3rem; }
+.opts { display: flex; flex-direction: column; gap: 10px; }
+.opt { display: flex; align-items: center; gap: 12px; min-height: 58px; border-radius: 16px; padding: 8px 14px; background: var(--panel); box-shadow: var(--shadow); text-align: left; font-weight: 600; font-size: 1.08rem; }
+.opt b { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--surface); }
+.opt.good { background: linear-gradient(135deg, #22c55e, #059669); color: #fff; }
+.opt.good b, .opt.bad b { background: rgba(255,255,255,.25); }
+.opt.bad { background: linear-gradient(135deg, #ef4444, #be123c); color: #fff; }
+.opt.dim { opacity: .45; }
+.verdict { text-align: center; font-weight: 700; font-size: 1.15rem; }
+.verdict.ok { color: #16a34a; } .verdict.ko { color: var(--under, #ef4444); }
+.anscard { background: var(--panel); box-shadow: var(--shadow); border-radius: 18px; padding: 12px 16px; display: flex; flex-direction: column; gap: 2px; border: 2px dashed var(--surface-2); }
+.anscard small { color: var(--muted); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
+.anscard b { font-size: 1.25rem; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn.bad { background: linear-gradient(135deg, #ef4444, #be123c); color: #fff; box-shadow: 0 8px 20px rgba(239,68,68,.3); }
+.two .btn.found { min-height: 64px; font-size: 1.25rem; }
+</style>
+<style>
+@font-face { font-family: "Fredoka"; src: url("../Fredoka.ttf") format("truetype"); font-weight: 300 700; font-display: swap; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+html { overscroll-behavior: none; }
+body.full { overflow: hidden; }
+.backmenu { align-self: flex-start; color: var(--muted); font-weight: 600; text-decoration: none; padding: 6px 2px; margin-bottom: -12px; }
+</style>
+</head>
+<body>
+
+<canvas id="fx"></canvas>
+<div class="app" id="app"></div>
+<div id="sheet"></div>
+
+<script>
+// Burger Quiz : Ketchup contre Mayo, 4 manches
+const NUG = [["Combien de pattes a une araignée ?", "8", "6", "10", "12"], ["Quelle est la capitale de l'Australie ?", "Canberra", "Sydney", "Melbourne", "Kangourouville"], ["De quelle couleur est la boîte noire d'un avion ?", "Orange", "Noire", "Rouge", "Transparente"], ["Quel animal est le plus rapide sur terre ?", "Le guépard", "Le lion", "Le lévrier", "Usain Bolt"], ["Combien de joueurs dans une équipe de foot sur le terrain ?", "11", "10", "12", "9"], ["Quel est le plus grand océan du monde ?", "Pacifique", "Atlantique", "Indien", "La piscine municipale"], ["Qui a peint la Joconde ?", "Léonard de Vinci", "Picasso", "Michel-Ange", "Van Gogh"], ["Combien de cœurs a une pieuvre ?", "3", "1", "2", "8"], ["Quel est le plus petit pays du monde ?", "Le Vatican", "Monaco", "Le Luxembourg", "Saint-Marin"], ["Dans quel pays se trouve le Machu Picchu ?", "Pérou", "Mexique", "Chili", "Bolivie"], ["Quel est le symbole chimique de l'or ?", "Au", "Or", "Ag", "Go"], ["Combien de temps faut-il à la lumière du Soleil pour arriver sur Terre ?", "Environ 8 minutes", "8 secondes", "8 heures", "Elle arrive instantanément"], ["Quelle planète est surnommée la planète rouge ?", "Mars", "Vénus", "Jupiter", "Saturne"], ["Combien d'os a le corps humain adulte ?", "206", "150", "306", "1000"], ["Quel est l'organe le plus grand du corps humain ?", "La peau", "Le foie", "L'intestin", "Le cerveau"], ["En quelle année l'homme a-t-il marché sur la Lune pour la première fois ?", "1969", "1959", "1979", "1989"], ["Qui a écrit « Les Misérables » ?", "Victor Hugo", "Émile Zola", "Molière", "Balzac"], ["Quelle est la langue la plus parlée au Brésil ?", "Le portugais", "L'espagnol", "Le brésilien", "L'anglais"], ["Combien de faces a un dé classique ?", "6", "4", "8", "12"], ["Quel animal pond des œufs alors que c'est un mammifère ?", "L'ornithorynque", "Le dauphin", "La chauve-souris", "Le kangourou"], ["Quel fruit est utilisé pour faire le guacamole ?", "L'avocat", "Le kiwi", "Le citron vert", "La courgette"], ["Comment s'appelle le bébé du lapin ?", "Le lapereau", "Le lapinou", "Le lapion", "Le lapichon"], ["Comment s'appelle le petit de la chèvre ?", "Le chevreau", "Le chevrier", "Le chèvreton", "Le biquet de lait"], ["Quel est le cri de l'éléphant ?", "Il barrit", "Il brame", "Il hennit", "Il glapit"], ["Quel est le cri du cerf ?", "Il brame", "Il barrit", "Il rugit", "Il hulule"], ["Quelle ville est surnommée la Ville Lumière ?", "Paris", "Lyon", "Las Vegas", "Tokyo"], ["Quel pays a la forme d'une botte ?", "L'Italie", "L'Espagne", "La Grèce", "Le Portugal"], ["Quelle est la monnaie du Japon ?", "Le yen", "Le yuan", "Le won", "Le sushi"], ["Quelle est la monnaie du Royaume-Uni ?", "La livre sterling", "L'euro", "Le dollar", "La couronne"], ["Combien de minutes dure un match de basket NBA ?", "48", "40", "60", "90"], ["Combien de trous sur un parcours de golf classique ?", "18", "9", "12", "24"], ["Quelle est la couleur du maillot du leader du Tour de France ?", "Jaune", "Vert", "À pois", "Blanc"], ["Quel sport pratique Teddy Riner ?", "Le judo", "La boxe", "La lutte", "Le rugby"], ["Dans quel sport utilise-t-on un volant ?", "Le badminton", "Le squash", "Le tennis de table", "Le golf"], ["Combien de cases sur un échiquier ?", "64", "32", "81", "100"], ["Quelle est la pièce la plus puissante aux échecs ?", "La dame", "Le roi", "La tour", "Le fou"], ["Combien de cartes dans un jeu classique de 52 cartes ?", "52", "32", "54", "78"], ["Quel personnage de jeu vidéo est un plombier ?", "Mario", "Sonic", "Link", "Pac-Man"], ["Quelle est la couleur de Sonic ?", "Bleu", "Rouge", "Vert", "Jaune"], ["Comment s'appelle le frère de Mario ?", "Luigi", "Wario", "Toad", "Yoshi"], ["Quel Pokémon est le numéro 1 du Pokédex ?", "Bulbizarre", "Pikachu", "Salamèche", "Carapuce"], ["Dans Harry Potter, comment s'appelle la chouette d'Harry ?", "Hedwige", "Croûtard", "Buck", "Fumseck"], ["Dans Harry Potter, quelle maison a pour emblème un serpent ?", "Serpentard", "Gryffondor", "Poufsouffle", "Serdaigle"], ["Comment s'appelle le lion du Roi Lion ?", "Simba", "Mufasa", "Nala", "Scar"], ["Comment s'appelle le bonhomme de neige de La Reine des neiges ?", "Olaf", "Sven", "Kristoff", "Hans"], ["Dans Shrek, quel animal est le meilleur ami de Shrek ?", "Un âne", "Un chat", "Un dragon", "Un cochon"], ["Quel est le prénom de Bob l'éponge ?", "Bob", "Patrick", "Carlo", "Sandy"], ["Où vit Bob l'éponge ?", "Dans un ananas", "Dans une noix de coco", "Dans un rocher", "Dans un sous-marin"], ["Qui chante « Formidable » ?", "Stromae", "Maître Gims", "Angèle", "Orelsan"], ["De quel pays vient Céline Dion ?", "Canada", "Belgique", "Suisse", "France"], ["Quel rappeur a sorti l'album « Civilisation » ?", "Orelsan", "Nekfeu", "Jul", "Booba"], ["Quel groupe a chanté « Bohemian Rhapsody » ?", "Queen", "The Beatles", "U2", "ABBA"], ["Combien de cordes a une guitare classique ?", "6", "4", "5", "8"], ["Combien de touches a un piano classique ?", "88", "52", "100", "66"], ["Quelle est la capitale du Canada ?", "Ottawa", "Toronto", "Montréal", "Vancouver"], ["Quelle est la capitale de l'Espagne ?", "Madrid", "Barcelone", "Séville", "Valence"], ["Quel fleuve traverse Paris ?", "La Seine", "La Loire", "Le Rhône", "La Garonne"], ["Quel est le plus haut sommet des Alpes ?", "Le mont Blanc", "Le Cervin", "L'Everest", "Le mont Ventoux"], ["Dans quelle ville se trouve le Vieux-Port ?", "Marseille", "Nice", "Bordeaux", "La Rochelle"], ["Quel département porte le numéro 13 ?", "Bouches-du-Rhône", "Var", "Gironde", "Rhône"], ["Combien de départements compte la France (outre-mer compris) ?", "101", "95", "96", "110"], ["Qui était le premier président de la Ve République ?", "Charles de Gaulle", "Georges Pompidou", "François Mitterrand", "Napoléon"], ["En quelle année a eu lieu la prise de la Bastille ?", "1789", "1689", "1799", "1815"], ["Quel roi était surnommé le Roi-Soleil ?", "Louis XIV", "Louis XVI", "Henri IV", "François Ier"], ["Comment s'appelait le bateau qui a coulé en 1912 après avoir heurté un iceberg ?", "Le Titanic", "Le Britannic", "Le Queen Mary", "La Méduse"], ["Quel est le plat national de l'Espagne le plus connu, à base de riz ?", "La paella", "Le risotto", "Le couscous", "Le gaspacho"], ["Avec quoi fabrique-t-on la tequila ?", "L'agave", "Le cactus", "La canne à sucre", "La pomme de terre"], ["De quel pays vient la pizza margherita ?", "Italie", "Grèce", "États-Unis", "France"], ["Quel ingrédient principal compose le houmous ?", "Les pois chiches", "Les lentilles", "Les haricots blancs", "Les petits pois"], ["Quelle boisson est faite avec du houblon ?", "La bière", "Le vin", "Le cidre", "Le rhum"], ["Quel fruit sèche pour devenir un pruneau ?", "La prune", "Le raisin", "La figue", "La datte"], ["Quel fruit sèche pour devenir un raisin sec ?", "Le raisin", "La prune", "La groseille", "La myrtille"], ["Quel animal produit la laine mérinos ?", "Le mouton", "La chèvre", "L'alpaga", "Le lama"], ["Combien de dents a un adulte, dents de sagesse comprises ?", "32", "28", "36", "42"], ["Quel est le groupe sanguin donneur universel ?", "O négatif", "AB positif", "A positif", "B négatif"], ["Combien de temps dure une grossesse humaine environ ?", "9 mois", "7 mois", "11 mois", "12 mois"], ["Quel animal a la plus longue langue par rapport à son corps ?", "Le caméléon", "La girafe", "Le serpent", "Le fourmilier"], ["Quelle est la vitesse de la lumière, environ ?", "300 000 km/s", "300 km/s", "3 000 km/h", "1 million de km/h"], ["Quelle est la plus grande planète du système solaire ?", "Jupiter", "Saturne", "Neptune", "La Terre"], ["Quel est le nom de notre galaxie ?", "La Voie lactée", "Andromède", "Orion", "La Grande Ourse"], ["Combien de joueurs dans une équipe de rugby à XV sur le terrain ?", "15", "13", "11", "12"], ["Dans quelle ville se trouve le stade Vélodrome ?", "Marseille", "Lyon", "Paris", "Lille"], ["Quelle marque a pour logo une pomme croquée ?", "Apple", "Samsung", "Microsoft", "Pomme de Pin SA"], ["Quelle marque a pour logo une virgule ?", "Nike", "Adidas", "Puma", "Lacoste"], ["Quelle marque a pour logo un crocodile ?", "Lacoste", "Le Coq sportif", "Ralph Lauren", "Kappa"], ["Qui a fondé Microsoft ?", "Bill Gates", "Steve Jobs", "Mark Zuckerberg", "Elon Musk"], ["Qui a fondé Facebook ?", "Mark Zuckerberg", "Bill Gates", "Jeff Bezos", "Larry Page"], ["Quel réseau social a pour logo un fantôme ?", "Snapchat", "Instagram", "TikTok", "Twitter"], ["Combien de couleurs a l'arc-en-ciel ?", "7", "5", "6", "9"], ["Quelle couleur obtient-on en mélangeant du bleu et du jaune ?", "Vert", "Violet", "Orange", "Marron"], ["Quel est le contraire de « nocturne » ?", "Diurne", "Matinal", "Lunaire", "Solaire"], ["Combien de secondes dans une heure ?", "3 600", "360", "6 000", "1 000"], ["Combien de jours dans une année bissextile ?", "366", "365", "364", "367"], ["Quel mois a le moins de jours ?", "Février", "Avril", "Novembre", "Juin"], ["Dans le conte, combien de nains accompagnent Blanche-Neige ?", "7", "5", "6", "12"], ["Qui a dit « Je pense, donc je suis » ?", "Descartes", "Platon", "Victor Hugo", "Napoléon"], ["Quel super-héros vient de la planète Krypton ?", "Superman", "Batman", "Thor", "Spider-Man"], ["Quel est le vrai nom de Spider-Man ?", "Peter Parker", "Bruce Wayne", "Clark Kent", "Tony Stark"], ["Quel est le vrai nom de Batman ?", "Bruce Wayne", "Peter Parker", "Clark Kent", "Steve Rogers"], ["Dans Star Wars, qui est le père de Luke Skywalker ?", "Dark Vador", "Obi-Wan Kenobi", "Yoda", "Han Solo"], ["Comment s'appelle le chien de Tintin ?", "Milou", "Idéfix", "Pluto", "Rantanplan"], ["Comment s'appelle le chien d'Obélix ?", "Idéfix", "Milou", "Rantanplan", "Pif"]];   // [question, bonne, fausse, fausse, fausse]
+const SEL = [["Un Pokémon", "Un médicament", [["Ronflex", "A"], ["Doliprane", "B"], ["Ectoplasma", "A"], ["Spasfon", "B"], ["Magicarpe", "A"], ["Smecta", "B"], ["Rondoudou", "A"], ["Gaviscon", "B"], ["Kangourex", "A"], ["Dafalgan", "B"]]], ["Un dinosaure", "Un médicament", [["Vélociraptor", "A"], ["Efferalgan", "B"], ["Diplodocus", "A"], ["Nurofen", "B"], ["Stégosaure", "A"], ["Strepsils", "B"], ["Ankylosaure", "A"], ["Fervex", "B"], ["Brachiosaure", "A"], ["Humex", "B"]]], ["Un dieu grec", "Une marque", [["Zeus", "A"], ["Adidas", "B"], ["Nike", "2"], ["Hermès", "2"], ["Poséidon", "A"], ["Puma", "B"], ["Dionysos", "A"], ["Lacoste", "B"], ["Héphaïstos", "A"], ["Dyson", "B"]]], ["Un personnage de Star Wars", "Un personnage d'Harry Potter", [["Yoda", "A"], ["Dobby", "B"], ["Chewbacca", "A"], ["Hagrid", "B"], ["Jabba", "A"], ["Voldemort", "B"], ["Padmé", "A"], ["Drago", "B"], ["Lando", "A"], ["Neville", "B"]]], ["Une ville française", "Une ville italienne", [["Vérone", "B"], ["Bergerac", "A"], ["Bergame", "B"], ["Toulon", "A"], ["Parme", "B"], ["Pau", "A"], ["Pise", "B"], ["Lille", "A"], ["Lecce", "B"], ["Albi", "A"]]], ["Un fromage", "Une commune française", [["Camembert", "2"], ["Reblochon", "A"], ["Munster", "2"], ["Mimolette", "A"], ["Nantes", "B"], ["Morbier", "2"], ["Rodez", "B"], ["Maroilles", "2"], ["Tomme", "A"], ["Époisses", "2"]]], ["Un footballeur", "Un plat", [["Paella", "B"], ["Griezmann", "A"], ["Ratatouille", "B"], ["Benzema", "A"], ["Couscous", "B"], ["Kanté", "A"], ["Tartiflette", "B"], ["Mbappé", "A"], ["Moussaka", "B"], ["Giroud", "A"]]], ["Un chanteur", "Un footballeur", [["Stromae", "A"], ["Zidane", "B"], ["Vianney", "A"], ["Griezmann", "B"], ["Jul", "A"], ["Benzema", "B"], ["Soprano", "A"], ["Pogba", "B"], ["Orelsan", "A"], ["Mbappé", "B"]]], ["Un pays", "Une capitale", [["Pérou", "A"], ["Lima", "B"], ["Mexico", "B"], ["Kenya", "A"], ["Nairobi", "B"], ["Djibouti", "2"], ["Bolivie", "A"], ["Oslo", "B"], ["Singapour", "2"], ["Monaco", "2"]]], ["Un oiseau", "Un poisson", [["Colibri", "A"], ["Mérou", "B"], ["Pélican", "A"], ["Bar", "B"], ["Rouge-gorge", "A"], ["Rouget", "B"], ["Cigogne", "A"], ["Sole", "B"], ["Martin-pêcheur", "A"], ["Thon", "B"]]]];   // [A, B, [[item, "A"|"B"|"2"], ...]]
+const MENUS = [["Le foot", [["Quel pays a gagné la Coupe du monde 1998 ?", "La France"], ["Quel numéro portait Zidane en équipe de France ?", "Le 10"], ["Dans quel club Messi a-t-il passé la plus grande partie de sa carrière ?", "Le FC Barcelone"], ["Combien de temps dure une mi-temps ?", "45 minutes"], ["Comment s'appelle le stade du PSG ?", "Le Parc des Princes"], ["Quel est le surnom de l'équipe de France ?", "Les Bleus"]]], ["Harry Potter", [["Comment s'appelle l'école de sorcellerie ?", "Poudlard"], ["Quelle est la maison d'Harry ?", "Gryffondor"], ["Comment s'appelle le meilleur ami roux d'Harry ?", "Ron Weasley"], ["Quel sport se joue sur des balais ?", "Le Quidditch"], ["Comment appelle-t-on les humains sans pouvoirs ?", "Les Moldus"], ["Quelle forme a la cicatrice d'Harry ?", "Un éclair"]]], ["Disney", [["Comment s'appelle la sirène de Disney ?", "Ariel"], ["Quel animal est Dumbo ?", "Un éléphant"], ["Comment s'appelle le méchant oncle de Simba ?", "Scar"], ["Quel objet Cendrillon perd-elle au bal ?", "Sa pantoufle de verre"], ["Comment s'appelle la fée de Peter Pan ?", "La fée Clochette"], ["Dans quel pays se passe Mulan ?", "La Chine"]]], ["Le corps humain", [["Combien de dents a un adulte ?", "32"], ["Quel organe pompe le sang ?", "Le cœur"], ["Où se trouve la rotule ?", "Au genou"], ["Combien de poumons avons-nous ?", "2"], ["Comment s'appelle l'os de la cuisse ?", "Le fémur"], ["Quelle est la température normale du corps ?", "Environ 37 °C"]]], ["La France", [["Quelle est la capitale de la France ?", "Paris"], ["Combien de départements en France ?", "101"], ["Quel est le plus long fleuve de France ?", "La Loire"], ["Quelle ville est la capitale de la Bretagne ?", "Rennes"], ["Quelle mer borde Marseille ?", "La Méditerranée"], ["Quel monument parisien a été construit pour l'Exposition universelle de 1889 ?", "La tour Eiffel"]]], ["Les animaux", [["Quel est le plus grand animal du monde ?", "La baleine bleue"], ["Comment s'appelle le petit de la vache ?", "Le veau"], ["Combien de pattes a un insecte ?", "6"], ["Quel animal est le roi de la savane ?", "Le lion"], ["Quel oiseau ne vole pas et vit en Antarctique ?", "Le manchot"], ["Quel animal change de couleur ?", "Le caméléon"]]], ["La bouffe", [["Quel fromage met-on dans une tartiflette ?", "Le reblochon"], ["De quel pays vient le kebab ?", "La Turquie"], ["Quel fruit sert à faire le cidre ?", "La pomme"], ["Quel est l'ingrédient principal des frites ?", "La pomme de terre"], ["De quelle région vient la choucroute ?", "L'Alsace"], ["Comment appelle-t-on une galette de blé noir ?", "Une galette bretonne (ou crêpe de sarrasin)"]]], ["La musique", [["Qui chante « Je te promets » ?", "Johnny Hallyday"], ["De quelle ville est Jul ?", "Marseille"], ["Qui était le roi de la pop ?", "Michael Jackson"], ["Combien de membres avaient les Beatles ?", "4"], ["Quelle chanteuse a chanté « My Heart Will Go On » ?", "Céline Dion"], ["Quel instrument a 88 touches ?", "Le piano"]]], ["Le cinéma", [["Qui joue Jack dans Titanic ?", "Leonardo DiCaprio"], ["Comment s'appelle l'ogre vert de DreamWorks ?", "Shrek"], ["Quel acteur joue dans Intouchables avec François Cluzet ?", "Omar Sy"], ["Comment s'appelle le parc rempli de dinosaures dans le film de Spielberg ?", "Jurassic Park"], ["Quel super-héros est surnommé l'homme chauve-souris ?", "Batman"], ["Quel est le prénom de l'agent 007 ?", "James (Bond)"]]], ["Les jeux vidéo", [["Quelle princesse Mario doit-il sauver ?", "La princesse Peach"], ["Quel est le Pokémon jaune le plus connu ?", "Pikachu"], ["Quel jeu se joue avec des blocs à construire et des creepers ?", "Minecraft"], ["Quelle entreprise fabrique la PlayStation ?", "Sony"], ["Comment s'appelle le héros de The Legend of Zelda ?", "Link"], ["Dans quel jeu mange-t-on des fantômes dans un labyrinthe ?", "Pac-Man"]]], ["L'histoire", [["Qui était empereur des Français en 1804 ?", "Napoléon Ier"], ["Qui a découvert l'Amérique en 1492 ?", "Christophe Colomb"], ["Quelle reine de France a été guillotinée en 1793 ?", "Marie-Antoinette"], ["Quelle héroïne a été brûlée à Rouen en 1431 ?", "Jeanne d'Arc"], ["En quelle année est tombé le mur de Berlin ?", "1989"], ["Quel peuple a construit les pyramides de Gizeh ?", "Les Égyptiens"]]], ["Les marques", [["Quelle marque fabrique l'iPhone ?", "Apple"], ["Quelle boisson rouge et blanche est la plus vendue au monde ?", "Coca-Cola"], ["Quelle marque de voitures a un cheval cabré comme logo ?", "Ferrari"], ["Quel fast-food a un clown comme mascotte ?", "McDonald's"], ["Quelle marque a trois bandes sur ses vêtements ?", "Adidas"], ["Quelle pâte à tartiner a un pot avec un couvercle blanc et un nom en rouge et noir ?", "Nutella"]]], ["L'espace", [["Quelle planète est la plus proche du Soleil ?", "Mercure"], ["Comment s'appelle le premier homme à avoir marché sur la Lune ?", "Neil Armstrong"], ["Quel astronaute français est allé dans la Station spatiale internationale ?", "Thomas Pesquet"], ["Combien de planètes dans le système solaire ?", "8"], ["Quelle planète a des anneaux très visibles ?", "Saturne"], ["Comment s'appelle notre étoile ?", "Le Soleil"]]], ["Les séries", [["Dans quelle ville se passe Friends ?", "New York"], ["Comment s'appelle le café de Friends ?", "Central Perk"], ["Dans quelle série espagnole des braqueurs portent des masques de Dalí ?", "La Casa de Papel"], ["Dans quelle série une fille aux pouvoirs s'appelle Eleven ?", "Stranger Things"], ["Comment s'appelle le père de famille des Simpson ?", "Homer"], ["Quelle série coréenne de Netflix se joue avec des jeux d'enfants mortels ?", "Squid Game"]]]]; // [titre, [[question, réponse], ...]]
+const ADD = [["Combien font 7 × 8 ?", "56"], ["Combien font 12 × 12 ?", "144"], ["Combien font 9 × 6 ?", "54"], ["Combien font 15 + 27 ?", "42"], ["Combien font 100 − 37 ?", "63"], ["La moitié de 250 ?", "125"], ["Le double de 45 ?", "90"], ["Combien de mois dans une année ?", "12"], ["Combien de jours dans une semaine ?", "7"], ["Combien de minutes dans une heure ?", "60"], ["Combien d'heures dans une journée ?", "24"], ["Combien de semaines dans une année ?", "52"], ["Combien de côtés a un triangle ?", "3"], ["Combien de côtés a un hexagone ?", "6"], ["Combien de doigts sur deux mains ?", "10"], ["Couleur du ciel par beau temps ?", "Bleu"], ["Couleur d'une banane mûre ?", "Jaune"], ["Couleur du drapeau du Japon, en plus du blanc ?", "Rouge"], ["Couleurs du drapeau italien ?", "Vert, blanc, rouge"], ["Capitale de l'Italie ?", "Rome"], ["Capitale de l'Allemagne ?", "Berlin"], ["Capitale du Portugal ?", "Lisbonne"], ["Capitale de la Belgique ?", "Bruxelles"], ["Capitale du Royaume-Uni ?", "Londres"], ["Capitale des États-Unis ?", "Washington"], ["Capitale de la Russie ?", "Moscou"], ["Capitale du Maroc ?", "Rabat"], ["Capitale de l'Égypte ?", "Le Caire"], ["Capitale du Japon ?", "Tokyo"], ["Capitale de la Grèce ?", "Athènes"], ["Capitale de la Suisse ?", "Berne"], ["Capitale de l'Irlande ?", "Dublin"], ["Capitale de la Suède ?", "Stockholm"], ["Capitale de l'Argentine ?", "Buenos Aires"], ["Plus grand pays du monde ?", "La Russie"], ["Pays le plus peuplé d'Europe ?", "La Russie (l'Allemagne pour l'UE)"], ["Langue officielle du Mexique ?", "L'espagnol"], ["Langue parlée en Autriche ?", "L'allemand"], ["Dans quel pays se trouve Barcelone ?", "L'Espagne"], ["Dans quel pays se trouve Venise ?", "L'Italie"], ["Dans quel pays se trouve Marrakech ?", "Le Maroc"], ["Dans quel pays se trouvent les pyramides de Gizeh ?", "L'Égypte"], ["Dans quel pays se trouve la statue de la Liberté ?", "Les États-Unis"], ["Sur quel continent est le Brésil ?", "L'Amérique (du Sud)"], ["Femelle du cheval ?", "La jument"], ["Femelle du cochon ?", "La truie"], ["Femelle du coq ?", "La poule"], ["Femelle du lièvre ?", "La hase"], ["Petit du chien ?", "Le chiot"], ["Petit du chat ?", "Le chaton"], ["Petit de la poule ?", "Le poussin"], ["Petit du cheval ?", "Le poulain"], ["Petit de l'ours ?", "L'ourson"], ["Petit du canard ?", "Le caneton"], ["Cri du chat ?", "Il miaule"], ["Cri du chien ?", "Il aboie"], ["Cri du loup ?", "Il hurle"], ["Cri du lion ?", "Il rugit"], ["Cri du cheval ?", "Il hennit"], ["Cri de la vache ?", "Elle meugle (ou beugle)"], ["Animal qui fait du miel ?", "L'abeille"], ["Animal avec une trompe ?", "L'éléphant"], ["Animal au plus long cou ?", "La girafe"], ["Animal qui porte sa maison sur son dos ?", "L'escargot (ou la tortue)"], ["Animal symbole de l'Australie qui saute ?", "Le kangourou"], ["Oiseau symbole de la France ?", "Le coq"], ["Combien de pattes a un chien ?", "4"], ["Combien de pattes a un oiseau ?", "2"], ["Combien d'ailes a une abeille ?", "4"], ["Fruit jaune et courbé ?", "La banane"], ["Fruit qui fait du vin ?", "Le raisin"], ["Légume orange que mangent les lapins ?", "La carotte"], ["Ingrédient principal du pain ?", "La farine"], ["Ingrédient principal de l'omelette ?", "Les œufs"], ["Avec quoi fait-on le beurre ?", "Le lait (la crème)"], ["Boisson chaude faite avec des feuilles ?", "Le thé"], ["De quelle couleur est la pistache ?", "Verte"], ["Plat italien en couches avec de la béchamel ?", "Les lasagnes"], ["Pâtisserie en forme de lune au petit-déjeuner ?", "Le croissant"], ["Contraire de « chaud » ?", "Froid"], ["Contraire de « grand » ?", "Petit"], ["Contraire de « jour » ?", "Nuit"], ["Contraire de « rapide » ?", "Lent"], ["Contraire de « vide » ?", "Plein"], ["Contraire de « gagner » ?", "Perdre"], ["Pluriel de « cheval » ?", "Chevaux"], ["Pluriel de « œil » ?", "Yeux"], ["Pluriel de « travail » ?", "Travaux"], ["Synonyme de « voiture » ?", "Automobile (ou bagnole)"], ["Combien de lettres dans l'alphabet ?", "26"], ["Combien de voyelles dans l'alphabet ?", "6 (a, e, i, o, u, y)"], ["Dernière lettre de l'alphabet ?", "Z"], ["Première lettre de l'alphabet grec ?", "Alpha"], ["Combien de joueurs dans une équipe de basket sur le terrain ?", "5"], ["Combien de joueurs dans une équipe de volley sur le terrain ?", "6"], ["Combien de joueurs dans une équipe de handball sur le terrain ?", "7"], ["Combien de joueurs au tennis en simple ?", "2"], ["Sport de Roland-Garros ?", "Le tennis"], ["Sport de Kylian Mbappé ?", "Le football"], ["Sport de Victor Wembanyama ?", "Le basket"], ["Sport de Michael Phelps ?", "La natation"], ["Sport de Tony Hawk ?", "Le skateboard"], ["Combien d'anneaux sur le drapeau olympique ?", "5"], ["Couleur de la carte qui exclut un joueur au foot ?", "Rouge"], ["Combien de points vaut un essai au rugby ?", "5"], ["Combien de points vaut un panier à 3 points ?", "3"], ["Qui a écrit « Le Petit Prince » ?", "Antoine de Saint-Exupéry"], ["Qui a écrit « Harry Potter » ?", "J.K. Rowling"], ["Qui a écrit « Les Fables » ?", "Jean de La Fontaine"], ["Qui a peint « Les Tournesols » ?", "Van Gogh"], ["Qui a inventé l'ampoule électrique (le plus souvent cité) ?", "Thomas Edison"], ["Qui a découvert la gravité avec une pomme ?", "Isaac Newton"], ["Qui a formulé E = mc² ?", "Albert Einstein"], ["Prénom de la mère de Simba ?", "Sarabi"], ["Couleur de Hulk ?", "Vert"], ["Couleur des Schtroumpfs ?", "Bleu"], ["Meilleur ami de Mickey, un chien qui parle ?", "Dingo"], ["Nom du chien de Mickey ?", "Pluto"], ["Ami jaune de Sacha ?", "Pikachu"], ["Frère de Mario ?", "Luigi"], ["Héros de Toy Story, un cowboy ?", "Woody"], ["Nom du poisson-clown de Pixar ?", "Nemo"], ["Super-héros avec un marteau ?", "Thor"], ["Super-héros avec un bouclier étoilé ?", "Captain America"], ["Jedi vert et petit ?", "Yoda"], ["Méchant en armure noire de Star Wars ?", "Dark Vador"], ["Ville de Batman ?", "Gotham City"], ["Pays du sushi ?", "Le Japon"], ["Pays de la paella ?", "L'Espagne"], ["Pays des tacos ?", "Le Mexique"], ["Pays du hamburger ?", "Les États-Unis"], ["Fête du 14 juillet en France ?", "La fête nationale"], ["Fête où l'on cherche des œufs en chocolat ?", "Pâques"], ["Fête où l'on se déguise le 31 octobre ?", "Halloween"], ["Fête des amoureux ?", "La Saint-Valentin"], ["Date de Noël ?", "Le 25 décembre"], ["Premier mois de l'année ?", "Janvier"], ["Saison des feuilles qui tombent ?", "L'automne"], ["Planète où l'on vit ?", "La Terre"], ["Satellite naturel de la Terre ?", "La Lune"], ["État de l'eau à 0 °C ?", "Glace (solide)"], ["Température d'ébullition de l'eau ?", "100 °C"], ["Combien de litres dans un mètre cube ?", "1 000"], ["Combien de grammes dans un kilo ?", "1 000"], ["Combien de centimètres dans un mètre ?", "100"], ["Monnaie de l'Europe ?", "L'euro"], ["Monnaie des États-Unis ?", "Le dollar"], ["Combien de faces a un cube ?", "6"], ["Combien de roues a un tricycle ?", "3"], ["Combien de cordes a un violon ?", "4"], ["Instrument noir et blanc à touches ?", "Le piano"], ["Instrument de Jimi Hendrix ?", "La guitare"], ["Combien de joueurs aux échecs ?", "2"], ["Pièce qui se déplace en L aux échecs ?", "Le cavalier"], ["Nom du jeu de société où l'on achète des rues ?", "Le Monopoly"], ["Jeu de cartes où l'on crie « Uno » ?", "Le Uno"]];   // [question, réponse]
+const KEY = "tablee_burger";
+const BODY = ["#3b5bff", "#ff5a1f", "#16a34a", "#9333ea", "#db2777", "#0891b2", "#ca8a04", "#4f46e5", "#ea580c", "#0d9488"];
+const TEAMS = [{ name: "Ketchup", c: "#ef4444", c2: "#b91c1c" }, { name: "Mayo", c: "#f59e0b", c2: "#d97706" }];
+const PHASES = [
+  { t: "Nuggets", d: "Chaque équipe répond à tour de rôle à des questions à 4 choix. 1 miam par bonne réponse." },
+  { t: "Sel ou poivre", d: "Pour chaque mot : c'est l'un, l'autre, ou les deux ? 1 miam par bonne réponse." },
+  { t: "Menus", d: "L'équipe en retard choisit son menu en premier : 6 questions sur un thème. 1 miam par bonne réponse." },
+  { t: "L'Addition", d: "Questions rapides contre la montre. Un joueur de l'autre équipe lit. 1 miam par bonne réponse." },
+];
+const NAME_KEYS = ["auracover_poche5", "auraspy1", "auratime1", "auratete1", "auraloup2", "auraapero1", "tablee_milieu", "tablee_codes", "tablee_preferes", "tablee_artiste", "tablee_motcache", "tablee_piege", "tablee_mdp", "tablee_regle", "tablee_tabou", "tablee_burger", "tablee_chiffre"];
+const MARK = `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 21c0-8 7-13 16-13s16 5 16 13z" fill="#fff"/><rect x="6" y="24" width="36" height="5" rx="2.5" fill="#fde68a"/><rect x="7" y="31" width="34" height="5" rx="2.5" fill="#fff" opacity=".85"/><path d="M8 38h32a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4z" fill="#fff"/></svg>`;
+
+let S = { screen: "home", nNug: 5, addSecs: 45, teams: [[], []], people: {}, recent: { n: [], s: [], m: [], a: [] }, game: null };
+function load() {
+  let d = null; try { d = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
+  if (d) for (const k of Object.keys(S)) if (d[k] !== undefined) S[k] = d[k];
+  S.teams = [S.teams[0] || [], S.teams[1] || []];
+  if (!S.game) { if (!["home", "teams", "board", "stats"].includes(S.screen)) S.screen = "home"; return; }
+  if (S.screen === "add") { S.game.addLeft = Math.max(0, Math.ceil((S.game.end - Date.now()) / 1000)); S.screen = S.game.addLeft > 0 ? "addPause" : "addEnd"; }
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function knownNames() {
+  const set = new Set(Object.keys(S.people));
+  for (const k of NAME_KEYS) try { const c = JSON.parse(localStorage.getItem(k) || "{}"); for (const n of Object.keys(c.people || {})) set.add(n); } catch (e) {}
+  return [...set];
+}
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+const fold = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+function seedOf(s) { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+const av = (nm, cls = "") => `<span class="av ${cls}" style="--c:${BODY[seedOf(nm || "?") % BODY.length]}" aria-hidden="true">${esc((nm.trim()[0] || "?").toUpperCase())}</span>`;
+const plural = (n, w) => `${n} ${w}${Math.abs(n) > 1 ? "s" : ""}`;
+const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
+function person(nm) { return S.people[nm] || (S.people[nm] = { games: 0, wins: 0, miams: 0, last: 0 }); }
+const statLine = p => p && p.games ? `${plural(p.games, "partie")} · ${plural(p.wins, "victoire")}` : "Nouveau ici";
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const teamOk = () => S.teams.every(t => t.length >= 1);
+const band = t => `--band1:${TEAMS[t].c};--band2:${TEAMS[t].c2}`;
+const total = t => S.game.score[t].reduce((a, b) => a + b, 0);
+const miams = n => plural(n, "miam");
+
+// tirage sans répéter les dernières parties
+function pick(listLen, key, n) {
+  const all = [...Array(listLen).keys()]; let p = all.filter(i => !S.recent[key].includes(i));
+  if (p.length < n) { S.recent[key] = []; p = all; }
+  const out = shuffle(p).slice(0, n); S.recent[key] = [...S.recent[key], ...out].slice(-Math.floor(listLen * .75)); return out;
+}
+
+// ---------- partie
+function newGame() {
+  const starter = Math.random() * 2 | 0;
+  S.game = { phase: 0, starter, score: [[0, 0, 0, 0], [0, 0, 0, 0]], k: 0, picked: null, ended: false,
+    nug: pick(NUG.length, "n", S.nNug * 2).map(i => ({ i, opts: shuffle([1, 2, 3, 4]) })),
+    sel: pick(SEL.length, "s", 2), menus: pick(MENUS.length, "m", 3), menuTaken: [], menuTeam: null, menuIdx: null,
+    add: pick(ADD.length, "a", Math.min(ADD.length, 120)), addPos: 0, addTeam: null, addDone: [], end: 0, addLeft: 0 };
+  go("phaseIntro");
+}
+const nugTeam = k => (S.game.starter + k) % 2;
+function answer(ok) {
+  const g = S.game; g.picked = ok; buzz(ok ? 25 : [70, 40, 70]);
+}
+function nextAfterAnswer() {
+  const g = S.game; g.picked = null; g.k++;
+  if (g.phase === 0 && g.k >= g.nug.length) { g.k = 0; g.phase = 1; go("phaseIntro"); return; }
+  if (g.phase === 1 && g.k >= SEL[g.sel[0]][2].length + SEL[g.sel[1]][2].length) { g.k = 0; g.phase = 2; go("phaseIntro"); return; }
+  save(); render();
+}
+// Sel ou poivre : le premier set pour l'équipe qui commence, le second pour l'autre
+function selTeamIdx() { const g = S.game; return g.k < SEL[g.sel[0]][2].length ? 0 : 1; }
+function selItem() { const g = S.game, s = selTeamIdx(); const off = s ? SEL[g.sel[0]][2].length : 0; return { set: SEL[g.sel[s]], item: SEL[g.sel[s]][2][g.k - off], n: g.k - off, team: (g.starter + s) % 2 }; }
+// Menus : l'équipe qui a le moins de miams choisit en premier
+function menuChooser() { const g = S.game; if (g.menuTaken.length === 0) { const a = total(0), b = total(1); return a === b ? g.starter : a < b ? 0 : 1; } return 1 - g.menuTeamFirst; }
+// Addition : l'équipe qui a le moins de miams commence
+function addFirst() { const g = S.game, a = total(0), b = total(1); return a === b ? 1 - g.starter : a < b ? 0 : 1; }
+function startAdd() { const g = S.game; g.end = Date.now() + (g.addLeft || S.addSecs) * 1000; g.addLeft = 0; buzz(30); go("add"); }
+function endAdd() { const g = S.game; if (S.screen !== "add") return; buzz([200, 80, 200]); g.addDone.push(g.addTeam); go("addEnd"); }
+function finishGame() {
+  const g = S.game, now = Date.now(), tot = [total(0), total(1)], best = Math.max(...tot);
+  g.winners = [0, 1].filter(t => tot[t] === best);
+  S.teams.forEach((team, t) => team.forEach(nm => { const p = person(nm); p.games++; p.last = now; p.miams += tot[t]; if (g.winners.includes(t)) p.wins++; }));
+  g.ended = true; go("end"); confetti();
+}
+
+// ---------- écrans
+const app = document.getElementById("app"), sheet = document.getElementById("sheet");
+function go(s) { S.screen = s; save(); render(); scrollTo(0, 0); }
+const step = (act, val, cls = "") => `<div class="step"><button data-a="${act}" data-v="-1" aria-label="Moins">−</button><span class="${cls}">${val}</span><button data-a="${act}" data-v="1" aria-label="Plus">+</button></div>`;
+const scoreBar = () => `<div class="sbar">${[0, 1].map(t => `<div class="sb" style="${band(t)}"><span>${TEAMS[t].name}</span><b>${total(t)}</b></div>`).join("")}</div>`;
+const LETTERS = ["A", "B", "C", "D"];
+
+function render() {
+  const g = S.game; let h = "";
+  switch (S.screen) {
+    case "home": {
+      h = `<a class="backmenu" href="../">‹ Menu</a><div class="spacer"></div>
+        <div class="brand"><span class="mark">${MARK}</span><div class="logo">Burger <i>Quiz</i></div></div>
+        <div class="sub" style="margin-top:0">Ketchup contre Mayo en 4 manches : Nuggets, Sel ou poivre, Menus et l'Addition. Le téléphone fait l'animateur.</div>
+        <div class="box">
+          <div class="line"><div class="name">Nuggets<small>Questions par équipe</small></div>${step("nNug", S.nNug)}</div>
+          <div class="line"><div class="name">Chrono de l'Addition<small>Par équipe</small></div>${step("addSecs", S.addSecs + " s")}</div>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="toTeams">Faire les équipes</button>
+        <button class="btn alt" data-a="board">Joueurs et stats</button>
+        <div class="links"><button class="link" data-a="rules">Règles</button><a class="link" href="../" style="text-decoration:none">‹ Menu</a></div>`;
+      break;
+    }
+    case "teams": {
+      h = `<h2>Les équipes</h2>
+        <div class="sub">Ketchup contre Mayo. Au moins 1 joueur par équipe.</div>
+        ${S.teams.map((team, t) => `<div class="teambox" style="${band(t)}">
+          <div class="teamhead"><span>Équipe ${TEAMS[t].name}</span><small>${plural(team.length, "joueur")}</small></div>
+          <div class="chips2">${team.map((nm, k) => `<button class="pchip" data-a="rm" data-v="${t}:${k}">${av(nm)}<span>${esc(nm)}</span><i aria-label="Retirer">×</i></button>`).join("")}
+            <button class="pchip add" data-a="addTo" data-v="${t}">+ Ajouter</button></div></div>`).join("")}
+        <button class="btn soft" data-a="mix">Mélanger les équipes</button>
+        <div class="spacer"></div>
+        <button class="btn" data-a="play" ${teamOk() ? "" : "disabled"}>${teamOk() ? "Jouer" : "Il faut 1 joueur par équipe"}</button>
+        <div class="links"><button class="link" data-a="home">Retour</button></div>`;
+      break;
+    }
+    case "phaseIntro": {
+      const p = PHASES[g.phase];
+      h = `${g.phase ? scoreBar() : ""}<div class="spacer"></div>
+        <div class="reveal place">
+          <div class="roundnum">${g.phase + 1}</div>
+          <div class="label">Manche ${g.phase + 1} sur 4</div>
+          <div class="place-name">${p.t}</div>
+          <div class="hint">${p.d}</div>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="phaseGo">C'est parti</button>`;
+      break;
+    }
+    case "play": {
+      if (g.phase === 0) {
+        const q = g.nug[g.k], n = NUG[q.i], t = nugTeam(g.k), done = g.picked !== null;
+        h = `${scoreBar()}<div class="label" style="text-align:center">Nuggets · question ${g.k + 1} sur ${g.nug.length}</div>
+          <div class="qcard" style="${band(t)}"><div class="label">Pour l'équipe ${TEAMS[t].name}</div><div class="qq">${esc(n[0])}</div></div>
+          <div class="opts">${q.opts.map((o, j) => { const cls = !done ? "" : o === 1 ? "good" : (g.chosen === o ? "bad" : "dim");
+            return `<button class="opt ${cls}" data-a="nug" data-v="${o}" ${done ? "disabled" : ""}><b>${LETTERS[j]}</b><span>${esc(n[o])}</span></button>`; }).join("")}</div>
+          ${done ? `<div class="verdict ${g.picked ? "ok" : "ko"}">${g.picked ? `Bien joué ! +1 miam pour ${TEAMS[t].name}` : `Raté ! La réponse : ${esc(n[1])}`}</div><button class="btn" data-a="next">Suivant</button>` : ""}`;
+      } else if (g.phase === 1) {
+        const { set, item, n, team } = selItem(), done = g.picked !== null;
+        const right = item[1] === "A" ? set[0] : item[1] === "B" ? set[1] : "Les deux";
+        h = `${scoreBar()}<div class="label" style="text-align:center">Sel ou poivre · ${n + 1} sur ${set[2].length}</div>
+          <div class="qcard" style="${band(team)}"><div class="label">Pour l'équipe ${TEAMS[team].name}</div><div class="qq small">${esc(set[0])}, ${esc(set[1].charAt(0).toLowerCase() + set[1].slice(1))} ou les deux ?</div><div class="qq big">${esc(item[0])}</div></div>
+          <div class="opts">${[["A", set[0]], ["B", set[1]], ["2", "Les deux"]].map(([v, l]) => { const cls = !done ? "" : v === item[1] ? "good" : (g.chosen === v ? "bad" : "dim");
+            return `<button class="opt ${cls}" data-a="sel" data-v="${v}" ${done ? "disabled" : ""}><span>${esc(l)}</span></button>`; }).join("")}</div>
+          ${done ? `<div class="verdict ${g.picked ? "ok" : "ko"}">${g.picked ? `Bien joué ! +1 miam pour ${TEAMS[team].name}` : `Raté ! C'était : ${esc(right)}`}</div><button class="btn" data-a="next">Suivant</button>` : ""}`;
+      }
+      break;
+    }
+    case "menuPick": {
+      const t = menuChooser();
+      h = `${scoreBar()}<div class="label" style="text-align:center">Menus</div>
+        <div class="reveal place" style="${band(t)}"><div class="label">Équipe ${TEAMS[t].name}</div><div class="place-name" style="font-size:1.8rem">Choisissez votre menu</div>
+          <div class="hint">${g.menuTaken.length ? "Il reste deux menus." : "Vous avez le moins de miams, vous choisissez en premier."}</div></div>
+        <div class="list">${g.menus.map((m, j) => g.menuTaken.includes(j) ? "" : `<button class="who" data-a="menu" data-v="${j}"><span class="t">${esc(MENUS[m][0])}<small>${plural(MENUS[m][1].length, "question")}</small></span><span class="go">›</span></button>`).join("")}</div>`;
+      break;
+    }
+    case "menuQ": {
+      const m = MENUS[g.menus[g.menuIdx]], q = m[1][g.k], t = g.menuTeam;
+      h = `${scoreBar()}<div class="label" style="text-align:center">Menu « ${esc(m[0])} » · ${g.k + 1} sur ${m[1].length}</div>
+        <div class="qcard" style="${band(t)}"><div class="label">Pour l'équipe ${TEAMS[t].name}</div><div class="qq">${esc(q[0])}</div></div>
+        <div class="anscard"><small>Réponse (pour celui qui lit)</small><b>${esc(q[1])}</b></div>
+        <div class="spacer"></div>
+        <div class="two"><button class="btn bad" data-a="menuAns" data-v="0">Faux</button><button class="btn found" data-a="menuAns" data-v="1">Juste</button></div>`;
+      break;
+    }
+    case "addIntro": case "addPause": {
+      const t = g.addTeam;
+      h = `${scoreBar()}<div class="spacer"></div>
+        <div class="reveal place" style="${band(t)}"><div class="label">L'Addition</div><div class="place-name">Équipe ${TEAMS[t].name}</div>
+          <div class="hint">${S.screen === "addPause" ? `L'appli a été fermée : il reste ${g.addLeft} s.` : `${S.addSecs} secondes de questions rapides. Un joueur de l'équipe ${TEAMS[1 - t].name} prend le téléphone et lit les questions.`}</div></div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="addGo">${S.screen === "addPause" ? "Reprendre" : "Lancer le chrono"}</button>`;
+      break;
+    }
+    case "add": {
+      const q = ADD[g.add[g.addPos % g.add.length]], t = g.addTeam;
+      h = `<div class="turnhead"><span class="label">Équipe ${TEAMS[t].name}</span><span class="tbig" id="t">${Math.ceil(Math.max(0, g.end - Date.now()) / 1000)}</span><span class="label">${miams(g.score[t][3])}</span></div>
+        <div class="tbar"><i id="tb" style="${band(t)}"></i></div>
+        <div class="qcard" style="${band(t)}"><div class="qq">${esc(q[0])}</div></div>
+        <div class="anscard"><small>Réponse</small><b>${esc(q[1])}</b></div>
+        <div class="spacer"></div>
+        <div class="two"><button class="btn bad" data-a="addAns" data-v="0">Faux</button><button class="btn found" data-a="addAns" data-v="1">Juste</button></div>`;
+      break;
+    }
+    case "addEnd": {
+      const t = g.addTeam, other = 1 - t, last = g.addDone.includes(other);
+      h = `<h2>Temps écoulé !</h2><div class="sub">L'équipe ${TEAMS[t].name} marque ${miams(g.score[t][3])} dans l'Addition.</div>${scoreBar()}
+        <div class="spacer"></div>
+        <button class="btn" data-a="addNext">${last ? "Voir les résultats" : `Au tour de l'équipe ${TEAMS[other].name}`}</button>`;
+      break;
+    }
+    case "end": {
+      const w = g.winners;
+      h = `<div class="endhead" style="${band(w.length > 1 ? 0 : w[0])}"><div class="label">Fin du Burger Quiz</div><h2>${w.length > 1 ? "Égalité !" : `L'équipe ${TEAMS[w[0]].name} gagne !`}</h2></div>
+        <div class="box">${[0, 1].sort((a, b) => total(b) - total(a)).map(t => `<div class="res"><span class="tdot" style="${band(t)}"></span>
+          <span class="t"><span>Équipe ${TEAMS[t].name}</span><small style="color:var(--muted)">${g.score[t].join(" + ")} · ${S.teams[t].map(esc).join(", ")}</small></span>
+          ${w.includes(t) ? `<span class="win">Gagné</span>` : ""}<span class="tot">${total(t)}</span></div>`).join("")}</div>
+        <div class="hint" style="text-align:center">Nuggets + Sel ou poivre + Menus + Addition</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="play">Rejouer</button>
+        <button class="btn soft" data-a="board">Classement</button>
+        <div class="links"><button class="link" data-a="toTeams">Changer les équipes</button><button class="link" data-a="home">Accueil</button></div>`;
+      break;
+    }
+    case "board": {
+      const q = fold(S.bq || "");
+      const list = Object.entries(S.people).filter(([n]) => fold(n).includes(q)).sort((a, b) => b[1].wins - a[1].wins || b[1].miams - a[1].miams || a[0].localeCompare(b[0]));
+      h = `<h2>Joueurs et stats</h2>
+        <input id="bq" type="text" maxlength="16" placeholder="Cherche un prénom" value="${esc(S.bq || "")}" autocomplete="off">
+        <div class="list" id="bl">${boardList(list)}</div>
+        <div class="spacer"></div>
+        <button class="btn soft" data-a="home">Retour</button>`;
+      break;
+    }
+    case "stats": {
+      const name = S.statOf, p = person(name);
+      const ranked = Object.entries(S.people).sort((a, b) => b[1].wins - a[1].wins || b[1].miams - a[1].miams).map(x => x[0]);
+      h = `<div class="statcard">${av(name, "xl")}<h2>${esc(name)}</h2>
+          <div class="hint">${p.games ? `${ranked.indexOf(name) + 1}${ranked.indexOf(name) ? "e" : "er"} du classement` : "Pas encore de partie"}</div></div>
+        <div class="tiles">
+          <div class="tile"><b>${p.games}</b><span>parties</span></div>
+          <div class="tile"><b>${p.wins}</b><span>victoires</span></div>
+          <div class="tile"><b>${pct(p.wins, p.games)}%</b><span>de réussite</span></div>
+          <div class="tile"><b>${p.miams}</b><span>miams d'équipe</span></div>
+          <div class="tile"><b>${p.games ? Math.round(p.miams / p.games) : 0}</b><span>miams par partie</span></div>
+          <div class="tile"><b>${p.games - p.wins}</b><span>défaites</span></div>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn soft" data-a="board">Retour au classement</button>
+        <div class="links"><button class="link" data-a="delP">${S.sureDel ? "Sûr ? Retouche pour supprimer" : "Supprimer ce joueur"}</button></div>`;
+      break;
+    }
+  }
+  app.innerHTML = h;
+  const bq = document.getElementById("bq");
+  if (bq) bq.oninput = () => { S.bq = bq.value; const qq = fold(bq.value);
+    document.getElementById("bl").innerHTML = boardList(Object.entries(S.people).filter(([n]) => fold(n).includes(qq)).sort((a, b) => b[1].wins - a[1].wins || b[1].miams - a[1].miams)); };
+  if (S.screen === "add") tick();
+}
+function boardList(list) {
+  if (!list.length) return `<div class="empty">${Object.keys(S.people).length ? "Personne avec ce nom." : "Personne pour l'instant. Jouez une partie et vos stats apparaîtront ici."}</div>`;
+  return list.map(([n, p], k) => `<button class="who" data-a="stat" data-v="${esc(n)}"><span class="rank ${k < 3 && p.wins ? "top" : ""}">${k + 1}</span>${av(n)}
+    <span class="t">${esc(n)}<small>${statLine(p)}</small></span><span class="go">›</span></button>`).join("");
+}
+
+let addTeam = 0, addQ = "";
+function addList() {
+  const q = fold(addQ), used = new Set(S.teams.flat());
+  const all = knownNames();
+  const list = all.filter(n => !used.has(n) && fold(n).includes(q)).sort((a, b) => ((S.people[b] || {}).last || 0) - ((S.people[a] || {}).last || 0) || a.localeCompare(b)).slice(0, 30);
+  const exact = all.some(n => fold(n) === q) || [...used].some(n => fold(n) === q);
+  let h = list.map(n => `<button class="who" data-a="addName" data-v="${esc(n)}">${av(n)}<span class="t">${esc(n)}<small>${statLine(S.people[n])}</small></span><span class="go">＋</span></button>`).join("");
+  if (addQ.trim() && !exact) h = `<button class="who new" data-a="addName" data-v="${esc(addQ.trim().slice(0, 16))}">${av(addQ.trim())}<span class="t">Ajouter ${esc(addQ.trim())}<small>Nouveau joueur</small></span><span class="go">＋</span></button>` + h;
+  return h || `<div class="empty">Écris un prénom pour l'ajouter.</div>`;
+}
+function openSheet(kind) {
+  if (!kind) { sheet.innerHTML = ""; return; }
+  let inner;
+  if (kind === "rules") inner = `<h2>Les règles</h2><div class="rules">
+      <p>Deux équipes, <b>Ketchup</b> et <b>Mayo</b>. Le téléphone fait l'animateur : celui qui le tient lit à voix haute. Les points s'appellent des <b>miams</b>.</p>
+      <p><b>1. Nuggets</b> : questions à 4 choix, chacune son tour. L'équipe répond, on touche sa réponse.</p>
+      <p><b>2. Sel ou poivre</b> : pour chaque mot, c'est l'un, l'autre, ou les deux ?</p>
+      <p><b>3. Menus</b> : l'équipe en retard choisit un thème parmi 3, puis l'autre parmi les 2 restants. 6 questions chacune. La réponse s'affiche pour celui qui lit : il touche Juste ou Faux.</p>
+      <p><b>4. L'Addition</b> : questions rapides contre la montre, lues par un joueur de l'autre équipe. L'équipe en retard commence.</p>
+      <p>L'équipe qui a le plus de miams à la fin gagne.</p></div><button class="btn" data-a="close">Compris</button>`;
+  else inner = `<h2>Ajouter à l'équipe ${TEAMS[addTeam].name}</h2>
+      <input id="aq" type="text" maxlength="16" placeholder="Cherche ou écris un prénom" value="${esc(addQ)}" autocomplete="off" autocapitalize="words" enterkeyhint="done">
+      <div class="list" id="al">${addList()}</div>
+      <button class="btn" data-a="close">OK</button>`;
+  sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true">${inner}</div></div>`;
+  const aq = document.getElementById("aq");
+  if (aq) { aq.oninput = () => { addQ = aq.value; document.getElementById("al").innerHTML = addList(); };
+    aq.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); const v = aq.value.trim(); if (v) addName(knownNames().find(n => fold(n) === fold(v)) || v.slice(0, 16)); } }; }
+}
+function addName(nm) {
+  for (const t of S.teams) { const i = t.indexOf(nm); if (i >= 0) t.splice(i, 1); }
+  S.teams[addTeam].push(nm); person(nm).last = Date.now(); addQ = ""; save(); render(); openSheet("add");
+  const aq = document.getElementById("aq"); if (aq) aq.focus();
+}
+
+const A = {
+  nNug: d => { S.nNug = Math.max(3, Math.min(10, S.nNug + +d)); save(); render(); },
+  addSecs: d => { S.addSecs = Math.max(30, Math.min(90, S.addSecs + 15 * d)); save(); render(); },
+  toTeams: () => { if (S.game && S.game.ended) S.game = null; go("teams"); },
+  home: () => { if (S.game && S.game.ended) S.game = null; go("home"); },
+  addTo: v => { addTeam = +v; addQ = ""; openSheet("add"); },
+  addName: v => addName(v),
+  rm: v => { const [t, k] = v.split(":").map(Number); S.teams[t].splice(k, 1); save(); render(); },
+  mix: () => { const all = shuffle(S.teams.flat()); S.teams = [[], []]; all.forEach((n, i) => S.teams[i % 2].push(n)); buzz(20); save(); render(); },
+  play: () => { if (!teamOk()) return; wake(); newGame(); },
+  phaseGo: () => { const g = S.game; g.k = 0; g.picked = null;
+    if (g.phase < 2) go("play");
+    else if (g.phase === 2) go("menuPick");
+    else { g.addTeam = addFirst(); go("addIntro"); } },
+  nug: v => { const g = S.game; if (g.picked !== null) return; g.chosen = +v; const ok = +v === 1; if (ok) g.score[nugTeam(g.k)][0]++; answer(ok); save(); render(); },
+  sel: v => { const g = S.game; if (g.picked !== null) return; const it = selItem(); g.chosen = v; const ok = v === it.item[1]; if (ok) g.score[it.team][1]++; answer(ok); save(); render(); },
+  next: () => nextAfterAnswer(),
+  menu: v => { const g = S.game, t = menuChooser(); if (!g.menuTaken.length) g.menuTeamFirst = t; g.menuTaken.push(+v); g.menuIdx = +v; g.menuTeam = t; g.k = 0; go("menuQ"); },
+  menuAns: v => { const g = S.game; if (v === "1") { g.score[g.menuTeam][2]++; buzz(25); } else buzz(10);
+    g.k++; const m = MENUS[g.menus[g.menuIdx]];
+    if (g.k < m[1].length) { save(); render(); return; }
+    if (g.menuTaken.length < 2) { go("menuPick"); return; }
+    g.phase = 3; g.k = 0; go("phaseIntro"); },
+  addGo: () => startAdd(),
+  addAns: v => { const g = S.game; if (S.screen !== "add") return; if (v === "1") { g.score[g.addTeam][3]++; buzz(20); } g.addPos++; save(); render(); },
+  addNext: () => { const g = S.game, other = 1 - g.addTeam; if (g.addDone.includes(other)) { finishGame(); return; } g.addTeam = other; go("addIntro"); },
+  board: () => { S.bq = ""; go("board"); },
+  stat: v => { S.statOf = v; S.sureDel = false; go("stats"); },
+  delP: () => { if (!S.sureDel) { S.sureDel = true; render(); return; } delete S.people[S.statOf]; S.sureDel = false; go("board"); },
+  rules: () => openSheet("rules"),
+  close: () => openSheet(null),
+  bg: (v, e) => { if (e.target.classList.contains("sheet")) openSheet(null); },
+};
+document.addEventListener("click", e => { const el = e.target.closest("[data-a]"); if (!el || el.disabled) return; const f = A[el.dataset.a]; if (f) f(el.dataset.v, e); });
+
+let lastSec = -1;
+function tick() {
+  const g = S.game; if (!g || S.screen !== "add") return;
+  const ms = Math.max(0, g.end - Date.now()), sec = Math.ceil(ms / 1000);
+  const t = document.getElementById("t"), tb = document.getElementById("tb");
+  if (t) { t.textContent = sec; t.classList.toggle("low", sec <= 5); }
+  if (tb) tb.style.width = (100 * ms / (S.addSecs * 1000)) + "%";
+  if (sec !== lastSec && sec <= 5 && sec > 0) buzz(15);
+  lastSec = sec;
+  if (ms <= 0) endAdd();
+}
+setInterval(tick, 100);
+
+function confetti() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c = document.getElementById("fx"), x = c.getContext("2d"), dpr = devicePixelRatio || 1;
+  c.width = innerWidth * dpr; c.height = innerHeight * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const P = [...Array(130)].map(() => ({ x: innerWidth / 2 + (Math.random() - .5) * 80, y: innerHeight * .3, vx: (Math.random() - .5) * 13, vy: -Math.random() * 14 - 4,
+    w: 6 + Math.random() * 6, h: 8 + Math.random() * 8, a: Math.random() * 6, va: (Math.random() - .5) * .4, c: BODY[Math.random() * BODY.length | 0] }));
+  const t0 = performance.now();
+  (function f(t) {
+    x.clearRect(0, 0, innerWidth, innerHeight);
+    for (const p of P) { p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.a += p.va;
+      x.save(); x.translate(p.x, p.y); x.rotate(p.a); x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); x.restore(); }
+    if (t - t0 < 3200) requestAnimationFrame(f); else x.clearRect(0, 0, innerWidth, innerHeight);
+  })(t0);
+}
+
+let lock = null;
+async function wake() { try { if ("wakeLock" in navigator && !lock) { lock = await navigator.wakeLock.request("screen"); lock.addEventListener("release", () => lock = null); } } catch (e) {} }
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.game) wake(); });
+
+load();
+render();
+</script>
+
+
+<script>
+// une seule appli : un seul service worker à la racine
+if ("serviceWorker" in navigator) addEventListener("load", async () => {
+  try { for (const r of await navigator.serviceWorker.getRegistrations()) if (!/\/undercovertelephone\/$/.test(r.scope) && r.scope !== new URL("../", location).href) r.unregister(); } catch (e) {}
+  navigator.serviceWorker.register("../sw.js", { scope: "../" }).catch(() => {});
+});
+</script>
+<!-- xq: bouton quitter commun -->
+<button id="xq" type="button" aria-label="Quitter la partie" hidden>✕</button>
+<style>
+#xq { position: fixed; z-index: 60; top: calc(env(safe-area-inset-top, 0px) + 10px); left: 12px; height: 38px; min-width: 38px; padding: 0 12px; border: 0; border-radius: 99px;
+  background: color-mix(in srgb, var(--surface, #fff) 88%, transparent); color: var(--ink, #111); font: 600 1rem Fredoka, system-ui, sans-serif;
+  box-shadow: 0 2px 10px rgba(0,0,0,.14); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); cursor: pointer; }
+#xq.sure { background: #ef4444; color: #fff; font-size: .9rem; }
+#xq[hidden] { display: none; }
+</style>
+<script>
+(() => {
+  const b = document.getElementById("xq"), app = document.getElementById("app");
+  const SKIP = ["home", "board", "stats", "rules", "playing", "count", "add"];
+  let t;
+  const reset = () => { b.classList.remove("sure"); b.textContent = "✕"; };
+  function upd() {
+    const sc = typeof S !== "undefined" ? S.screen : "home";
+    const has = app.querySelector('[data-a="quit"], [data-a="home"], a[href="../"]');
+    b.hidden = SKIP.includes(sc) || !!has;
+    if (b.hidden) reset();
+  }
+  b.addEventListener("click", () => {
+    if (!b.classList.contains("sure")) { b.classList.add("sure"); b.textContent = "Quitter la partie ?"; clearTimeout(t); t = setTimeout(reset, 3000); return; }
+    try { S.game = null; S.screen = "home"; save(); } catch (e) {}
+    location.reload();
+  });
+  new MutationObserver(upd).observe(app, { childList: true, subtree: true });
+  upd();
+})();
+</script>
+</body>
+</html>

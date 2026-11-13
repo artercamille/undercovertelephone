@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#7c3aed">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tablée">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" type="image/png" href="../icons/favicon-64.png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<title>Le Juste Chiffre</title>
+<style>
+
+/* Tablée : un écran = un titre, une consigne, un bouton ; chaque jeu a sa couleur. */
+:root {
+  --bg: #ffffff;
+  --surface: #f3f3f5;
+  --surface-2: #e9e9ed;
+  --ink: #111114;
+  --muted: #6e6e76;
+  --accent: #ff5a1f;
+  --accent-ink: #ffffff;
+  --civil: #16a34a;
+  --under: #e11d48;
+  --white: #71717a;
+  --font: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-weight: 500; font-size: 17px; line-height: 1.35;
+  -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+input { -webkit-user-select: text; user-select: text; }
+.app { max-width: 440px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; gap: 20px;
+  padding-block: 26px 28px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.logo { text-align: center; font-size: 2.6rem; font-weight: 700; line-height: 1; }
+.logo i { font-style: normal; color: var(--accent); }
+h2 { margin: 0; font-size: 1.8rem; font-weight: 700; line-height: 1.12; text-align: center; text-wrap: balance; }
+.sub { text-align: center; color: var(--muted); margin-top: -10px; text-wrap: balance; }
+.label { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.spacer { flex: 1; }
+.pop { animation: pop .3s ease-out backwards; }
+@keyframes pop { from { transform: translateY(8px); opacity: 0 } }
+
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
+.btn { width: 100%; min-height: 60px; border-radius: 16px; background: var(--accent); color: var(--accent-ink); font-size: 1.2rem; font-weight: 600; transition: transform .08s, opacity .15s; }
+.btn:active { transform: scale(.98); }
+.btn.alt, .btn.soft { background: var(--surface); color: var(--ink); }
+.btn:disabled { opacity: .35; }
+.link { color: var(--muted); font-weight: 500; font-size: .95rem; padding: 10px; }
+.links { display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 12px; }
+
+.box { background: var(--surface); border-radius: 18px; padding: 2px 16px; }
+.line { display: flex; align-items: center; gap: 12px; min-height: 62px; }
+.line + .line { border-top: 1px solid var(--surface-2); }
+.line .name { flex: 1; font-weight: 600; }
+.line .name small { display: block; color: var(--muted); font-size: .82rem; font-weight: 500; }
+.step { display: flex; align-items: center; gap: 4px; }
+.step button { width: 40px; height: 40px; border-radius: 50%; background: var(--bg); font-size: 1.3rem; font-weight: 600; }
+.step button:active { transform: scale(.9); }
+.step span { min-width: 54px; text-align: center; font-weight: 600; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.big { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.big .step { gap: 20px; }
+.big .step button { width: 56px; height: 56px; font-size: 1.7rem; background: var(--surface); }
+.big .step span.count { font-size: 4.2rem; font-weight: 700; min-width: 90px; line-height: 1; }
+.chips { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-top: -6px; }
+.chip { font-size: .88rem; font-weight: 600; padding: 4px 12px; border-radius: 99px; background: var(--surface); }
+.chip.civil { color: var(--civil); } .chip.undercover { color: var(--under); } .chip.white { color: var(--white); }
+
+/* cartes */
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.card { aspect-ratio: 3 / 4; border-radius: 16px; background: var(--accent); color: var(--accent-ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px;
+  animation: pop .3s ease-out backwards; transition: transform .1s; }
+.card .q { font-size: 2.4rem; font-weight: 700; line-height: 1; }
+.card .num { font-size: .8rem; font-weight: 600; opacity: .8; }
+.card:active { transform: scale(.95); }
+.card.taken { background: var(--surface); color: var(--muted); pointer-events: none; font-weight: 600; font-size: .95rem; text-align: center; overflow-wrap: anywhere; gap: 8px; }
+
+/* qui es-tu */
+input[type=text] { width: 100%; min-height: 58px; border-radius: 16px; border: 2px solid var(--surface-2); background: var(--bg); color: var(--ink);
+  font: inherit; font-size: 1.2rem; font-weight: 600; padding: 0 18px; }
+input[type=text]:focus { border-color: var(--accent); outline: none; }
+input::placeholder { color: var(--muted); font-weight: 500; }
+.list { display: flex; flex-direction: column; background: var(--surface); border-radius: 18px; overflow: hidden; }
+.list:empty { display: none; }
+.who { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 8px 14px; text-align: left; }
+.who + .who { border-top: 1px solid var(--surface-2); }
+.who:active { background: var(--surface-2); }
+.who .t { flex: 1; min-width: 0; font-weight: 600; font-size: 1.1rem; overflow-wrap: anywhere; }
+.who .t small { display: block; color: var(--muted); font-weight: 500; font-size: .82rem; }
+.who .go { color: var(--muted); font-size: 1.3rem; }
+.who.new { background: var(--accent); color: var(--accent-ink); }
+.who.new .t small, .who.new .go { color: var(--accent-ink); opacity: .85; }
+.who.sel { background: var(--ink); color: var(--bg); }
+.who.sel .t small, .who.sel .n { color: var(--bg); opacity: .7; }
+.who .n { width: 20px; text-align: center; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.av { --c: var(--accent); width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  background: var(--c); color: #fff; font-weight: 700; font-size: 1.05rem; }
+.av.dead { filter: grayscale(1); opacity: .5; }
+.av.xl { width: 84px; height: 84px; font-size: 2.2rem; }
+.empty { text-align: center; color: var(--muted); padding: 14px; font-size: .95rem; text-wrap: balance; }
+
+/* révélations */
+.reveal { background: var(--surface); border-radius: 24px; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  animation: pop .3s ease-out backwards; }
+.word { font-size: 2.9rem; font-weight: 700; line-height: 1.05; text-wrap: balance; max-width: 100%; }
+.role { font-size: 2.9rem; font-weight: 700; line-height: 1; }
+.role.civil { color: var(--civil); } .role.undercover { color: var(--under); } .role.white { color: var(--white); }
+.hint { color: var(--muted); font-size: .98rem; text-wrap: balance; }
+.reveal input[type=text] { text-align: center; }
+
+/* fin + stats */
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pair > div { background: var(--surface); border-radius: 18px; padding: 14px 10px; text-align: center; }
+.pair b { display: block; font-size: 1.15rem; font-weight: 700; overflow-wrap: anywhere; margin-top: 2px; }
+.res { display: flex; align-items: center; gap: 10px; min-height: 60px; font-variant-numeric: tabular-nums; }
+.res + .res { border-top: 1px solid var(--surface-2); }
+.res .t { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.res .t small { display: block; font-size: .8rem; font-weight: 600; }
+.res.dead .t > span { color: var(--muted); }
+.res .g { font-weight: 700; color: var(--civil); min-width: 34px; text-align: right; }
+.res .win { font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--accent); color: var(--accent-ink); }
+.r.civil { color: var(--civil); } .r.undercover { color: var(--under); } .r.white { color: var(--white); }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tile { background: var(--surface); border-radius: 16px; padding: 12px 6px; text-align: center; }
+.tile b { display: block; font-size: 1.7rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tile span { font-size: .78rem; color: var(--muted); font-weight: 500; }
+.bars { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; }
+.bar { display: grid; grid-template-columns: 96px 1fr 44px; align-items: center; gap: 10px; font-size: .95rem; font-weight: 600; }
+.bar .tr { height: 10px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.bar .tr i { display: block; height: 100%; border-radius: 99px; }
+.bar em { font-style: normal; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; font-size: .85rem; }
+.rank { width: 22px; text-align: center; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rank.top { color: var(--accent); }
+.statcard { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+
+.sheet { position: fixed; inset: 0; z-index: 10; background: rgba(0,0,0,.4); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s; }
+@keyframes fade { from { opacity: 0 } }
+.sheet > div { width: min(100%, 440px); background: var(--bg); border-radius: 24px 24px 0 0; display: flex; flex-direction: column; gap: 14px; max-height: 90%; overflow-y: auto;
+  animation: up .25s ease-out;
+  padding: 24px max(20px, env(safe-area-inset-right, 0px)) max(22px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)); }
+@keyframes up { from { transform: translateY(40px) } }
+.rules p { margin: 0 0 10px; }
+.rules b { font-weight: 700; }
+/* ---- couche "juste milieu" : relief, dégradés, motif sur les cartes */
+:root { --accent-2: #ff2e63; --glow: rgba(255, 90, 31, .35); --shadow: 0 1px 2px rgba(20,20,30,.06), 0 8px 24px rgba(20,20,30,.08); --panel: #ffffff; --bg-2: #fff1ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; } }
+:root[data-theme="dark"] { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; }
+body { background: radial-gradient(120% 60% at 50% -10%, var(--bg-2), var(--bg) 60%) fixed, var(--bg); }
+.brand { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.mark { width: 74px; height: 74px; border-radius: 22px; display: grid; place-items: center; transform: rotate(-6deg);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 10px 26px var(--glow); }
+.mark svg { width: 46px; height: 46px; }
+.logo { font-size: 2.7rem; }
+.logo i { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.btn { background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 8px 20px var(--glow); }
+.btn.alt, .btn.soft { background: var(--panel); box-shadow: var(--shadow); }
+.btn:disabled { box-shadow: none; }
+.box, .list, .pair > div, .tile { background: var(--panel); box-shadow: var(--shadow); }
+.who + .who, .line + .line, .res + .res { border-top-color: var(--surface); }
+.step button { background: var(--surface); }
+.big .step button { background: var(--panel); box-shadow: var(--shadow); }
+.big .step span.count { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.chip { background: var(--panel); box-shadow: var(--shadow); }
+.card { position: relative; overflow: hidden; border-radius: 18px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.09) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--accent), var(--accent-2));
+  box-shadow: 0 8px 18px var(--glow); }
+.card::before { content: ""; position: absolute; inset: 6px; border-radius: 13px; border: 2px solid rgba(255,255,255,.35); pointer-events: none; }
+.card .q { width: 54%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.22); display: grid; place-items: center; font-size: 2rem; }
+.card:nth-child(3n+1) { transform: rotate(-2deg); } .card:nth-child(3n) { transform: rotate(2deg); }
+.card:active { transform: scale(.94); }
+.card.taken { background: var(--panel); box-shadow: var(--shadow); transform: none; }
+.card.taken::before { border-color: var(--surface); }
+.av { background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 60%, #ff2e63)); box-shadow: 0 3px 8px color-mix(in srgb, var(--c) 35%, transparent); }
+.who.new { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.who.sel { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+.who.sel .t small, .who.sel .n { color: #fff; }
+.reveal { background: var(--panel); box-shadow: var(--shadow); position: relative; overflow: hidden; padding-top: 0; animation: flipIn .5s cubic-bezier(.2,1.2,.4,1) backwards; }
+@keyframes flipIn { from { transform: perspective(900px) rotateY(70deg); opacity: 0 } }
+.reveal::before { content: ""; display: block; align-self: stretch; height: 92px; margin: 0 -20px 4px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2))); }
+.reveal .av.xl { margin-top: -66px; box-shadow: 0 0 0 6px var(--panel), 0 8px 18px rgba(0,0,0,.18); }
+.reveal.civil { --band1: #22c55e; --band2: #0d9488; }
+.reveal.undercover { --band1: #f43f5e; --band2: #be123c; }
+.reveal.white { --band1: #a1a1aa; --band2: #52525b; }
+.reveal.wordcard .word { background: linear-gradient(135deg, var(--ink), color-mix(in srgb, var(--ink) 60%, var(--accent))); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 4px; }
+.res .win { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.tile b { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.endhead { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px; border-radius: 24px; color: #fff; text-align: center;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2)));
+  box-shadow: var(--shadow); animation: pop .4s ease-out backwards; }
+.endhead.civils { --band1: #22c55e; --band2: #0d9488; } .endhead.imposteurs { --band1: #f43f5e; --band2: #be123c; } .endhead.white { --band1: #71717a; --band2: #3f3f46; }
+.endhead h2 { color: #fff; }
+.endhead .label { color: rgba(255,255,255,.85); }
+.sheet > div { background: var(--bg); }
+canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ---- Le Juste Chiffre : violet → ambre */
+:root { --accent: #7c3aed; --accent-2: #f59e0b; --glow: rgba(124, 58, 237, .28); --bg-2: #f5f0ff; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent: #a78bfa; --accent-2: #fbbf24; --glow: rgba(167, 139, 250, .25); --bg-2: #17122a; } }
+:root[data-theme="dark"] { --accent: #a78bfa; --accent-2: #fbbf24; --glow: rgba(167, 139, 250, .25); --bg-2: #17122a; }
+
+.qcard { border-radius: 24px; padding: 26px 20px; color: #fff; text-align: center; min-height: 180px; display: grid; place-items: center;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.09) 0 12px, transparent 12px 24px), linear-gradient(150deg, var(--accent), var(--accent-2)); box-shadow: 0 12px 26px var(--glow); }
+.qq { font-size: 1.6rem; font-weight: 700; line-height: 1.2; text-wrap: balance; }
+.bignum { font-size: 2.6rem; font-weight: 700; line-height: 1.05; text-wrap: balance;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.mini { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; color: var(--muted); font-weight: 600; font-size: .9rem; }
+.mini b { color: var(--ink); }
+.pick { justify-content: center; padding: 0; }
+.pchip.on { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+.pchip.on i { color: #fff; font-size: .85rem; font-weight: 700; }
+.res .tot { font-weight: 700; font-size: 1.25rem; min-width: 32px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ---- éléments communs aux nouveaux jeux */
+.endhead.main { --band1: var(--accent); --band2: var(--accent-2); }
+.reveal.main { --band1: var(--accent); --band2: var(--accent-2); }
+.place-name { font-size: 2.2rem; font-weight: 700; line-height: 1.08; text-wrap: balance; max-width: 100%; }
+.teambox { background: var(--panel); box-shadow: var(--shadow); border-radius: 20px; overflow: hidden; }
+.teamhead { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 16px; color: #fff; font-weight: 700; font-size: 1.1rem;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(135deg, var(--band1, var(--accent)), var(--band2, var(--accent-2))); }
+.teamhead small { font-weight: 600; opacity: .9; font-size: .85rem; }
+.chips2 { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; }
+.pchip { display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; border-radius: 99px; background: var(--surface); font-weight: 600; font-size: .98rem; }
+.pchip .av { width: 30px; height: 30px; font-size: .85rem; }
+.pchip i { font-style: normal; color: var(--muted); font-size: 1.2rem; margin-left: 2px; }
+.pchip.add { padding: 0 16px; min-height: 38px; color: var(--accent); background: transparent; box-shadow: inset 0 0 0 2px var(--surface-2); }
+.res .tot { font-weight: 700; font-size: 1.25rem; min-width: 32px; text-align: right; font-variant-numeric: tabular-nums; }
+.tdot { width: 22px; height: 22px; border-radius: 50%; flex: none; background: linear-gradient(135deg, var(--band1), var(--band2)); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.two .btn { font-size: 1.05rem; min-height: 56px; }
+.toggle { width: 100%; text-align: left; }
+.toggle .name { flex: 1; }
+.sw { width: 48px; height: 28px; border-radius: 99px; background: var(--surface-2); position: relative; transition: background .2s; flex: none; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.sw.on { background: var(--accent); } .sw.on::after { transform: translateX(20px); }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; background: var(--surface); border-radius: 14px; padding: 4px; }
+.seg button { min-height: 44px; border-radius: 11px; font-weight: 600; color: var(--muted); padding: 0 6px; }
+.seg button.on { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; box-shadow: 0 4px 12px var(--glow); }
+.rolebox { background: var(--surface); border-radius: 14px; padding: 10px 16px; font-weight: 600; }
+.rolebox small { display: block; color: var(--muted); font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
+.clock { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 16px; }
+.clock b { font-size: 3.4rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.clock.low b { background: none; color: var(--under); animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: .4 } }
+.clock .row { display: flex; gap: 8px; margin-top: 8px; }
+.clock .row button { padding: 8px 16px; border-radius: 99px; background: var(--surface); font-weight: 600; font-size: .95rem; }
+
+.qtext { font-size: 1.55rem; font-weight: 700; line-height: 1.2; text-wrap: balance; }
+.endhead.imp { --band1: #334155; --band2: #0f172a; }
+.who .ans { font-size: 1.1rem; max-width: 50%; text-align: right; overflow-wrap: anywhere; }
+.res .g { font-weight: 700; color: var(--civil); min-width: 30px; text-align: right; }
+.rules p { margin: 0 0 10px; }
+
+</style>
+<style>
+@font-face { font-family: "Fredoka"; src: url("../Fredoka.ttf") format("truetype"); font-weight: 300 700; font-display: swap; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+html { overscroll-behavior: none; }
+body.full { overflow: hidden; }
+.backmenu { align-self: flex-start; color: var(--muted); font-weight: 600; text-decoration: none; padding: 6px 2px; margin-bottom: -12px; }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div id="sheet"></div>
+<script>
+// ---------- outils communs à tous les jeux Tablée
+const BODY = ["#3b5bff", "#ff5a1f", "#16a34a", "#9333ea", "#db2777", "#0891b2", "#ca8a04", "#4f46e5", "#ea580c", "#0d9488"];
+const NAME_KEYS = ["auracover_poche5", "auraspy1", "auratime1", "auratete1", "auraloup2", "auraapero1", "tablee_milieu", "tablee_codes", "tablee_preferes", "tablee_artiste", "tablee_motcache", "tablee_piege", "tablee_mdp", "tablee_regle", "tablee_tabou", "tablee_burger", "tablee_chiffre"];
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+const fold = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+function seedOf(s) { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+const av = (nm, cls = "") => `<span class="av ${cls}" style="--c:${BODY[seedOf(nm || "?") % BODY.length]}" aria-hidden="true">${esc((nm.trim()[0] || "?").toUpperCase())}</span>`;
+const plural = (n, w) => `${n} ${w}${n > 1 ? "s" : ""}`;
+const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const rnd = n => Math.random() * n | 0;
+function knownNames(own) {
+  const set = new Set(Object.keys(own || {}));
+  for (const k of NAME_KEYS) try { const c = JSON.parse(localStorage.getItem(k) || "{}"); for (const n of Object.keys(c.people || {})) set.add(n); } catch (e) {}
+  return [...set];
+}
+// liste « qui es-tu ? » : prénoms connus filtrés + « nouveau joueur »
+function nameList(q, exclude, people, act) {
+  const f = fold(q), all = knownNames(people), used = new Set(exclude);
+  const list = all.filter(n => !used.has(n) && fold(n).includes(f)).sort((a, b) => ((people[b] || {}).last || 0) - ((people[a] || {}).last || 0) || a.localeCompare(b)).slice(0, 30);
+  const exact = all.some(n => fold(n) === f) || [...used].some(n => fold(n) === f);
+  let h = list.map(n => `<button class="who" data-a="${act}" data-v="${esc(n)}">${av(n)}<span class="t">${esc(n)}</span><span class="go">＋</span></button>`).join("");
+  if (q.trim() && !exact) h = `<button class="who new" data-a="${act}" data-v="${esc(q.trim().slice(0, 16))}">${av(q.trim())}<span class="t">${esc(q.trim())}<small>Nouveau joueur</small></span><span class="go">＋</span></button>` + h;
+  return h || `<div class="empty">Écris un prénom, le jeu s'en souviendra.</div>`;
+}
+const exactName = (v, people) => knownNames(people).find(n => fold(n) === fold(v)) || v.slice(0, 16);
+function confetti() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  let c = document.getElementById("fx"); if (!c) { c = document.createElement("canvas"); c.id = "fx"; document.body.appendChild(c); }
+  const x = c.getContext("2d"), dpr = devicePixelRatio || 1;
+  c.width = innerWidth * dpr; c.height = innerHeight * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const P = [...Array(130)].map(() => ({ x: innerWidth / 2 + (Math.random() - .5) * 80, y: innerHeight * .3, vx: (Math.random() - .5) * 13, vy: -Math.random() * 14 - 4,
+    w: 6 + Math.random() * 6, h: 8 + Math.random() * 8, a: Math.random() * 6, va: (Math.random() - .5) * .4, c: BODY[Math.random() * BODY.length | 0] }));
+  const t0 = performance.now(), W = innerWidth, H = innerHeight;
+  (function f(t) {
+    if (innerWidth !== W || innerHeight !== H) { c.width = c.width; return; }
+    x.clearRect(0, 0, innerWidth, innerHeight);
+    for (const p of P) { p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.a += p.va;
+      x.save(); x.translate(p.x, p.y); x.rotate(p.a); x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); x.restore(); }
+    if (t - t0 < 3200) requestAnimationFrame(f); else x.clearRect(0, 0, innerWidth, innerHeight);
+  })(t0);
+}
+let wakeLock = null;
+async function wake() { try { if ("wakeLock" in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request("screen"); wakeLock.addEventListener("release", () => wakeLock = null); } } catch (e) {} }
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") wake(); });
+const step = (act, val, cls = "") => `<div class="step"><button data-a="${act}" data-v="-1" aria-label="Moins">−</button><span class="${cls}">${val}</span><button data-a="${act}" data-v="1" aria-label="Plus">+</button></div>`;
+
+const QS = [["Combien mesure la tour Eiffel, antennes comprises (en mètres) ?", "330 m", "Sans antenne, elle fait environ 300 m."], ["Combien de marches y a-t-il dans la tour Eiffel jusqu'au sommet ?", "1 665 marches", "Le public ne peut monter à pied que jusqu'au 2e étage."], ["Combien d'os y a-t-il dans le corps d'un adulte ?", "206 os", "Un bébé en a environ 300 : certains se soudent en grandissant."], ["Combien d'os y a-t-il dans une main ?", "27 os", ""], ["Combien de dents a un adulte, dents de sagesse comprises ?", "32 dents", ""], ["Combien de litres de sang a un adulte, environ ?", "5 litres", ""], ["Quelle est la température normale du corps humain (en °C) ?", "37 °C", ""], ["En quelle année l'homme a-t-il marché sur la Lune pour la première fois ?", "1969", "Neil Armstrong, le 21 juillet 1969 (heure française)."], ["En quelle année a eu lieu la prise de la Bastille ?", "1789", ""], ["En quelle année le Titanic a-t-il coulé ?", "1912", ""], ["En quelle année est tombé le mur de Berlin ?", "1989", ""], ["En quelle année est né Napoléon Bonaparte ?", "1769", ""], ["En quelle année Christophe Colomb a-t-il atteint l'Amérique ?", "1492", ""], ["En quelle année la tour Eiffel a-t-elle été inaugurée ?", "1889", "Pour l'Exposition universelle."], ["En quelle année est sorti le premier iPhone ?", "2007", ""], ["En quelle année a été créé Facebook ?", "2004", ""], ["En quelle année a été créé YouTube ?", "2005", ""], ["En quelle année a été créé Google ?", "1998", ""], ["En quelle année est sorti le premier Super Mario Bros. ?", "1985", ""], ["En quelle année est sorti le premier film Harry Potter ?", "2001", ""], ["En quelle année est sorti le film Titanic de James Cameron ?", "1997", ""], ["En quelle année la France a-t-elle gagné sa première Coupe du monde de football ?", "1998", ""], ["En quelle année a été inventé le Coca-Cola ?", "1886", ""], ["En quelle année est né Johnny Hallyday ?", "1943", ""], ["En quelle année est mort Michael Jackson ?", "2009", ""], ["En quelle année l'euro est-il arrivé dans nos porte-monnaie ?", "2002", "Les pièces et billets en euros sont arrivés le 1er janvier 2002."], ["En quelle année a été créé le Tour de France ?", "1903", ""], ["En quelle année ont eu lieu les premiers Jeux olympiques modernes ?", "1896", "À Athènes."], ["En quelle année est sorti le premier épisode des Simpson (en série) ?", "1989", ""], ["Combien de Pokémon dans la toute première génération ?", "151", ""], ["Combien d'épisodes compte la série Friends ?", "236 épisodes", "Sur 10 saisons."], ["Combien de saisons compte Game of Thrones ?", "8 saisons", ""], ["Combien de films dans la saga Harry Potter ?", "8 films", "Le dernier livre a été coupé en deux films."], ["Combien de livres dans la saga Harry Potter ?", "7 livres", ""], ["Combien de touches sur un piano classique ?", "88 touches", "52 blanches et 36 noires."], ["Combien de cases sur un échiquier ?", "64 cases", ""], ["Combien de cartes dans un jeu de tarot ?", "78 cartes", ""], ["Combien de dominos dans un jeu classique ?", "28 dominos", ""], ["Combien de cases sur le plateau du Monopoly ?", "40 cases", ""], ["Combien de pays dans l'Union européenne ?", "27 pays", "Depuis le départ du Royaume-Uni en 2020."], ["Combien de départements en France, outre-mer compris ?", "101 départements", ""], ["Combien de pays membres de l'ONU ?", "193 pays", ""], ["Combien de pays en Afrique ?", "54 pays", ""], ["Combien d'États aux États-Unis ?", "50 États", ""], ["Combien d'étoiles sur le drapeau américain ?", "50 étoiles", "Une par État."], ["Combien d'habitants en France, environ ?", "68 millions", ""], ["Combien d'habitants sur Terre, environ ?", "8 milliards", "Le cap des 8 milliards a été franchi fin 2022."], ["Combien d'habitants à Marseille, environ ?", "870 000 habitants", "C'est la 2e ville de France."], ["Combien de kilomètres entre Paris et Marseille par la route, environ ?", "775 km", ""], ["Combien de kilomètres fait un marathon ?", "42,195 km", ""], ["Combien mesure le mont Everest (en mètres) ?", "8 849 m", "Mesure officielle de 2020."], ["Combien mesure le Burj Khalifa à Dubaï (en mètres) ?", "828 m", "C'est la plus haute tour du monde."], ["Combien mesure la statue de la Liberté, du sol à la torche (en mètres) ?", "93 m", "La statue seule fait environ 46 m."], ["Combien de kilomètres mesure la Seine ?", "777 km", ""], ["Combien de kilomètres entre la Terre et la Lune, environ ?", "384 000 km", ""], ["Combien de kilomètres entre la Terre et le Soleil, environ ?", "150 millions de km", ""], ["Quelle est la vitesse de la lumière (en km par seconde), environ ?", "300 000 km/s", ""], ["Combien de planètes dans le système solaire ?", "8 planètes", "Pluton n'en fait plus partie depuis 2006."], ["Combien de jours met la Terre pour faire le tour du Soleil ?", "365 jours (et 6 heures)", "D'où les années bissextiles."], ["Combien de minutes met la lumière du Soleil pour arriver sur Terre ?", "Environ 8 minutes", ""], ["Combien de degrés fait-il à la surface du Soleil, environ ?", "5 500 °C", ""], ["À combien de degrés bout l'eau au niveau de la mer ?", "100 °C", ""], ["Combien de cœurs a une pieuvre ?", "3 cœurs", ""], ["Combien de dents a un escargot, environ ?", "Environ 14 000", "Des dents minuscules sur sa langue râpeuse."], ["Combien de temps dure la grossesse d'un éléphant (en mois) ?", "22 mois", ""], ["Combien pèse un éléphant d'Afrique adulte, environ (en tonnes) ?", "Environ 6 tonnes", ""], ["Combien pèse le cœur d'une baleine bleue, environ (en kilos) ?", "Environ 180 kg", ""], ["Combien mesure une girafe adulte, environ (en mètres) ?", "Environ 5 m", ""], ["À quelle vitesse peut courir un guépard (en km/h) ?", "Environ 110 km/h", ""], ["Combien d'heures par jour dort un koala, environ ?", "Environ 20 heures", ""], ["Combien d'heures par jour dort un chat, environ ?", "Entre 12 et 16 heures", ""], ["Combien d'années vit une tortue géante, environ ?", "Plus de 100 ans", ""], ["Combien d'œufs pond une poule par an, environ ?", "Environ 300 œufs", "Pour une poule pondeuse."], ["Combien de pattes ont 3 araignées et 2 chats ensemble ?", "32 pattes", "3 × 8 + 2 × 4."], ["Combien de buts Zidane a-t-il marqués en finale de la Coupe du monde 1998 ?", "2 buts", "Deux coups de tête."], ["Combien de Ballons d'or a gagnés Lionel Messi ?", "8", "Un record."], ["Combien de tournois du Grand Chelem a gagnés Roger Federer en simple ?", "20", ""], ["Combien de fois Rafael Nadal a-t-il gagné Roland-Garros ?", "14 fois", ""], ["Combien de minutes dure un match de foot, hors arrêts de jeu ?", "90 minutes", ""], ["Combien mesure un terrain de tennis en longueur (en mètres) ?", "23,77 m", ""], ["À quelle hauteur est le panier de basket (en mètres) ?", "3,05 m", ""], ["Combien mesure une piscine olympique (en mètres) ?", "50 m", ""], ["Combien de joueurs au total sur un terrain de rugby à XV ?", "30 joueurs", "15 par équipe."], ["Combien de kilomètres fait le Tour de France, environ ?", "Environ 3 400 km", "Ça change chaque année."], ["Combien de trous sur une balle de golf, environ ?", "Entre 300 et 500", "La plupart en ont autour de 350 à 400."], ["Combien de calories dans un Big Mac, environ ?", "Environ 500 kcal", ""], ["Combien de morceaux de sucre dans une canette de Coca de 33 cl, environ ?", "Environ 7 morceaux", "Environ 35 g de sucre."], ["Combien de litres d'eau faut-il pour remplir une baignoire, environ ?", "Environ 150 litres", ""], ["Combien de grains de riz dans un kilo, environ ?", "Environ 50 000", ""], ["Combien de cheveux a-t-on sur la tête, environ ?", "Environ 100 000", ""], ["Combien de fois le cœur bat-il par minute au repos, environ ?", "Entre 60 et 80", ""], ["Combien de mots dans le dictionnaire Le Petit Robert, environ ?", "Environ 60 000 mots", ""], ["Combien de lettres dans l'alphabet ?", "26 lettres", ""], ["Combien de langues parle-t-on dans le monde, environ ?", "Environ 7 000", ""], ["Combien de pays ont le français comme langue officielle, environ ?", "Une trentaine (29)", ""], ["Combien de faces a un dé de jeu de rôle « D20 » ?", "20 faces", ""], ["Combien de km/h atteint un TGV en service commercial ?", "320 km/h", ""], ["Combien de passagers peut transporter un Airbus A380, au maximum ?", "853 passagers", "En configuration tout en classe éco."], ["Combien de km/h atteint une Formule 1, environ, au maximum ?", "Environ 350 km/h", ""], ["Combien de vols décollent dans le monde chaque jour, environ ?", "Environ 100 000", ""], ["Combien de stations de métro à Paris, environ ?", "Environ 300", ""], ["Combien de kilomètres fait le périphérique parisien ?", "35 km", ""], ["Combien d'années a régné Louis XIV ?", "72 ans", "De 1643 à 1715, le plus long règne de l'histoire de France."], ["Combien d'années a régné Elizabeth II ?", "70 ans", ""], ["Quel âge avait Elizabeth II à sa mort ?", "96 ans", ""], ["Quel âge avait Mozart à sa mort ?", "35 ans", ""], ["Quel âge avait Emmanuel Macron quand il a été élu président en 2017 ?", "39 ans", ""], ["Combien de présidents a eu la Ve République ?", "8 présidents", "De Gaulle, Pompidou, Giscard d'Estaing, Mitterrand, Chirac, Sarkozy, Hollande, Macron."], ["Combien de secondes dans une journée ?", "86 400 secondes", ""], ["Combien de minutes dans une semaine ?", "10 080 minutes", ""], ["Combien d'heures dans une année (non bissextile) ?", "8 760 heures", ""], ["Combien de jours a vécus une personne de 30 ans, environ ?", "Environ 11 000 jours", ""], ["Combien font 17 × 23 ?", "391", ""], ["Combien font 999 + 999 ?", "1 998", ""], ["Combien de zéros dans un milliard ?", "9 zéros", ""], ["Combien de kilos pèse un litre d'eau ?", "1 kg", ""], ["Combien pèse une pièce de 1 euro (en grammes) ?", "7,5 g", ""], ["Combien de fromages différents en France, environ ?", "Plus de 1 000", "On cite souvent « plus de 1 200 »."], ["Combien de baguettes sont vendues en France chaque jour, environ ?", "Environ 16 millions", "Le chiffre courant est 6 milliards par an."], ["Combien de litres de vin produit la France par an, environ ?", "Environ 4 à 5 milliards de litres", ""], ["Combien de kilos de fromage mange un Français par an, environ ?", "Environ 27 kg", ""], ["Combien de McDonald's en France, environ ?", "Environ 1 500", ""], ["Combien de restaurants McDonald's dans le monde, environ ?", "Environ 40 000", ""], ["Combien de vidéos sont mises en ligne sur YouTube chaque minute, environ (en heures) ?", "Environ 500 heures", "Le chiffre officiel publié est « plus de 500 heures par minute »."], ["Combien de disques Johnny Hallyday a-t-il vendus, environ (en millions) ?", "Environ 110 millions", ""], ["Combien de films Disney « Classiques d'animation », environ ?", "Plus de 60", ""], ["Combien de minutes dure le film Titanic, environ ?", "194 minutes", "Plus de 3 heures."], ["Combien de minutes dure un épisode des Simpson, environ ?", "22 minutes", ""], ["Combien de couleurs a un Rubik's Cube classique ?", "6 couleurs", ""], ["Combien de combinaisons possibles pour un Rubik's Cube, environ ?", "43 milliards de milliards", "Exactement 43 252 003 274 489 856 000."], ["Combien de pays traverse le Danube ?", "10 pays", "Le record pour un fleuve."], ["Combien de kilomètres mesure la Grande Muraille de Chine, environ ?", "Plus de 20 000 km", "Mesure de 2012, toutes branches comprises."], ["Combien de pyramides à Gizeh, les grandes ?", "3 grandes pyramides", "Khéops, Khéphren et Mykérinos."], ["Combien d'années a mis la construction de la tour Eiffel, environ ?", "2 ans", "De 1887 à 1889."], ["Combien de rivets dans la tour Eiffel, environ ?", "2,5 millions", ""], ["Combien de visiteurs par an au Louvre, environ (en millions) ?", "Environ 9 millions", "C'est le musée le plus visité du monde."], ["Combien de tableaux de Van Gogh a-t-il vendus de son vivant ?", "Un seul (selon la légende)", "La Vigne rouge, en 1890."], ["Combien de km parcourt-on à pied dans une vie, environ ?", "Environ 150 000 km", "Presque 4 fois le tour de la Terre."], ["Combien de litres de salive produit-on par jour, environ ?", "Environ 1 à 1,5 litre", ""], ["Combien de fois par jour cligne-t-on des yeux, environ ?", "Environ 15 000 fois", ""], ["Combien de rêves fait-on par nuit, environ ?", "4 à 6 rêves", "On en oublie la plupart."], ["Combien de temps (en minutes) un humain peut-il tenir en apnée, record du monde statique ?", "Plus de 11 minutes", "Sans oxygène pur au préalable."], ["Combien de temps (en secondes) dure le record du monde du 100 m ?", "9,58 s", "Usain Bolt, en 2009."], ["Combien de km/h a couru Usain Bolt au plus vite, environ ?", "Environ 44 km/h", "En pointe, lors de son record."]];   // [question, réponse, anecdote]
+const KEY = "tablee_chiffre";
+const MARK = `<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="9" width="34" height="30" rx="7" fill="#fff"/><text x="24" y="31" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="17" fill="#7c3aed">123</text></svg>`;
+
+let S = { screen: "home", players: [], nQ: 10, people: {}, recent: [], game: null };
+function load() { let d = null; try { d = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {} if (d) for (const k of Object.keys(S)) if (d[k] !== undefined) S[k] = d[k]; if (!S.game && S.screen !== "home") S.screen = "home"; }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function person(nm) { return S.people[nm] || (S.people[nm] = { games: 0, wins: 0, pts: 0, exact: 0, last: 0 }); }
+
+function newGame() {
+  const all = QS.map((_, i) => i); let p = all.filter(i => !S.recent.includes(i));
+  if (p.length < S.nQ) { S.recent = []; p = all; }
+  const qs = shuffle(p).slice(0, S.nQ);
+  S.recent = [...S.recent, ...qs].slice(-Math.floor(QS.length * .8));
+  S.game = { qs, k: 0, pts: Object.fromEntries(S.players.map(n => [n, 0])), exact: {}, sel: {}, ended: false };
+  go("q");
+}
+function nextQ() {
+  const g = S.game;
+  for (const [n, v] of Object.entries(g.sel)) { g.pts[n] = (g.pts[n] || 0) + v; if (v === 2) g.exact[n] = (g.exact[n] || 0) + 1; }
+  g.sel = {}; g.k++;
+  if (g.k >= g.qs.length) { finish(); return; }
+  go("q");
+}
+const ranking = g => S.players.slice().sort((a, b) => (g.pts[b] || 0) - (g.pts[a] || 0));
+function finish() {
+  const g = S.game, now = Date.now(), best = Math.max(...S.players.map(n => g.pts[n] || 0));
+  g.winners = best > 0 ? S.players.filter(n => (g.pts[n] || 0) === best) : [];
+  for (const n of S.players) { const p = person(n); p.games++; p.last = now; p.pts += g.pts[n] || 0; p.exact += g.exact[n] || 0; if (g.winners.includes(n)) p.wins++; }
+  g.ended = true; go("end"); if (g.winners.length) confetti();
+}
+
+const app = document.getElementById("app"), sheet = document.getElementById("sheet");
+function go(s) { S.screen = s; save(); render(); scrollTo(0, 0); }
+function render() {
+  const g = S.game; let h = "";
+  switch (S.screen) {
+    case "home": {
+      const ok = S.players.length >= 2;
+      h = `<a class="backmenu" href="../">‹ Menu</a><div class="brand"><span class="mark">${MARK}</span><div class="logo">Le Juste <i>Chiffre</i></div></div>
+        <div class="sub" style="margin-top:0">Une question, un chiffre à deviner. Chacun annonce le sien à voix haute, le plus proche marque le point.</div>
+        <div class="teambox"><div class="teamhead"><span>Les joueurs</span><small>${S.players.length} / 16</small></div>
+          <div class="chips2">${S.players.map((n, k) => `<button class="pchip" data-a="rm" data-v="${k}">${av(n)}<span>${esc(n)}</span><i>×</i></button>`).join("")}${S.players.length < 16 ? `<button class="pchip add" data-a="add">+ Ajouter</button>` : ""}</div></div>
+        <div class="box"><div class="line"><div class="name">Questions<small>${QS.length} questions en tout</small></div>${step("nQ", S.nQ)}</div></div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="play" ${ok ? "" : "disabled"}>${ok ? "Jouer" : "Il faut au moins 2 joueurs"}</button>
+        <div class="links"><button class="link" data-a="board">Scores</button><button class="link" data-a="rules">Règles</button><a class="link" href="../" style="text-decoration:none">‹ Menu</a></div>`;
+      break;
+    }
+    case "q": {
+      const q = QS[g.qs[g.k]];
+      h = `<div class="label" style="text-align:center">Question ${g.k + 1} sur ${g.qs.length}</div>
+        <div class="qcard"><div class="qq">${esc(q[0])}</div></div>
+        <div class="hint" style="text-align:center">Chacun annonce son chiffre à voix haute, l'un après l'autre. Pas le droit de dire le même chiffre qu'un autre !</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="reveal">Révéler la réponse</button>
+        ${g.k ? `<div class="mini">${ranking(g).slice(0, 3).map((n, i) => `<span>${i + 1}. ${esc(n)} <b>${g.pts[n] || 0}</b></span>`).join("")}</div>` : ""}`;
+      break;
+    }
+    case "a": {
+      const q = QS[g.qs[g.k]];
+      h = `<div class="label" style="text-align:center">Question ${g.k + 1} sur ${g.qs.length}</div>
+        <div class="hint" style="text-align:center">${esc(q[0])}</div>
+        <div class="reveal main ans"><div class="label">La réponse</div><div class="bignum">${esc(q[1])}</div>${q[2] ? `<div class="hint">${esc(q[2])}</div>` : ""}</div>
+        <div class="label" style="text-align:center">Qui était le plus proche ? Touche une fois (+1), deux fois si c'est pile la réponse (+2).</div>
+        <div class="chips2 pick">${S.players.map(n => { const v = g.sel[n] || 0; return `<button class="pchip ${v ? "on" : ""}" data-a="sel" data-v="${esc(n)}">${av(n)}<span>${esc(n)}</span>${v ? `<i>${v === 2 ? "Pile ! +2" : "+1"}</i>` : ""}</button>`; }).join("")}</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="next">${g.k + 1 >= g.qs.length ? "Voir le classement" : "Question suivante"}</button>`;
+      break;
+    }
+    case "end": {
+      const r = ranking(g), w = g.winners;
+      h = `<div class="endhead main"><div class="label">Partie terminée</div><h2>${!w.length ? "Personne n'a marqué !" : w.length > 1 ? "Égalité !" : `${esc(w[0])} gagne !`}</h2></div>
+        <div class="box">${r.map((n, i) => `<div class="res">${av(n)}<span class="t"><span>${esc(n)}</span><small style="color:var(--muted)">${g.exact[n] ? plural(g.exact[n], "réponse") + " pile" : ""}</small></span>${w.includes(n) ? `<span class="win">Gagné</span>` : ""}<span class="tot">${g.pts[n] || 0}</span></div>`).join("")}</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="play">Rejouer</button>
+        <div class="links"><button class="link" data-a="board">Scores</button><button class="link" data-a="home">Accueil</button><a class="link" href="../" style="text-decoration:none">‹ Menu</a></div>`;
+      break;
+    }
+  }
+  app.innerHTML = h;
+}
+let addQ = "";
+function openSheet(kind) {
+  if (!kind) { sheet.innerHTML = ""; return; }
+  if (kind === "rules") { sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true"><h2>Les règles</h2><div class="rules">
+    <p>Celui qui tient le téléphone lit la question à voix haute. <b>Chacun annonce son chiffre</b>, l'un après l'autre (on peut aussi l'écrire sur un papier pour éviter de copier).</p>
+    <p>On révèle la réponse. <b>Le plus proche gagne 1 point</b>. S'il a trouvé <b>pile</b> la bonne réponse, il gagne <b>2 points</b>. En cas d'égalité, les deux marquent.</p>
+    <p>Pour les réponses « environ », on prend le chiffre affiché comme référence.</p>
+    <p>Après le nombre de questions choisi, celui qui a le plus de points gagne.</p></div><button class="btn" data-a="close">Compris</button></div></div>`; return; }
+  if (kind === "board") { const list = Object.entries(S.people).filter(([, p]) => p.games).sort((a, b) => b[1].wins - a[1].wins || b[1].pts - a[1].pts);
+    sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true"><h2>Scores</h2><div class="box">${list.map(([n, p]) => `<div class="res">${av(n)}<span class="t"><span>${esc(n)}</span><small style="color:var(--muted)">${plural(p.wins, "victoire")} sur ${plural(p.games, "partie")} · ${plural(p.exact, "réponse")} pile</small></span><span class="tot">${p.pts}</span></div>`).join("") || `<div class="empty">Pas encore de partie.</div>`}</div>
+    <button class="btn" data-a="close">OK</button></div></div>`; return; }
+  sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true"><h2>Ajouter des joueurs</h2>
+    <input id="aq" type="text" maxlength="16" placeholder="Cherche ou écris un prénom" value="${esc(addQ)}" autocomplete="off" autocapitalize="words" enterkeyhint="done">
+    <div class="list" id="al">${nameList(addQ, S.players, S.people, "addName")}</div><button class="btn" data-a="close">OK</button></div></div>`;
+  const aq = document.getElementById("aq");
+  aq.oninput = () => { addQ = aq.value; document.getElementById("al").innerHTML = nameList(addQ, S.players, S.people, "addName"); };
+  aq.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); if (aq.value.trim()) addName(exactName(aq.value.trim(), S.people)); } };
+}
+function addName(n) { if (S.players.length >= 16 || S.players.includes(n)) return; S.players.push(n); person(n).last = Date.now(); addQ = ""; save(); render(); openSheet("add"); const aq = document.getElementById("aq"); if (aq) aq.focus(); }
+const A = {
+  add: () => { addQ = ""; openSheet("add"); }, addName: v => addName(v),
+  rm: v => { S.players.splice(+v, 1); save(); render(); },
+  nQ: d => { S.nQ = Math.max(5, Math.min(30, S.nQ + 5 * d)); save(); render(); },
+  play: () => { if (S.players.length < 2) return; wake(); newGame(); },
+  reveal: () => { buzz(30); go("a"); },
+  sel: v => { const g = S.game, c = g.sel[v] || 0; if (c === 2) delete g.sel[v]; else g.sel[v] = c + 1; buzz(15); save(); render(); },
+  next: () => nextQ(),
+  home: () => { if (S.game && S.game.ended) S.game = null; go("home"); },
+  board: () => openSheet("board"),
+  rules: () => openSheet("rules"), close: () => openSheet(null),
+  bg: (v, e) => { if (e.target.classList.contains("sheet")) openSheet(null); },
+};
+document.addEventListener("click", e => { const el = e.target.closest("[data-a]"); if (!el || el.disabled) return; const f = A[el.dataset.a]; if (f) f(el.dataset.v, e); });
+load(); render();
+
+
+
+</script>
+<script>
+// une seule appli : un seul service worker à la racine
+if ("serviceWorker" in navigator) addEventListener("load", async () => {
+  try { for (const r of await navigator.serviceWorker.getRegistrations()) if (r.scope !== new URL("../", location).href) r.unregister(); } catch (e) {}
+  navigator.serviceWorker.register("../sw.js", { scope: "../" }).catch(() => {});
+});
+</script>
+<!-- xq: bouton quitter commun -->
+<button id="xq" type="button" aria-label="Quitter la partie" hidden>✕</button>
+<style>
+#xq { position: fixed; z-index: 60; top: calc(env(safe-area-inset-top, 0px) + 10px); left: 12px; height: 38px; min-width: 38px; padding: 0 12px; border: 0; border-radius: 99px;
+  background: color-mix(in srgb, var(--surface, #fff) 88%, transparent); color: var(--ink, #111); font: 600 1rem Fredoka, system-ui, sans-serif;
+  box-shadow: 0 2px 10px rgba(0,0,0,.14); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); cursor: pointer; }
+#xq.sure { background: #ef4444; color: #fff; font-size: .9rem; }
+#xq[hidden] { display: none; }
+</style>
+<script>
+(() => {
+  const b = document.getElementById("xq"), app = document.getElementById("app");
+  const SKIP = ["home", "board", "stats", "rules", "playing", "count"];
+  let t;
+  const reset = () => { b.classList.remove("sure"); b.textContent = "✕"; };
+  function upd() {
+    const sc = typeof S !== "undefined" ? S.screen : "home";
+    const has = app.querySelector('[data-a="quit"], [data-a="home"], a[href="../"]');
+    b.hidden = SKIP.includes(sc) || !!has;
+    if (b.hidden) reset();
+  }
+  b.addEventListener("click", () => {
+    if (!b.classList.contains("sure")) { b.classList.add("sure"); b.textContent = "Quitter la partie ?"; clearTimeout(t); t = setTimeout(reset, 3000); return; }
+    try { S.game = null; S.screen = "home"; save(); } catch (e) {}
+    location.reload();
+  });
+  new MutationObserver(upd).observe(app, { childList: true, subtree: true });
+  upd();
+})();
+</script>
+</body>
+</html>
