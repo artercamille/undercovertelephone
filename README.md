@@ -17,6 +17,7 @@ Des jeux de soirée dans une seule appli, avec **un seul téléphone** pour tout
 | **Tabou** | Fais deviner le mot sans dire les mots interdits | 4 et plus | 462 cartes |
 | **Burger Quiz** | Ketchup contre Mayo : Nuggets, Sel ou poivre, Menus, Addition | 2 et plus | 382 questions |
 | **Le Juste Chiffre** | Un chiffre à deviner, le plus proche gagne | 2 et plus | 144 questions |
+| **Crack List** | Le Petit Bac en cartes, le premier sans cartes gagne | 2 à 8 | 303 listes |
 | **Mot de Passe** | Un mot par indice pour faire trouver le mot | 4 et plus | 2403 mots |
 | **Le Dernier Mot** | Trouvez le mot secret, puis le complice | 4 à 10 | 2885 mots |
 | **Time's Up** | Fais deviner des stars : décris, puis un seul mot | 4 et plus | 497 personnalités |
