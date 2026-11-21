@@ -15,6 +15,8 @@ Des jeux de soirée dans une seule appli, avec **un seul téléphone** pour tout
 | **La Question Piège** | Un seul joueur n'a pas eu la même question | 4 à 12 | 483 paires |
 | **La Règle** | Une règle secrète, un enquêteur, un chrono | 3 et plus | 201 règles |
 | **Le Classement** | Le juge classe ses potes, devinez la question secrète | 3 à 12 | 189 questions |
+| **Top Ten** | Chiffre secret de 1 à 10, le Cap'Ten remet tout le monde dans l'ordre (coopératif) | 4 à 11 | 282 thèmes |
+| **Devineuf** | Trouve les 9 réponses à une question avant la fin du chrono | 2 à 12 | 223 questions |
 | **Tabou** | Fais deviner le mot sans dire les mots interdits | 4 et plus | 462 cartes |
 | **Burger Quiz** | Ketchup contre Mayo : Nuggets, Sel ou poivre, Menus, Addition | 2 et plus | 382 questions |
 | **Le Juste Chiffre** | Un chiffre à deviner, le plus proche gagne | 2 et plus | 144 questions |
