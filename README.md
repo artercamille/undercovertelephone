@@ -14,6 +14,7 @@ Des jeux de soirée dans une seule appli, avec **un seul téléphone** pour tout
 | **Le Faux Artiste** | Tout le monde dessine, un seul fait semblant | 3 à 10 | 1275 mots |
 | **La Question Piège** | Un seul joueur n'a pas eu la même question | 4 à 12 | 483 paires |
 | **La Règle** | Une règle secrète, un enquêteur, un chrono | 3 et plus | 201 règles |
+| **Le Classement** | Le juge classe ses potes, devinez la question secrète | 3 à 12 | 189 questions |
 | **Tabou** | Fais deviner le mot sans dire les mots interdits | 4 et plus | 462 cartes |
 | **Burger Quiz** | Ketchup contre Mayo : Nuggets, Sel ou poivre, Menus, Addition | 2 et plus | 382 questions |
 | **Le Juste Chiffre** | Un chiffre à deviner, le plus proche gagne | 2 et plus | 144 questions |
