@@ -368,7 +368,7 @@ function load() {
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 function knownNames() {
   const set = new Set(Object.keys(S.people));
-  for (const k of ["auracover_poche5", "auraspy1", "auratime1", "auratete1", "auraloup2", "auraapero1", "tablee_milieu", "tablee_codes", "tablee_preferes", "tablee_artiste", "tablee_motcache", "tablee_piege", "tablee_mdp", "tablee_regle", "tablee_tabou", "tablee_burger", "tablee_chiffre", "tablee_crack", "tablee_classement", "tablee_topten", "tablee_devineuf", "tablee_justone", "tablee_timeline", "tablee_hitster", "tablee_blind", "tablee_tune"]) try { const c = JSON.parse(localStorage.getItem(k) || "{}"); for (const n of Object.keys(c.people || {})) set.add(n); } catch (e) {}
+  for (const k of ["auracover_poche5", "auraspy1", "auratime1", "auratete1", "auraloup2", "auraapero1", "tablee_milieu", "tablee_codes", "tablee_preferes", "tablee_artiste", "tablee_motcache", "tablee_piege", "tablee_mdp", "tablee_regle", "tablee_tabou", "tablee_burger", "tablee_chiffre", "tablee_crack", "tablee_classement", "tablee_topten", "tablee_devineuf", "tablee_justone", "tablee_timeline", "tablee_hitster", "tablee_blind", "tablee_tune", "tablee_famille"]) try { const c = JSON.parse(localStorage.getItem(k) || "{}"); for (const n of Object.keys(c.people || {})) set.add(n); } catch (e) {}
   return [...set];
 }
 const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));

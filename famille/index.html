@@ -1,0 +1,998 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10b981">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tablée">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" type="image/png" href="../icons/favicon-64.png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<title>Une famille en or</title>
+<style>
+
+/* Même mise en page que L'Intrus : un écran = un titre, une consigne, un bouton ; ici en vert. */
+:root {
+  --bg: #ffffff;
+  --surface: #f3f3f5;
+  --surface-2: #e9e9ed;
+  --ink: #111114;
+  --muted: #6e6e76;
+  --accent: #ff5a1f;
+  --accent-ink: #ffffff;
+  --civil: #16a34a;
+  --under: #e11d48;
+  --white: #71717a;
+  --font: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-weight: 500; font-size: 17px; line-height: 1.35;
+  -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+input { -webkit-user-select: text; user-select: text; }
+.app { max-width: 440px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; gap: 20px;
+  padding-block: 26px 28px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.logo { text-align: center; font-size: 2.6rem; font-weight: 700; line-height: 1; }
+.logo i { font-style: normal; color: var(--accent); }
+h2 { margin: 0; font-size: 1.8rem; font-weight: 700; line-height: 1.12; text-align: center; text-wrap: balance; }
+.sub { text-align: center; color: var(--muted); margin-top: -10px; text-wrap: balance; }
+.label { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.spacer { flex: 1; }
+.pop { animation: pop .3s ease-out backwards; }
+@keyframes pop { from { transform: translateY(8px); opacity: 0 } }
+
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
+.btn { width: 100%; min-height: 60px; border-radius: 16px; background: var(--accent); color: var(--accent-ink); font-size: 1.2rem; font-weight: 600; transition: transform .08s, opacity .15s; }
+.btn:active { transform: scale(.98); }
+.btn.alt, .btn.soft { background: var(--surface); color: var(--ink); }
+.btn:disabled { opacity: .35; }
+.link { color: var(--muted); font-weight: 500; font-size: .95rem; padding: 10px; }
+.links { display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 12px; }
+
+.box { background: var(--surface); border-radius: 18px; padding: 2px 16px; }
+.line { display: flex; align-items: center; gap: 12px; min-height: 62px; }
+.line + .line { border-top: 1px solid var(--surface-2); }
+.line .name { flex: 1; font-weight: 600; }
+.line .name small { display: block; color: var(--muted); font-size: .82rem; font-weight: 500; }
+.step { display: flex; align-items: center; gap: 4px; }
+.step button { width: 40px; height: 40px; border-radius: 50%; background: var(--bg); font-size: 1.3rem; font-weight: 600; }
+.step button:active { transform: scale(.9); }
+.step span { min-width: 54px; text-align: center; font-weight: 600; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.big { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.big .step { gap: 20px; }
+.big .step button { width: 56px; height: 56px; font-size: 1.7rem; background: var(--surface); }
+.big .step span.count { font-size: 4.2rem; font-weight: 700; min-width: 90px; line-height: 1; }
+.chips { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-top: -6px; }
+.chip { font-size: .88rem; font-weight: 600; padding: 4px 12px; border-radius: 99px; background: var(--surface); }
+.chip.civil { color: var(--civil); } .chip.undercover { color: var(--under); } .chip.white { color: var(--white); }
+
+/* cartes */
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.card { aspect-ratio: 3 / 4; border-radius: 16px; background: var(--accent); color: var(--accent-ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px;
+  animation: pop .3s ease-out backwards; transition: transform .1s; }
+.card .q { font-size: 2.4rem; font-weight: 700; line-height: 1; }
+.card .num { font-size: .8rem; font-weight: 600; opacity: .8; }
+.card:active { transform: scale(.95); }
+.card.taken { background: var(--surface); color: var(--muted); pointer-events: none; font-weight: 600; font-size: .95rem; text-align: center; overflow-wrap: anywhere; gap: 8px; }
+
+/* qui es-tu */
+input[type=text] { width: 100%; min-height: 58px; border-radius: 16px; border: 2px solid var(--surface-2); background: var(--bg); color: var(--ink);
+  font: inherit; font-size: 1.2rem; font-weight: 600; padding: 0 18px; }
+input[type=text]:focus { border-color: var(--accent); outline: none; }
+input::placeholder { color: var(--muted); font-weight: 500; }
+.list { display: flex; flex-direction: column; background: var(--surface); border-radius: 18px; overflow: hidden; }
+.list:empty { display: none; }
+.who { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 8px 14px; text-align: left; }
+.who + .who { border-top: 1px solid var(--surface-2); }
+.who:active { background: var(--surface-2); }
+.who .t { flex: 1; min-width: 0; font-weight: 600; font-size: 1.1rem; overflow-wrap: anywhere; }
+.who .t small { display: block; color: var(--muted); font-weight: 500; font-size: .82rem; }
+.who .go { color: var(--muted); font-size: 1.3rem; }
+.who.new { background: var(--accent); color: var(--accent-ink); }
+.who.new .t small, .who.new .go { color: var(--accent-ink); opacity: .85; }
+.who.sel { background: var(--ink); color: var(--bg); }
+.who.sel .t small, .who.sel .n { color: var(--bg); opacity: .7; }
+.who .n { width: 20px; text-align: center; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.av { --c: var(--accent); width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  background: var(--c); color: #fff; font-weight: 700; font-size: 1.05rem; }
+.av.dead { filter: grayscale(1); opacity: .5; }
+.av.xl { width: 84px; height: 84px; font-size: 2.2rem; }
+.empty { text-align: center; color: var(--muted); padding: 14px; font-size: .95rem; text-wrap: balance; }
+
+/* révélations */
+.reveal { background: var(--surface); border-radius: 24px; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  animation: pop .3s ease-out backwards; }
+.word { font-size: 2.9rem; font-weight: 700; line-height: 1.05; text-wrap: balance; max-width: 100%; }
+.role { font-size: 2.9rem; font-weight: 700; line-height: 1; }
+.role.civil { color: var(--civil); } .role.undercover { color: var(--under); } .role.white { color: var(--white); }
+.hint { color: var(--muted); font-size: .98rem; text-wrap: balance; }
+.reveal input[type=text] { text-align: center; }
+
+/* fin + stats */
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pair > div { background: var(--surface); border-radius: 18px; padding: 14px 10px; text-align: center; }
+.pair b { display: block; font-size: 1.15rem; font-weight: 700; overflow-wrap: anywhere; margin-top: 2px; }
+.res { display: flex; align-items: center; gap: 10px; min-height: 60px; font-variant-numeric: tabular-nums; }
+.res + .res { border-top: 1px solid var(--surface-2); }
+.res .t { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.res .t small { display: block; font-size: .8rem; font-weight: 600; }
+.res.dead .t > span { color: var(--muted); }
+.res .g { font-weight: 700; color: var(--civil); min-width: 34px; text-align: right; }
+.res .win { font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--accent); color: var(--accent-ink); }
+.r.civil { color: var(--civil); } .r.undercover { color: var(--under); } .r.white { color: var(--white); }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tile { background: var(--surface); border-radius: 16px; padding: 12px 6px; text-align: center; }
+.tile b { display: block; font-size: 1.7rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tile span { font-size: .78rem; color: var(--muted); font-weight: 500; }
+.bars { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; }
+.bar { display: grid; grid-template-columns: 96px 1fr 44px; align-items: center; gap: 10px; font-size: .95rem; font-weight: 600; }
+.bar .tr { height: 10px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.bar .tr i { display: block; height: 100%; border-radius: 99px; }
+.bar em { font-style: normal; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; font-size: .85rem; }
+.rank { width: 22px; text-align: center; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rank.top { color: var(--accent); }
+.statcard { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+
+.sheet { position: fixed; inset: 0; z-index: 10; background: rgba(0,0,0,.4); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s; }
+@keyframes fade { from { opacity: 0 } }
+.sheet > div { width: min(100%, 440px); background: var(--bg); border-radius: 24px 24px 0 0; display: flex; flex-direction: column; gap: 14px; max-height: 90%; overflow-y: auto;
+  animation: up .25s ease-out;
+  padding: 24px max(20px, env(safe-area-inset-right, 0px)) max(22px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)); }
+@keyframes up { from { transform: translateY(40px) } }
+.rules p { margin: 0 0 10px; }
+.rules b { font-weight: 700; }
+/* ---- couche "juste milieu" : relief, dégradés, motif sur les cartes */
+:root { --accent-2: #ff2e63; --glow: rgba(255, 90, 31, .35); --shadow: 0 1px 2px rgba(20,20,30,.06), 0 8px 24px rgba(20,20,30,.08); --panel: #ffffff; --bg-2: #fff1ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; } }
+:root[data-theme="dark"] { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; }
+body { background: radial-gradient(120% 60% at 50% -10%, var(--bg-2), var(--bg) 60%) fixed, var(--bg); }
+.brand { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.mark { width: 74px; height: 74px; border-radius: 22px; display: grid; place-items: center; transform: rotate(-6deg);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 10px 26px var(--glow); }
+.mark svg { width: 46px; height: 46px; }
+.logo { font-size: 2.7rem; }
+.logo i { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.btn { background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 8px 20px var(--glow); }
+.btn.alt, .btn.soft { background: var(--panel); box-shadow: var(--shadow); }
+.btn:disabled { box-shadow: none; }
+.box, .list, .pair > div, .tile { background: var(--panel); box-shadow: var(--shadow); }
+.who + .who, .line + .line, .res + .res { border-top-color: var(--surface); }
+.step button { background: var(--surface); }
+.big .step button { background: var(--panel); box-shadow: var(--shadow); }
+.big .step span.count { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.chip { background: var(--panel); box-shadow: var(--shadow); }
+.card { position: relative; overflow: hidden; border-radius: 18px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.09) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--accent), var(--accent-2));
+  box-shadow: 0 8px 18px var(--glow); }
+.card::before { content: ""; position: absolute; inset: 6px; border-radius: 13px; border: 2px solid rgba(255,255,255,.35); pointer-events: none; }
+.card .q { width: 54%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.22); display: grid; place-items: center; font-size: 2rem; }
+.card:nth-child(3n+1) { transform: rotate(-2deg); } .card:nth-child(3n) { transform: rotate(2deg); }
+.card:active { transform: scale(.94); }
+.card.taken { background: var(--panel); box-shadow: var(--shadow); transform: none; }
+.card.taken::before { border-color: var(--surface); }
+.av { background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 60%, #ff2e63)); box-shadow: 0 3px 8px color-mix(in srgb, var(--c) 35%, transparent); }
+.who.new { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.who.sel { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+.who.sel .t small, .who.sel .n { color: #fff; }
+.reveal { background: var(--panel); box-shadow: var(--shadow); position: relative; overflow: hidden; padding-top: 0; animation: flipIn .5s cubic-bezier(.2,1.2,.4,1) backwards; }
+@keyframes flipIn { from { transform: perspective(900px) rotateY(70deg); opacity: 0 } }
+.reveal::before { content: ""; display: block; align-self: stretch; height: 92px; margin: 0 -20px 4px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2))); }
+.reveal .av.xl { margin-top: -66px; box-shadow: 0 0 0 6px var(--panel), 0 8px 18px rgba(0,0,0,.18); }
+.reveal.civil { --band1: #22c55e; --band2: #0d9488; }
+.reveal.undercover { --band1: #f43f5e; --band2: #be123c; }
+.reveal.white { --band1: #a1a1aa; --band2: #52525b; }
+.reveal.wordcard .word { background: linear-gradient(135deg, var(--ink), color-mix(in srgb, var(--ink) 60%, var(--accent))); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 4px; }
+.res .win { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.tile b { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.endhead { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px; border-radius: 24px; color: #fff; text-align: center;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2)));
+  box-shadow: var(--shadow); animation: pop .4s ease-out backwards; }
+.endhead.civils { --band1: #22c55e; --band2: #0d9488; } .endhead.imposteurs { --band1: #f43f5e; --band2: #be123c; } .endhead.white { --band1: #71717a; --band2: #3f3f46; }
+.endhead h2 { color: #fff; }
+.endhead .label { color: rgba(255,255,255,.85); }
+.sheet > div { background: var(--bg); }
+canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ---- Une famille en or : or → bleu nuit */
+:root { --accent: #ca8a04; --accent-2: #1e40af; --glow: rgba(202, 138, 4, .3); --bg-2: #fbf6ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent: #eab308; --accent-2: #3b82f6; --glow: rgba(234, 179, 8, .22); --bg-2: #11141f; } }
+:root[data-theme="dark"] { --accent: #eab308; --accent-2: #3b82f6; --glow: rgba(234, 179, 8, .22); --bg-2: #11141f; }
+.reveal.place { --band1: var(--accent); --band2: var(--accent-2); }
+
+.reveal.place { --band1: var(--accent); --band2: var(--accent-2); }
+.endhead.agents { --band1: var(--accent); --band2: var(--accent-2); }
+.place-name { font-size: 2.4rem; font-weight: 700; line-height: 1.05; text-wrap: balance; max-width: 100%; }
+.roundnum { margin-top: -62px; width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; font-size: 3rem; font-weight: 700; color: #fff;
+  background: linear-gradient(135deg, var(--band1, var(--accent)), var(--band2, var(--accent-2))); box-shadow: 0 0 0 6px var(--panel), 0 8px 18px rgba(0,0,0,.18); }
+.teambox { background: var(--panel); box-shadow: var(--shadow); border-radius: 20px; overflow: hidden; }
+.teamhead { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 16px; color: #fff; font-weight: 700; font-size: 1.1rem;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(135deg, var(--band1), var(--band2)); }
+.teamhead small { font-weight: 500; opacity: .9; font-size: .85rem; }
+.chips2 { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; }
+.pchip { display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; border-radius: 99px; background: var(--surface); font-weight: 600; font-size: .98rem; }
+.pchip .av { width: 30px; height: 30px; font-size: .85rem; }
+.pchip i { font-style: normal; color: var(--muted); font-size: 1.2rem; margin-left: 2px; }
+.pchip.add { padding: 0 16px; min-height: 38px; color: var(--accent); background: transparent; box-shadow: inset 0 0 0 2px var(--surface-2); }
+.tdot { width: 22px; height: 22px; border-radius: 50%; flex: none; background: linear-gradient(135deg, var(--band1), var(--band2)); }
+.res .tot { font-weight: 700; font-size: 1.25rem; min-width: 32px; text-align: right; font-variant-numeric: tabular-nums; }
+.turnhead { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.tbig { font-size: 3rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.tbig.low { color: var(--under); animation: pulse .5s infinite alternate; }
+@keyframes pulse { to { transform: scale(1.12) } }
+.tbar { height: 10px; border-radius: 99px; background: var(--surface); overflow: hidden; margin-top: -8px; }
+.tbar i { display: block; height: 100%; width: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--band1), var(--band2)); transition: width .1s linear; }
+.bigcard { min-height: 280px; border-radius: 28px; padding: 28px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; color: #fff;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.09) 0 12px, transparent 12px 24px), linear-gradient(150deg, var(--band1), var(--band2));
+  box-shadow: 0 14px 30px rgba(0,0,0,.18); }
+.bigcard .label { color: rgba(255,255,255,.85); }
+.btn.found { min-height: 76px; font-size: 1.5rem; background: linear-gradient(135deg, #22c55e, #059669); box-shadow: 0 10px 24px rgba(34,197,94,.35); }
+
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; background: var(--surface); border-radius: 14px; padding: 4px; }
+.seg button { min-height: 42px; border-radius: 11px; font-weight: 600; color: var(--muted); padding: 0 6px; font-size: .86rem; }
+.seg button.on { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+
+.fbar { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: stretch; }
+.fbar:not(:has(.pot)) { grid-template-columns: 1fr 1fr; }
+.fs { border-radius: 16px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; gap: 6px; color: #fff; font-weight: 600;
+  background: linear-gradient(135deg, var(--band1), var(--band2)); box-shadow: var(--shadow); transition: transform .25s, box-shadow .25s, opacity .25s; }
+.fs b { font-size: 1.45rem; font-variant-numeric: tabular-nums; }
+.fbar:has(.fs.hi) .fs:not(.hi) { opacity: .55; }
+.fs.hi { transform: scale(1.04); box-shadow: 0 0 0 3px var(--bg, #fff), 0 0 0 5px var(--band1); }
+.pot { border-radius: 16px; padding: 4px 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.05;
+  background: linear-gradient(160deg, #fde68a, #f59e0b 55%, #b45309); color: #422006; box-shadow: 0 6px 16px rgba(217, 119, 6, .35), inset 0 1px 0 rgba(255,255,255,.6); }
+.pot small { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+.pot b { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.qcard { border-radius: 22px; padding: 16px 18px; color: #fff; text-align: center; display: flex; flex-direction: column; gap: 4px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.08) 0 12px, transparent 12px 24px), linear-gradient(150deg, var(--accent), var(--accent-2)); box-shadow: 0 12px 26px var(--glow); }
+.qcard small { font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; opacity: .9; }
+.qcard b { font-size: 1.32rem; line-height: 1.2; text-wrap: balance; }
+/* le tableau, façon plateau télé : bleu nuit et or */
+.fboard { --gold1: #fde68a; --gold2: #f59e0b; --gold3: #b45309; display: flex; flex-direction: column; gap: 7px; padding: 10px; border-radius: 22px;
+  background: radial-gradient(120% 90% at 50% 0%, #1e3a8a, #0b1640 70%); box-shadow: inset 0 0 0 2px rgba(253, 230, 138, .55), inset 0 0 24px rgba(0,0,0,.45), 0 14px 30px rgba(11, 22, 64, .35); }
+.frow { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 8px 6px 6px; border-radius: 14px; text-align: left; color: #fff;
+  background: linear-gradient(180deg, #23408f, #172c6b); box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 2px 0 rgba(0,0,0,.25); transition: transform .12s; perspective: 600px; }
+button.frow:not(:disabled):active { transform: scale(.97); }
+.frow .fn { width: 36px; height: 36px; flex: none; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 1.1rem; color: #422006;
+  background: radial-gradient(circle at 35% 30%, var(--gold1), var(--gold2) 60%, var(--gold3)); box-shadow: 0 2px 6px rgba(0,0,0,.35); }
+.frow .ft { flex: 1; min-width: 0; font-weight: 600; font-size: 1.02rem; line-height: 1.15; overflow-wrap: anywhere; display: flex; align-items: center; gap: 8px; }
+.frow .ft small { width: 10px; height: 10px; border-radius: 50%; flex: none; background: linear-gradient(135deg, var(--band1), var(--band2)); box-shadow: 0 0 0 2px rgba(255,255,255,.7); }
+.frow .fp { min-width: 44px; height: 36px; border-radius: 10px; display: grid; place-items: center; font-weight: 700; font-size: 1.15rem; font-variant-numeric: tabular-nums; background: rgba(0,0,0,.28); }
+.fboard.host .frow:not(.on) .ft, .fboard.host .frow:not(.on) .fp { opacity: .5; font-style: italic; }
+.fboard.host .frow:not(.on) .fp { background: rgba(0,0,0,.18); }
+.frow.on { color: #422006; background: linear-gradient(180deg, #fef3c7, #fcd34d 55%, #f59e0b); box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 2px 0 #92400e, 0 0 18px rgba(253, 224, 71, .35); }
+.frow.on.new { animation: flip .55s cubic-bezier(.2, 1.3, .4, 1); }
+.frow.on .fn { background: #172c6b; color: var(--gold1); }
+.frow.on .fp { background: rgba(120, 53, 15, .14); }
+.frow.miss { opacity: .6; }
+.frow.miss .ft { font-style: italic; }
+.fboard.public .frow:not(.on) .ft::before { content: ""; display: block; height: 10px; width: 70%; border-radius: 99px; background: rgba(255,255,255,.1); }
+@keyframes flip { from { transform: rotateX(-90deg); } to { transform: none; } }
+.say { text-align: center; font-weight: 600; font-size: 1.05rem; line-height: 1.3; text-wrap: balance; }
+.duel, .playline { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.vs { font-size: .82rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.whoami { display: inline-flex; align-items: center; gap: 8px; padding: 4px 14px 4px 4px; border-radius: 99px; color: #fff; font-weight: 700;
+  background: linear-gradient(135deg, var(--band1), var(--band2)); box-shadow: 0 6px 14px -6px var(--band1); }
+.whoami .av { width: 32px; height: 32px; font-size: .9rem; box-shadow: 0 0 0 2px rgba(255,255,255,.8); }
+.strk { display: flex; gap: 6px; }
+.strk b { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; font-size: 1.2rem; color: var(--muted); background: var(--surface); }
+.strk b.on { color: #fff; background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 4px 12px rgba(239,68,68,.45); animation: pop .3s ease-out; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn.tb { background: linear-gradient(135deg, var(--band1), var(--band2)); color: #fff; box-shadow: 0 8px 20px -8px var(--band1); }
+.btn.bad { background: linear-gradient(135deg, #ef4444, #be123c); color: #fff; box-shadow: 0 8px 20px rgba(239,68,68,.3); }
+.xo { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; pointer-events: none; background: rgba(0,0,0,.18); animation: xoFade 1.1s ease-out forwards; }
+.xo div { display: flex; gap: 10px; }
+.xo b { width: min(28vw, 130px); aspect-ratio: 1; border-radius: 22px; display: grid; place-items: center; font-size: min(22vw, 104px); line-height: 1; color: #fff;
+  background: linear-gradient(135deg, #ef4444, #991b1b); box-shadow: 0 0 0 4px rgba(255,255,255,.85), 0 20px 50px rgba(185, 28, 28, .6); animation: xoPop .35s cubic-bezier(.2, 1.6, .4, 1) backwards; }
+.xo b:nth-child(2) { animation-delay: .06s; } .xo b:nth-child(3) { animation-delay: .12s; }
+@keyframes xoPop { from { transform: scale(.2) rotate(-20deg); opacity: 0; } }
+@keyframes xoFade { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
+.hostline { display: flex; align-items: center; gap: 10px; padding: 6px 16px 6px 6px; border-radius: 99px; background: var(--surface); font-weight: 700; text-align: left; }
+.hostline small { display: block; font-size: .72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.reveal.triple .roundnum { background: radial-gradient(circle at 35% 30%, #fde68a, #f59e0b 60%, #b45309); color: #422006; }
+.hostbox { --band1: #94a3b8; --band2: #64748b; }
+.tog { width: 50px; height: 30px; border-radius: 99px; background: var(--surface-2); position: relative; transition: background .2s; flex: none; }
+.tog i { position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.tog.on { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.tog.on i { transform: translateX(20px); }
+.fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fa { min-height: 62px; border-radius: 14px; padding: 8px 10px; display: flex; flex-direction: column; justify-content: center; gap: 2px; text-align: left; color: #fff;
+  background: linear-gradient(180deg, #23408f, #172c6b); box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 2px 0 rgba(0,0,0,.25); }
+.fa:active { transform: scale(.97); }
+.fa span { font-weight: 600; font-size: .95rem; line-height: 1.15; overflow-wrap: anywhere; }
+.fa b { font-size: .82rem; color: #fde68a; font-variant-numeric: tabular-nums; }
+.fa.dup { background: var(--surface); color: var(--muted); box-shadow: none; }
+.fa.dup b { color: var(--under, #ef4444); }
+.flash { min-height: 1.3em; text-align: center; font-weight: 700; color: var(--under, #ef4444); }
+.flash:not(:empty) { animation: pop .3s ease-out; }
+.ftab { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: 22px; background: radial-gradient(120% 90% at 50% 0%, #1e3a8a, #0b1640 70%); box-shadow: inset 0 0 0 2px rgba(253, 230, 138, .55); }
+.fq { display: grid; grid-template-columns: 1fr; gap: 4px; }
+.ftab.two .fq { grid-template-columns: 1fr 1fr; }
+.fq small { grid-column: 1 / -1; color: rgba(255,255,255,.7); font-size: .74rem; font-weight: 600; }
+.fcell { display: flex; align-items: center; gap: 6px; min-height: 40px; padding: 4px 4px 4px 10px; border-radius: 10px; color: #422006; font-weight: 600; font-size: .9rem;
+  background: linear-gradient(180deg, #fef3c7, #fcd34d 55%, #f59e0b); animation: flip .5s cubic-bezier(.2, 1.3, .4, 1) backwards; }
+.fcell span { flex: 1; min-width: 0; overflow-wrap: anywhere; line-height: 1.1; }
+.fcell b { min-width: 34px; height: 30px; border-radius: 8px; display: grid; place-items: center; background: #172c6b; color: #fde68a; font-variant-numeric: tabular-nums; }
+.fcell.no { background: rgba(255,255,255,.08); color: rgba(255,255,255,.5); }
+.fcell.top { box-shadow: 0 0 0 2px #fff, 0 0 14px rgba(253, 224, 71, .6); }
+.fq:nth-child(2) .fcell { animation-delay: .08s; } .fq:nth-child(3) .fcell { animation-delay: .16s; } .fq:nth-child(4) .fcell { animation-delay: .24s; } .fq:nth-child(5) .fcell { animation-delay: .32s; }
+.bigtot { display: flex; align-items: baseline; gap: 6px; }
+.bigtot b { font-size: 3.4rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.bigtot small { font-size: 1.1rem; opacity: .85; }
+.res .tot { font-weight: 700; font-size: 1.25rem; min-width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
+.link:disabled { opacity: .4; }
+
+</style>
+<style>
+@font-face { font-family: "Fredoka"; src: url("../Fredoka.ttf") format("truetype"); font-weight: 300 700; font-display: swap; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+html { overscroll-behavior: none; }
+body.full { overflow: hidden; }
+.backmenu { align-self: flex-start; color: var(--muted); font-weight: 600; text-decoration: none; padding: 6px 2px; margin-bottom: -12px; }
+</style>
+<style id="polish">
+/* finition commune : fond d'ambiance, profondeur, transitions */
+:root { --line: rgba(20, 20, 30, .07); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --line: rgba(255, 255, 255, .07); } }
+:root[data-theme="dark"] { --line: rgba(255, 255, 255, .07); }
+body::before { content: ""; position: fixed; inset: -12%; z-index: -1; pointer-events: none;
+  background: radial-gradient(55% 38% at 0% 0%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 70%),
+    radial-gradient(50% 36% at 100% 6%, color-mix(in srgb, var(--accent-2) 18%, transparent), transparent 70%),
+    radial-gradient(70% 40% at 50% 112%, color-mix(in srgb, var(--accent-2) 12%, transparent), transparent 70%);
+  animation: aurad 26s ease-in-out infinite alternate; }
+@keyframes aurad { to { transform: translate(4%, 3%) scale(1.06); } }
+#app.enter { animation: scrin .34s cubic-bezier(.2, 1, .3, 1); }
+@keyframes scrin { from { opacity: 0; translate: 0 16px; } }
+h2 { letter-spacing: -.01em; }
+.logo { letter-spacing: -.02em; }
+.brand .mark { position: relative; overflow: hidden; isolation: isolate; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 16px 30px -10px var(--glow), 0 6px 12px -6px var(--glow);
+  animation: markin .7s cubic-bezier(.2, 1.4, .3, 1) backwards, markbob 4.5s 1s ease-in-out infinite alternate; }
+.brand .mark::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(255, 255, 255, .3), transparent 55%); }
+@keyframes markin { from { scale: .5; opacity: 0; } }
+@keyframes markbob { to { translate: 0 -6px; } }
+.btn { position: relative; overflow: hidden; isolation: isolate;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), inset 0 -3px 0 rgba(0, 0, 0, .12), 0 14px 26px -12px var(--glow), 0 5px 12px -6px var(--glow);
+  transition: transform .14s cubic-bezier(.2, 1.4, .4, 1), box-shadow .2s, opacity .2s, filter .2s; }
+.btn:active { transform: translateY(2px) scale(.985); }
+.btn:not(.alt):not(.soft):not(:disabled)::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, .26) 50%, transparent 65%); transform: translateX(-120%); animation: btnshine 5s 1.4s ease-in-out infinite; }
+@keyframes btnshine { 30%, 100% { transform: translateX(120%); } }
+.btn.alt, .btn.soft { border: 1px solid var(--line); box-shadow: var(--shadow); }
+.btn:disabled { filter: grayscale(.55); opacity: .42; box-shadow: none; }
+.box, .list, .teambox, .reveal, .tile, .pair > div { border: 1px solid var(--line); }
+.endhead { position: relative; overflow: hidden; isolation: isolate; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 18px 34px -16px var(--glow); }
+.endhead::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(180deg, rgba(255, 255, 255, .2), transparent 48%); }
+.pchip { transition: transform .14s cubic-bezier(.2, 1.4, .4, 1); }
+.pchip:active { transform: scale(.93); }
+.step button { transition: transform .14s cubic-bezier(.2, 1.4, .4, 1), background .2s; }
+input[type=text]:focus { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent); }
+.sheet { background: rgba(8, 8, 14, .42); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.sheet > div { border-radius: 30px 30px 0 0; border-top: 1px solid var(--line); box-shadow: 0 -24px 60px -24px rgba(0, 0, 0, .4); animation: sheetup .42s cubic-bezier(.2, 1.15, .3, 1); }
+.sheet > div::before { content: ""; flex: none; align-self: center; width: 42px; height: 5px; border-radius: 3px; background: var(--surface-2); margin: -4px 0 0; }
+@keyframes sheetup { from { transform: translateY(100%); } }
+html #xq { background: color-mix(in srgb, var(--panel, var(--surface, #fff)) 78%, transparent); border: 1px solid var(--line); box-shadow: 0 6px 16px -6px rgba(0, 0, 0, .25);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); transition: transform .14s; }
+html #xq:active { transform: scale(.92); }
+html #xq.sure { border-color: transparent; }
+.brand { position: relative; overflow: hidden; isolation: isolate; padding: 24px 16px 22px; border-radius: 28px; color: #fff; gap: 10px;
+  background: repeating-linear-gradient(45deg, rgba(255, 255, 255, .08) 0 10px, transparent 10px 20px), linear-gradient(155deg, var(--accent), var(--accent-2));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -2px 0 rgba(0, 0, 0, .08), 0 22px 38px -20px var(--glow), 0 8px 18px -10px var(--glow);
+  animation: heroin .6s cubic-bezier(.2, 1.1, .3, 1) backwards; }
+.brand::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(180deg, rgba(255, 255, 255, .22), transparent 50%); }
+@keyframes heroin { from { scale: .94; opacity: 0; } }
+.brand .mark { background: rgba(255, 255, 255, .22); border: 1px solid rgba(255, 255, 255, .42); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 12px 22px -10px rgba(0, 0, 0, .3); }
+.brand .mark::after { display: none; }
+.brand .logo { color: #fff; text-shadow: 0 2px 10px rgba(0, 0, 0, .2), 0 1px 2px rgba(0, 0, 0, .12); }
+.brand .logo i { background: none; -webkit-background-clip: border-box; background-clip: border-box; color: rgba(255, 255, 255, .94); }
+.brand .wm { position: absolute; right: -34px; bottom: -44px; width: 176px; height: 176px; opacity: .16; transform: rotate(-14deg); z-index: -1; pointer-events: none; }
+.brand .wm.wl { right: auto; left: -40px; top: -46px; bottom: auto; width: 120px; height: 120px; opacity: .1; transform: rotate(16deg); }
+@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }
+::view-transition-group(hero) { animation-duration: .5s; animation-timing-function: cubic-bezier(.2, 1, .25, 1); }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .28s; }
+.brand { view-transition-name: hero; }
+.vt .brand, .vt .brand .mark { animation: none; }
+@supports (background: linear-gradient(in oklch, red, blue)) {
+  .brand { background: repeating-linear-gradient(45deg, rgba(255, 255, 255, .08) 0 10px, transparent 10px 20px), linear-gradient(in oklch 155deg, var(--accent), var(--accent-2)); }
+}
+.reveal .av.xl { position: relative; }
+.reveal .av.xl::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 3px solid var(--c, var(--accent)); opacity: 0; pointer-events: none;
+  animation: ring 2.2s .7s cubic-bezier(.2, .6, .3, 1) infinite; }
+@keyframes ring { 0% { transform: scale(.92); opacity: .6; } 100% { transform: scale(1.75); opacity: 0; } }
+</style>
+</head>
+<body>
+
+<canvas id="fx"></canvas>
+<div class="app" id="app"></div>
+<div id="sheet"></div>
+
+<script>
+// Une famille en or : deux familles, « on a demandé à 100 personnes », 6 réponses au tableau
+const Q = [["Citez quelque chose qu'on fait juste après s'être réveillé", [["Regarder son téléphone", 31], ["Aller aux toilettes", 19], ["Boire un café", 15], ["Se brosser les dents", 10], ["Prendre une douche", 9], ["S'étirer", 6]]], ["Citez quelque chose qu'on oublie souvent en partant de chez soi", [["Les clés", 34], ["Le téléphone", 22], ["Le portefeuille", 13], ["Éteindre la lumière", 10], ["Le chargeur", 7], ["Les lunettes", 6]]], ["Citez une chose qu'on fait en attendant le bus", [["Regarder son téléphone", 45], ["Écouter de la musique", 18], ["Regarder l'heure", 12], ["Lire", 7], ["Fumer une cigarette", 6], ["Discuter", 5]]], ["Citez quelque chose qu'on trouve dans une salle de bain", [["Une brosse à dents", 26], ["Une douche", 18], ["Un miroir", 15], ["Du savon", 13], ["Une serviette", 10], ["Du dentifrice", 8]]], ["Citez quelque chose qu'on trouve dans un sac à main", [["Un portefeuille", 25], ["Des clés", 20], ["Un téléphone", 16], ["Du maquillage", 14], ["Des mouchoirs", 10], ["Un rouge à lèvres", 7]]], ["Citez une tâche ménagère que personne n'aime faire", [["La vaisselle", 30], ["Le repassage", 24], ["Les toilettes", 14], ["Le ménage", 10], ["Les vitres", 9], ["Le linge", 6]]], ["Citez quelque chose qu'on range dans le frigo", [["Le lait", 25], ["Le beurre", 19], ["Le fromage", 16], ["Les yaourts", 14], ["Les œufs", 9], ["Les légumes", 7]]], ["Citez quelque chose qui sonne", [["Un téléphone", 38], ["Un réveil", 22], ["Une sonnette", 14], ["Une cloche", 10], ["Une alarme", 7], ["Un micro-ondes", 4]]], ["Citez quelque chose qu'on fait avant de se coucher", [["Se brosser les dents", 33], ["Regarder son téléphone", 22], ["Lire", 12], ["Mettre son réveil", 10], ["Aller aux toilettes", 8], ["Regarder la télé", 6]]], ["Citez quelque chose qu'on peut perdre facilement", [["Ses clés", 36], ["Son téléphone", 16], ["Une chaussette", 13], ["Son temps", 9], ["Ses lunettes", 8], ["La télécommande", 7]]], ["Citez une pièce de la maison", [["La cuisine", 28], ["Le salon", 24], ["La chambre", 20], ["La salle de bain", 14], ["Les toilettes", 6], ["Le garage", 4]]], ["Citez quelque chose qu'on trouve dans une trousse", [["Un stylo", 37], ["Une gomme", 18], ["Un crayon", 15], ["Une règle", 10], ["Un taille-crayon", 8], ["Des ciseaux", 5]]], ["Citez quelque chose qu'on met dans un café", [["Du sucre", 52], ["Du lait", 25], ["De la crème", 7], ["De la cannelle", 4], ["Du chocolat", 4], ["Du caramel", 3]]], ["Citez quelque chose qui a des touches", [["Un clavier", 35], ["Un piano", 30], ["Une télécommande", 13], ["Un téléphone", 10], ["Une calculatrice", 6], ["Un accordéon", 3]]], ["Citez une chose qu'on fait sous la douche", [["Chanter", 39], ["Se laver les cheveux", 23], ["Réfléchir", 11], ["Se savonner", 10], ["Se raser", 7], ["Pleurer", 3]]], ["Citez quelque chose qu'on achète à la boulangerie", [["Une baguette", 50], ["Des croissants", 20], ["Des pains au chocolat", 12], ["Un gâteau", 7], ["Un sandwich", 5], ["Une tarte", 3]]], ["Citez quelque chose qu'on trouve dans une boîte à outils", [["Un marteau", 34], ["Un tournevis", 28], ["Des clous", 12], ["Une pince", 10], ["Une clé à molette", 7], ["Un mètre", 5]]], ["Citez quelque chose qu'on peut remplir", [["Un verre", 28], ["Un formulaire", 18], ["Un réservoir", 15], ["Un sac", 12], ["Une baignoire", 9], ["Un frigo", 7]]], ["Citez une raison d'arriver en retard au travail", [["Les bouchons", 35], ["Pas entendu le réveil", 28], ["Les transports en grève", 13], ["La voiture en panne", 9], ["Les enfants", 7], ["La météo", 4]]], ["Citez quelque chose qu'on fait quand on s'ennuie", [["Regarder son téléphone", 36], ["Dormir", 17], ["Manger", 13], ["Regarder la télé", 12], ["Jouer aux jeux vidéo", 8], ["Sortir se promener", 6]]], ["Citez quelque chose qui se recharge", [["Un téléphone", 52], ["Une batterie", 14], ["Une voiture électrique", 11], ["Un ordinateur", 9], ["Une carte de transport", 5], ["Des piles", 4]]], ["Citez quelque chose qu'on trouve sur un bureau", [["Un ordinateur", 33], ["Des stylos", 19], ["Une lampe", 14], ["Des papiers", 12], ["Un téléphone", 8], ["Une tasse", 6]]], ["Citez un appareil qu'on trouve dans une cuisine", [["Un frigo", 30], ["Un four", 22], ["Un micro-ondes", 18], ["Un lave-vaisselle", 12], ["Une cafetière", 9], ["Un grille-pain", 5]]], ["Citez quelque chose qui se plie", [["Du linge", 26], ["Une feuille", 22], ["Une chaise", 13], ["Un parapluie", 12], ["Une carte", 9], ["Un genou", 7]]], ["Citez une chose qu'on fait le dimanche", [["Dormir", 30], ["Manger en famille", 25], ["Se promener", 14], ["Regarder un match", 9], ["Faire le marché", 7], ["Faire le ménage", 5]]], ["Citez un fruit rouge", [["La fraise", 41], ["La framboise", 21], ["La cerise", 18], ["La groseille", 8], ["La pomme", 5], ["La grenade", 3]]], ["Citez un plat typiquement français", [["Le bœuf bourguignon", 21], ["La raclette", 18], ["Le cassoulet", 16], ["La blanquette", 13], ["Le pot-au-feu", 11], ["La choucroute", 9]]], ["Citez quelque chose qu'on met sur une pizza", [["Du fromage", 32], ["Du jambon", 22], ["Des champignons", 15], ["De la sauce tomate", 12], ["Des olives", 8], ["Du chorizo", 5]]], ["Citez un aliment qu'on mange au petit-déjeuner", [["Des tartines", 27], ["Des céréales", 24], ["Des croissants", 18], ["Un yaourt", 11], ["Des œufs", 9], ["Un fruit", 6]]], ["Citez quelque chose qu'on mange avec les doigts", [["Des frites", 32], ["Une pizza", 20], ["Un hamburger", 17], ["Du poulet", 12], ["Des chips", 9], ["Des sushis", 4]]], ["Citez un dessert qu'on commande au restaurant", [["Un fondant au chocolat", 30], ["Une crème brûlée", 22], ["Une glace", 16], ["Un tiramisu", 13], ["Un café gourmand", 8], ["Une tarte tatin", 5]]], ["Citez un fromage", [["Le camembert", 33], ["Le comté", 18], ["Le roquefort", 13], ["Le brie", 12], ["Le chèvre", 10], ["L'emmental", 6]]], ["Citez quelque chose qu'on mange à Noël", [["La dinde", 26], ["Le foie gras", 24], ["La bûche", 20], ["Les huîtres", 13], ["Le saumon fumé", 8], ["Les chocolats", 5]]], ["Citez une boisson chaude", [["Le café", 45], ["Le thé", 27], ["Le chocolat chaud", 18], ["Le vin chaud", 4], ["Une tisane", 3], ["Une soupe", 1]]], ["Citez un légume vert", [["Le haricot vert", 26], ["Le brocoli", 22], ["La courgette", 16], ["La salade", 14], ["Les petits pois", 10], ["Les épinards", 7]]], ["Citez quelque chose qu'on mange au cinéma", [["Du pop-corn", 75], ["Des bonbons", 12], ["Des M&M's", 5], ["Des chips", 3], ["Des nachos", 2], ["Une glace", 2]]], ["Citez quelque chose qu'on trouve dans un sandwich", [["Du jambon", 34], ["Du beurre", 18], ["De la salade", 14], ["Du fromage", 13], ["De la tomate", 9], ["Du poulet", 6]]], ["Citez un ingrédient pour faire des crêpes", [["De la farine", 32], ["Des œufs", 28], ["Du lait", 25], ["Du sucre", 7], ["Du beurre", 4], ["Une pincée de sel", 2]]], ["Citez quelque chose qu'on met sur une crêpe", [["Du Nutella", 50], ["Du sucre", 18], ["De la confiture", 13], ["Du jambon", 6], ["Du miel", 5], ["De la chantilly", 4]]], ["Citez un plat qu'on mange au fast-food", [["Un burger", 52], ["Des frites", 22], ["Des nuggets", 12], ["Un wrap", 5], ["Une salade", 4], ["Un milkshake", 3]]], ["Citez une sauce", [["La mayonnaise", 31], ["Le ketchup", 26], ["La sauce tomate", 13], ["La sauce béarnaise", 10], ["La moutarde", 8], ["La sauce barbecue", 6]]], ["Citez un aliment qu'on fait griller au barbecue", [["Des saucisses", 38], ["Des merguez", 25], ["Des côtes de porc", 12], ["Des brochettes", 10], ["Du poulet", 7], ["Des chipolatas", 4]]], ["Citez quelque chose qu'on mange à l'apéro", [["Des chips", 34], ["Des cacahuètes", 22], ["Du saucisson", 16], ["Des olives", 12], ["Des toasts", 7], ["Des tomates cerises", 5]]], ["Citez une épice ou un aromate", [["Le poivre", 26], ["Le curry", 18], ["Le paprika", 14], ["Le thym", 12], ["La cannelle", 10], ["Le basilic", 8]]], ["Citez quelque chose qu'on mange en été", [["Une glace", 36], ["Une pastèque", 20], ["Une salade", 15], ["Un melon", 12], ["Des grillades", 8], ["Des fraises", 5]]], ["Citez un parfum de glace", [["Le chocolat", 32], ["La vanille", 27], ["La fraise", 16], ["La pistache", 12], ["Le café", 5], ["Le citron", 4]]], ["Citez quelque chose de sucré", [["Le chocolat", 30], ["Les bonbons", 25], ["Le sucre", 15], ["Un gâteau", 12], ["Le miel", 9], ["La confiture", 6]]], ["Citez quelque chose qu'on mange avec une cuillère", [["De la soupe", 34], ["Un yaourt", 30], ["Une glace", 12], ["Des céréales", 9], ["Une compote", 7], ["Une mousse au chocolat", 4]]], ["Citez un plat italien", [["Les pâtes", 30], ["La pizza", 27], ["Les lasagnes", 20], ["Le risotto", 9], ["Le tiramisu", 7], ["Les raviolis", 4]]], ["Citez un fruit qu'on épluche", [["La banane", 34], ["L'orange", 26], ["La mandarine", 13], ["Le kiwi", 11], ["L'ananas", 8], ["La pomme", 5]]], ["Citez quelque chose qu'on met dans une salade", [["De la tomate", 30], ["Du concombre", 18], ["De la vinaigrette", 15], ["Du maïs", 13], ["Des œufs", 10], ["Des oignons", 6]]], ["Citez une boisson qu'on commande dans un bar", [["Une bière", 46], ["Un mojito", 15], ["Un verre de vin", 12], ["Un coca", 10], ["Un café", 7], ["Un spritz", 5]]], ["Citez un aliment qu'on mange souvent avec du ketchup", [["Des frites", 60], ["Des pâtes", 13], ["Un hamburger", 10], ["Des nuggets", 8], ["Des saucisses", 5], ["Une omelette", 2]]], ["Citez quelque chose qu'on met dans sa valise", [["Des vêtements", 30], ["Une trousse de toilette", 20], ["Des chaussures", 14], ["Un maillot de bain", 12], ["Un chargeur", 9], ["Des sous-vêtements", 7]]], ["Citez quelque chose qu'on emporte à la plage", [["Une serviette", 35], ["De la crème solaire", 25], ["Un parasol", 14], ["Un maillot de bain", 10], ["Des lunettes de soleil", 8], ["Un livre", 4]]], ["Citez une ville française où on part en vacances", [["Nice", 24], ["Marseille", 18], ["Biarritz", 15], ["La Rochelle", 13], ["Saint-Tropez", 11], ["Bordeaux", 6]]], ["Citez un pays où on part en vacances", [["L'Espagne", 32], ["L'Italie", 24], ["Le Portugal", 14], ["La Grèce", 12], ["Le Maroc", 9], ["Les États-Unis", 5]]], ["Citez quelque chose qu'on fait à la montagne", [["Du ski", 46], ["De la randonnée", 25], ["De la luge", 10], ["De l'escalade", 7], ["Une raclette", 6], ["Du snowboard", 3]]], ["Citez quelque chose qu'on fait à l'aéroport", [["Attendre", 30], ["Passer la sécurité", 22], ["Enregistrer ses bagages", 18], ["Faire du shopping", 12], ["Montrer son passeport", 9], ["Manger", 5]]], ["Citez quelque chose qui peut gâcher des vacances", [["La pluie", 36], ["Tomber malade", 22], ["Perdre ses bagages", 15], ["Une dispute", 10], ["Les moustiques", 8], ["Un coup de soleil", 6]]], ["Citez un souvenir qu'on ramène de vacances", [["Un magnet", 33], ["Un porte-clés", 20], ["Des photos", 16], ["Un T-shirt", 13], ["Une carte postale", 8], ["Un coup de soleil", 5]]], ["Citez quelque chose qu'on trouve dans un camping", [["Des tentes", 38], ["Une piscine", 18], ["Des caravanes", 15], ["Des sanitaires", 12], ["Des moustiques", 8], ["Un barbecue", 5]]], ["Citez une activité qu'on fait au bord de la mer", [["Se baigner", 36], ["Bronzer", 26], ["Faire un château de sable", 13], ["Faire du surf", 10], ["Jouer au beach-volley", 7], ["Pêcher", 4]]], ["Citez un moyen de transport pour partir en vacances", [["La voiture", 44], ["L'avion", 30], ["Le train", 18], ["Le bateau", 4], ["Le camping-car", 2], ["Le bus", 2]]], ["Citez quelque chose qu'on voit à Paris", [["La tour Eiffel", 52], ["L'Arc de Triomphe", 15], ["Le Louvre", 12], ["Notre-Dame", 10], ["Le Sacré-Cœur", 6], ["Les Champs-Élysées", 4]]], ["Citez un parc d'attractions", [["Disneyland", 54], ["Le Parc Astérix", 24], ["Le Futuroscope", 9], ["Le Puy du Fou", 7], ["Europa-Park", 4], ["Walibi", 2]]], ["Citez quelque chose qu'on fait dans un hôtel", [["Dormir", 42], ["Prendre le petit-déjeuner", 20], ["Prendre une douche", 12], ["Aller à la piscine", 10], ["Regarder la télé", 7], ["Commander au room service", 4]]], ["Citez une matière qu'on étudie au collège", [["Les maths", 34], ["Le français", 26], ["L'histoire-géo", 15], ["L'anglais", 12], ["Le sport", 7], ["La SVT", 4]]], ["Citez un métier qui fait rêver les enfants", [["Pompier", 28], ["Footballeur", 20], ["Policier", 15], ["Astronaute", 12], ["Vétérinaire", 10], ["Docteur", 8]]], ["Citez une excuse pour ne pas aller en cours", [["Être malade", 50], ["Ne pas entendre le réveil", 16], ["Un rendez-vous chez le médecin", 12], ["Une grève", 9], ["Un problème de famille", 5], ["La neige", 3]]], ["Citez quelque chose qu'on trouve dans une salle de classe", [["Un tableau", 40], ["Des tables", 22], ["Des chaises", 15], ["Un bureau", 9], ["Une craie", 6], ["Une carte du monde", 4]]], ["Citez un métier où on porte un uniforme", [["Policier", 37], ["Pompier", 22], ["Militaire", 16], ["Infirmier", 10], ["Pilote", 7], ["Cuisinier", 5]]], ["Citez quelque chose qu'on fait pendant une réunion ennuyeuse", [["Regarder son téléphone", 36], ["Bâiller", 20], ["Gribouiller", 15], ["Regarder l'heure", 12], ["Dormir", 8], ["Penser à autre chose", 6]]], ["Citez un métier qu'on exerce la nuit", [["Infirmier", 26], ["Boulanger", 22], ["Policier", 16], ["Chauffeur de taxi", 12], ["Barman", 10], ["Veilleur de nuit", 7]]], ["Citez quelque chose qu'on fait à la pause café", [["Boire un café", 40], ["Discuter", 26], ["Fumer une cigarette", 12], ["Regarder son téléphone", 10], ["Manger un gâteau", 5], ["Râler", 3]]], ["Citez un métier qui demande beaucoup d'études", [["Médecin", 52], ["Avocat", 18], ["Chirurgien", 10], ["Ingénieur", 9], ["Vétérinaire", 5], ["Pharmacien", 3]]], ["Citez une raison de démissionner", [["Le salaire", 34], ["Le patron", 28], ["L'ambiance", 12], ["Une meilleure offre", 11], ["Le stress", 8], ["Un déménagement", 4]]], ["Citez quelque chose qu'on offre à la Saint-Valentin", [["Des fleurs", 40], ["Des chocolats", 22], ["Un bijou", 15], ["Un parfum", 9], ["Un restaurant", 7], ["Une carte", 4]]], ["Citez un endroit pour un premier rendez-vous", [["Un restaurant", 40], ["Un bar", 25], ["Le cinéma", 18], ["Un parc", 8], ["Un café", 5], ["La plage", 2]]], ["Citez quelque chose qui énerve dans un couple", [["Le désordre", 25], ["Les ronflements", 20], ["Le téléphone à table", 16], ["Le retard", 12], ["La jalousie", 10], ["La lunette des toilettes", 8]]], ["Citez quelque chose qu'on fait pour un anniversaire", [["Souffler les bougies", 35], ["Manger un gâteau", 22], ["Offrir des cadeaux", 18], ["Faire une fête", 12], ["Chanter", 7], ["Faire un restaurant", 4]]], ["Citez quelque chose qu'on voit à un mariage", [["La mariée", 30], ["Une robe blanche", 20], ["Des alliances", 15], ["Un gâteau", 12], ["Des fleurs", 10], ["Un DJ", 6]]], ["Citez quelque chose que disent les parents tout le temps", [["Range ta chambre", 33], ["Fais tes devoirs", 25], ["Va te coucher", 15], ["Lâche ton téléphone", 12], ["Mange tes légumes", 8], ["Dis merci", 5]]], ["Citez quelque chose qu'un bébé fait souvent", [["Pleurer", 45], ["Dormir", 25], ["Manger", 12], ["Sourire", 7], ["Faire caca", 6], ["Ramper", 3]]], ["Citez quelque chose que font les grands-parents", [["Gâter les petits-enfants", 30], ["Faire des gâteaux", 20], ["Raconter des histoires", 18], ["Jardiner", 12], ["Jouer aux cartes", 8], ["Faire la sieste", 5]]], ["Citez une qualité qu'on cherche chez son partenaire", [["L'humour", 32], ["La gentillesse", 22], ["La fidélité", 18], ["L'honnêteté", 12], ["Le physique", 9], ["L'intelligence", 5]]], ["Citez un cadeau qu'on offre à la fête des mères", [["Des fleurs", 40], ["Un parfum", 18], ["Un bijou", 14], ["Des chocolats", 11], ["Un dessin", 9], ["Un restaurant", 6]]], ["Citez une chose qu'on fait lors d'un repas de famille", [["Manger", 36], ["Discuter", 22], ["Se disputer", 15], ["Boire", 10], ["Rire", 8], ["Jouer à un jeu", 5]]], ["Citez un animal qu'on peut avoir chez soi", [["Un chien", 38], ["Un chat", 34], ["Un poisson rouge", 10], ["Un lapin", 8], ["Un hamster", 6], ["Un oiseau", 3]]], ["Citez un animal qui fait peur", [["L'araignée", 32], ["Le serpent", 25], ["Le requin", 16], ["Le lion", 10], ["Le crocodile", 9], ["Le rat", 5]]], ["Citez un animal qui vit dans la mer", [["Le requin", 30], ["Le dauphin", 25], ["La baleine", 18], ["Le poisson", 12], ["La pieuvre", 7], ["La méduse", 5]]], ["Citez un animal qui vole", [["L'oiseau", 33], ["L'aigle", 18], ["La chauve-souris", 15], ["Le pigeon", 13], ["Le papillon", 10], ["La mouche", 6]]], ["Citez un animal très lent", [["La tortue", 50], ["L'escargot", 30], ["Le paresseux", 15], ["La limace", 3], ["Le koala", 1], ["Le panda", 1]]], ["Citez un animal qu'on voit au zoo", [["Le lion", 30], ["La girafe", 22], ["L'éléphant", 18], ["Le singe", 14], ["Le tigre", 9], ["Le zèbre", 5]]], ["Citez un insecte", [["La mouche", 28], ["La fourmi", 22], ["Le moustique", 18], ["L'abeille", 15], ["La coccinelle", 9], ["Le papillon", 6]]], ["Citez un animal avec des rayures", [["Le zèbre", 58], ["Le tigre", 30], ["L'abeille", 5], ["La guêpe", 3], ["Le raton laveur", 2], ["Le chat tigré", 1]]], ["Citez un animal qui vit dans la forêt", [["Le cerf", 26], ["Le sanglier", 22], ["L'écureuil", 18], ["Le renard", 15], ["Le loup", 10], ["Le hibou", 6]]], ["Citez un animal qu'on associe à la malice", [["Le renard", 48], ["Le singe", 22], ["Le chat", 12], ["La pie", 7], ["Le corbeau", 6], ["Le serpent", 4]]], ["Citez un cri d'animal", [["Le miaulement", 26], ["L'aboiement", 24], ["Le meuglement", 14], ["Le rugissement", 12], ["Le hennissement", 10], ["Le cocorico", 9]]], ["Citez un sport qu'on pratique avec un ballon", [["Le football", 46], ["Le basket", 20], ["Le rugby", 14], ["Le handball", 9], ["Le volley", 8], ["Le water-polo", 2]]], ["Citez un sport qui se joue avec une raquette", [["Le tennis", 52], ["Le badminton", 20], ["Le ping-pong", 15], ["Le padel", 9], ["Le squash", 3], ["Le jokari", 1]]], ["Citez un sportif français célèbre", [["Kylian Mbappé", 34], ["Zinédine Zidane", 26], ["Antoine Dupont", 12], ["Teddy Riner", 10], ["Léon Marchand", 9], ["Tony Parker", 5]]], ["Citez un sport qu'on pratique dans l'eau", [["La natation", 50], ["Le surf", 18], ["Le water-polo", 10], ["Le plongeon", 9], ["Le kayak", 7], ["L'aviron", 4]]], ["Citez un sport d'hiver", [["Le ski", 52], ["Le snowboard", 18], ["Le patinage", 13], ["Le hockey sur glace", 8], ["Le biathlon", 5], ["La luge", 3]]], ["Citez quelque chose qu'on voit dans un stade de foot", [["Des supporters", 30], ["Des joueurs", 25], ["Un ballon", 15], ["Un arbitre", 12], ["Des buts", 9], ["Des écharpes", 5]]], ["Citez un sport de combat", [["La boxe", 40], ["Le judo", 25], ["Le karaté", 15], ["Le MMA", 10], ["La lutte", 6], ["Le taekwondo", 3]]], ["Citez quelque chose qu'on emporte à la salle de sport", [["Une bouteille d'eau", 36], ["Une serviette", 26], ["Des baskets", 14], ["Des écouteurs", 12], ["Un cadenas", 6], ["Une barre protéinée", 3]]], ["Citez un sport qu'on regarde à la télé", [["Le football", 50], ["Le rugby", 16], ["Le tennis", 13], ["Le cyclisme", 9], ["La Formule 1", 7], ["Le basket", 3]]], ["Citez une raison d'arrêter le sport", [["Une blessure", 38], ["Le manque de temps", 30], ["La flemme", 15], ["Le prix", 7], ["La fatigue", 5], ["Un déménagement", 3]]], ["Citez quelque chose qu'on fait avant un match", [["S'échauffer", 52], ["Manger des pâtes", 15], ["Se concentrer", 12], ["Écouter de la musique", 9], ["Mettre sa tenue", 6], ["Prier", 3]]], ["Citez un club de foot français", [["Le PSG", 40], ["L'OM", 32], ["L'OL", 12], ["Lens", 6], ["Monaco", 5], ["Saint-Étienne", 3]]], ["Citez un dessin animé de Disney", [["Le Roi Lion", 36], ["La Reine des neiges", 22], ["Blanche-Neige", 12], ["Aladdin", 11], ["La Belle et la Bête", 9], ["Cendrillon", 6]]], ["Citez un jeu de société", [["Le Monopoly", 42], ["Le Scrabble", 18], ["Le Uno", 12], ["Les échecs", 10], ["Le Cluedo", 9], ["Le Trivial Pursuit", 5]]], ["Citez un super-héros", [["Superman", 33], ["Spider-Man", 28], ["Batman", 20], ["Iron Man", 9], ["Hulk", 5], ["Captain America", 3]]], ["Citez un instrument de musique", [["La guitare", 38], ["Le piano", 30], ["La batterie", 12], ["Le violon", 10], ["La flûte", 5], ["La trompette", 3]]], ["Citez un réseau social", [["Instagram", 30], ["Facebook", 25], ["TikTok", 22], ["Snapchat", 12], ["X", 7], ["LinkedIn", 3]]], ["Citez un jeu vidéo célèbre", [["Mario", 34], ["Fortnite", 20], ["FIFA", 16], ["Minecraft", 13], ["Call of Duty", 9], ["Tetris", 5]]], ["Citez un personnage de conte", [["Le Petit Chaperon rouge", 32], ["Cendrillon", 22], ["Blanche-Neige", 18], ["Le Petit Poucet", 11], ["Pinocchio", 8], ["La Belle au bois dormant", 5]]], ["Citez quelque chose qu'on voit dans un cirque", [["Des clowns", 42], ["Des acrobates", 18], ["Des lions", 13], ["Un chapiteau", 10], ["Des jongleurs", 8], ["Des éléphants", 5]]], ["Citez un chanteur français célèbre", [["Johnny Hallyday", 34], ["Jul", 16], ["Stromae", 13], ["Charles Aznavour", 12], ["Jean-Jacques Goldman", 10], ["Angèle", 7]]], ["Citez une série télé célèbre", [["Friends", 26], ["Game of Thrones", 20], ["Breaking Bad", 16], ["Stranger Things", 15], ["La Casa de Papel", 12], ["Plus belle la vie", 6]]], ["Citez quelque chose qu'on fait au cinéma", [["Regarder un film", 40], ["Manger du pop-corn", 30], ["S'embrasser", 10], ["Dormir", 8], ["Pleurer", 6], ["Rire", 4]]], ["Citez un loisir qu'on fait seul", [["Lire", 34], ["Courir", 16], ["Jouer aux jeux vidéo", 14], ["Regarder la télé", 13], ["Dessiner", 10], ["Faire des puzzles", 6]]], ["Citez un jeu de cartes", [["La belote", 34], ["Le Uno", 22], ["Le poker", 18], ["La bataille", 12], ["Le tarot", 7], ["Le solitaire", 4]]], ["Citez un film qui fait peur", [["Scream", 24], ["Ça", 22], ["L'Exorciste", 17], ["Conjuring", 14], ["Saw", 12], ["Shining", 7]]], ["Citez quelque chose qu'on chante en chœur", [["Joyeux anniversaire", 42], ["La Marseillaise", 25], ["Une chanson de Noël", 12], ["Les Champs-Élysées", 8], ["Un hymne de supporters", 6], ["Une comptine", 4]]], ["Citez un personnage de dessin animé", [["Mickey", 30], ["Bob l'éponge", 22], ["Les Simpson", 18], ["Tom et Jerry", 12], ["Pikachu", 9], ["Scooby-Doo", 6]]], ["Citez une application qu'on utilise tous les jours", [["WhatsApp", 32], ["Instagram", 20], ["TikTok", 15], ["YouTube", 12], ["Google Maps", 9], ["Snapchat", 7]]], ["Citez quelque chose qu'on fait le soir du 31 décembre", [["Faire la fête", 32], ["Boire du champagne", 22], ["Faire le décompte", 16], ["S'embrasser", 12], ["Manger", 9], ["Regarder les feux d'artifice", 5]]], ["Citez quelque chose qu'on voit dans un sapin de Noël", [["Des boules", 38], ["Une étoile", 22], ["Des guirlandes", 20], ["Des lumières", 12], ["Des cadeaux", 5], ["Un ange", 2]]], ["Citez quelque chose qu'on fait à Halloween", [["Se déguiser", 40], ["Réclamer des bonbons", 30], ["Creuser une citrouille", 12], ["Regarder un film d'horreur", 9], ["Faire peur", 5], ["Faire la fête", 3]]], ["Citez un déguisement classique", [["Un pirate", 25], ["Une princesse", 20], ["Un super-héros", 18], ["Un fantôme", 12], ["Un vampire", 10], ["Un cow-boy", 8]]], ["Citez quelque chose qu'on prépare pour une fête", [["À boire", 30], ["De la musique", 25], ["À manger", 20], ["La décoration", 12], ["Les invitations", 7], ["Un gâteau", 4]]], ["Citez quelque chose qu'on voit le 14 juillet", [["Un feu d'artifice", 50], ["Un défilé militaire", 25], ["Un bal", 10], ["Des drapeaux", 8], ["La patrouille de France", 5], ["Des pompiers", 2]]], ["Citez quelque chose qu'on fait à Pâques", [["Chercher des œufs", 52], ["Manger du chocolat", 30], ["Manger de l'agneau", 8], ["Aller à la messe", 5], ["Peindre des œufs", 3], ["Faire un repas de famille", 2]]], ["Citez quelque chose qui fait du bruit en soirée", [["La musique", 40], ["Les voisins", 14], ["Les rires", 14], ["Les verres qui trinquent", 12], ["Les cris", 10], ["Les pétards", 5]]], ["Citez une grande ville française", [["Paris", 30], ["Marseille", 25], ["Lyon", 20], ["Toulouse", 9], ["Bordeaux", 8], ["Lille", 6]]], ["Citez une région française", [["La Bretagne", 30], ["La Provence", 22], ["La Normandie", 16], ["L'Alsace", 13], ["La Corse", 10], ["L'Occitanie", 6]]], ["Citez quelque chose de typiquement français", [["La baguette", 40], ["Le béret", 18], ["Le fromage", 15], ["Le vin", 12], ["La tour Eiffel", 8], ["Les grèves", 5]]], ["Citez un monument célèbre dans le monde", [["La tour Eiffel", 32], ["La statue de la Liberté", 22], ["Le Colisée", 16], ["Les pyramides", 13], ["La Grande Muraille de Chine", 10], ["Big Ben", 5]]], ["Citez un fleuve français", [["La Seine", 38], ["La Loire", 26], ["Le Rhône", 18], ["La Garonne", 12], ["La Dordogne", 3], ["Le Rhin", 2]]], ["Citez un président de la République française", [["Emmanuel Macron", 28], ["Charles de Gaulle", 22], ["Jacques Chirac", 18], ["Nicolas Sarkozy", 13], ["François Mitterrand", 10], ["François Hollande", 7]]], ["Citez une marque française", [["Renault", 26], ["Peugeot", 22], ["Chanel", 14], ["Louis Vuitton", 13], ["L'Oréal", 9], ["Michelin", 6]]], ["Citez un vin ou un alcool français", [["Le champagne", 34], ["Le bordeaux", 22], ["Le pastis", 14], ["Le cognac", 10], ["Le beaujolais", 8], ["Le calvados", 5]]], ["Citez une chose qu'on associe à Marseille", [["L'OM", 34], ["Le pastis", 18], ["La bouillabaisse", 14], ["Le Vieux-Port", 12], ["L'accent", 9], ["Le savon de Marseille", 6]]], ["Citez quelque chose qu'on associe à la Bretagne", [["Les crêpes", 42], ["La pluie", 20], ["La mer", 12], ["Le beurre salé", 10], ["Le cidre", 8], ["Le drapeau breton", 4]]], ["Citez une marque de voiture", [["Renault", 26], ["Peugeot", 23], ["BMW", 13], ["Mercedes", 12], ["Citroën", 11], ["Tesla", 7]]], ["Citez quelque chose qu'on trouve dans une voiture", [["Un volant", 32], ["Des sièges", 18], ["Un autoradio", 14], ["Une ceinture", 12], ["Un GPS", 8], ["Une boîte à gants", 6]]], ["Citez quelque chose qui énerve au volant", [["Les bouchons", 35], ["Les autres conducteurs", 24], ["Les feux rouges", 14], ["Les radars", 10], ["Les trottinettes", 8], ["Ne pas trouver de place", 5]]], ["Citez quelque chose qu'on fait dans le train", [["Dormir", 30], ["Regarder son téléphone", 25], ["Lire", 18], ["Regarder par la fenêtre", 12], ["Écouter de la musique", 8], ["Manger", 4]]], ["Citez un moyen de transport à deux roues", [["Le vélo", 44], ["La moto", 30], ["Le scooter", 15], ["La trottinette", 8], ["La mobylette", 2], ["Le gyropode", 1]]], ["Citez quelque chose qu'on voit sur l'autoroute", [["Des voitures", 30], ["Des camions", 26], ["Un péage", 18], ["Une aire de repos", 12], ["Des panneaux", 7], ["Des radars", 4]]], ["Citez quelque chose qui fait peur en avion", [["Les turbulences", 45], ["Le crash", 25], ["Le décollage", 12], ["L'atterrissage", 8], ["Le vide", 4], ["Un bébé qui pleure", 3]]], ["Citez une raison de rater son train", [["Le retard", 34], ["Les bouchons", 20], ["Pas entendu le réveil", 18], ["Se tromper de quai", 10], ["Perdre son billet", 6], ["Se tromper d'heure", 5]]], ["Citez quelque chose qui est blanc", [["La neige", 36], ["Le lait", 24], ["Le sucre", 10], ["Un nuage", 10], ["Une feuille", 8], ["La robe de mariée", 5]]], ["Citez quelque chose qui est rouge", [["Une tomate", 25], ["Le sang", 20], ["Une fraise", 18], ["Un camion de pompiers", 12], ["Le feu rouge", 10], ["Une cerise", 7]]], ["Citez quelque chose qui est jaune", [["Le soleil", 34], ["Le citron", 22], ["La banane", 18], ["Un poussin", 9], ["Un taxi", 6], ["Un canari", 4]]], ["Citez quelque chose de rond", [["Un ballon", 36], ["Une balle", 16], ["Une roue", 14], ["Le soleil", 12], ["Une pizza", 8], ["Une pièce", 6]]], ["Citez quelque chose de froid", [["La glace", 36], ["La neige", 26], ["Le frigo", 14], ["L'hiver", 12], ["Un glaçon", 6], ["Le pôle Nord", 3]]], ["Citez quelque chose de chaud", [["Le soleil", 36], ["Le feu", 26], ["Un radiateur", 12], ["Un café", 10], ["Une soupe", 7], ["Le four", 5]]], ["Citez quelque chose qui pique", [["Une guêpe", 26], ["Une aiguille", 20], ["Un cactus", 18], ["Une rose", 12], ["Le piment", 10], ["Une ortie", 7]]], ["Citez quelque chose qui sent mauvais", [["Les chaussettes", 30], ["Les poubelles", 25], ["Les pieds", 15], ["Le fromage", 12], ["Les toilettes", 9], ["Les œufs pourris", 5]]], ["Citez quelque chose qui sent bon", [["Les fleurs", 34], ["Le parfum", 26], ["Le pain chaud", 13], ["Le café", 10], ["Le linge propre", 9], ["Un gâteau", 5]]], ["Citez quelque chose qui colle", [["La colle", 38], ["Le scotch", 22], ["Le chewing-gum", 16], ["Le miel", 12], ["Un timbre", 6], ["La confiture", 4]]], ["Citez quelque chose qui se casse facilement", [["Un verre", 38], ["Une assiette", 18], ["Un œuf", 15], ["Un écran de téléphone", 14], ["Un miroir", 8], ["Un os", 4]]], ["Citez quelque chose qui a des ailes", [["Un oiseau", 38], ["Un avion", 30], ["Un ange", 11], ["Un papillon", 10], ["Une abeille", 5], ["Un dragon", 3]]], ["Citez quelque chose qu'on trouve dans le ciel", [["Les nuages", 32], ["Le soleil", 25], ["Les étoiles", 15], ["La lune", 12], ["Les oiseaux", 8], ["Un avion", 6]]], ["Citez quelque chose qui a des roues", [["Une voiture", 40], ["Un vélo", 25], ["Un bus", 10], ["Une valise", 9], ["Un skateboard", 8], ["Un caddie", 5]]], ["Citez quelque chose qu'on ouvre", [["Une porte", 40], ["Une fenêtre", 22], ["Une bouteille", 14], ["Un cadeau", 10], ["Un livre", 8], ["Les yeux", 5]]], ["Citez quelque chose qui fait peur aux enfants", [["Le noir", 40], ["Les monstres", 22], ["Les araignées", 12], ["Le loup", 10], ["Les clowns", 8], ["L'orage", 5]]], ["Citez quelque chose qu'on fait quand il pleut", [["Prendre un parapluie", 40], ["Rester à la maison", 25], ["Regarder un film", 13], ["Mettre un imperméable", 9], ["Sauter dans les flaques", 6], ["Dormir", 4]]], ["Citez une partie du visage", [["Le nez", 30], ["Les yeux", 26], ["La bouche", 20], ["Les oreilles", 10], ["Le front", 7], ["Les joues", 5]]], ["Citez une chose qu'on a en double sur le corps", [["Les yeux", 30], ["Les bras", 22], ["Les jambes", 18], ["Les oreilles", 14], ["Les mains", 10], ["Les pieds", 4]]], ["Citez quelque chose qu'on fait avec ses mains", [["Écrire", 30], ["Manger", 20], ["Applaudir", 15], ["Dessiner", 12], ["Toucher", 9], ["Cuisiner", 6]]], ["Citez quelque chose qu'on porte sur la tête", [["Un chapeau", 38], ["Une casquette", 30], ["Un bonnet", 14], ["Un casque", 9], ["Une couronne", 5], ["Des lunettes de soleil", 3]]], ["Citez un vêtement qu'on porte en hiver", [["Un manteau", 36], ["Une écharpe", 22], ["Un bonnet", 16], ["Des gants", 13], ["Un pull", 9], ["Une doudoune", 4]]], ["Citez une couleur", [["Le bleu", 30], ["Le rouge", 25], ["Le vert", 16], ["Le jaune", 12], ["Le noir", 9], ["Le rose", 6]]], ["Citez quelque chose qui brille", [["Le soleil", 30], ["Un diamant", 22], ["L'or", 16], ["Les étoiles", 14], ["Un miroir", 8], ["Une lampe", 5]]], ["Citez quelque chose de très long", [["Un fleuve", 22], ["Un train", 22], ["Une girafe", 13], ["Un serpent", 12], ["Une journée de travail", 10], ["Un film", 8]]], ["Citez quelque chose qui fait mal", [["Se cogner le petit orteil", 30], ["Une piqûre", 20], ["Une brûlure", 15], ["Une rage de dents", 14], ["Un coup", 10], ["Une épine", 5]]], ["Citez quelque chose qu'on peut casser sans le toucher", [["Une promesse", 40], ["Le silence", 25], ["Un record", 15], ["Un cœur", 10], ["La routine", 4], ["Le moral", 3]]], ["Citez une chose qu'on fait en cachette", [["Manger", 30], ["Fumer", 22], ["Regarder le téléphone de quelqu'un", 16], ["Pleurer", 12], ["Lire un journal intime", 8], ["Faire un cadeau", 5]]], ["Citez un mensonge qu'on dit souvent", [["Je vais bien", 34], ["J'arrive dans 5 minutes", 26], ["J'ai pas vu ton message", 14], ["J'adore ton cadeau", 12], ["Je suis malade", 7], ["J'ai lu les conditions", 4]]], ["Citez quelque chose qu'on dit au téléphone", [["Allô", 60], ["Ça va ?", 15], ["T'es où ?", 10], ["Je te rappelle", 7], ["Bisous", 4], ["Tu m'entends ?", 3]]], ["Citez quelque chose qu'on fait sur son téléphone", [["Envoyer des messages", 30], ["Aller sur les réseaux", 25], ["Appeler", 18], ["Prendre des photos", 12], ["Jouer", 8], ["Regarder des vidéos", 5]]], ["Citez quelque chose qu'on prend en photo", [["Des paysages", 30], ["Sa nourriture", 20], ["Ses enfants", 16], ["Un selfie", 14], ["Son animal", 10], ["Un coucher de soleil", 6]]], ["Citez quelque chose qu'on trouve dans un jardin", [["Des fleurs", 32], ["De l'herbe", 22], ["Des arbres", 16], ["Un potager", 12], ["Une tondeuse", 8], ["Un barbecue", 6]]], ["Citez une chose qu'on peut gagner", [["De l'argent", 36], ["Un match", 20], ["Le loto", 18], ["Une médaille", 12], ["Un concours", 8], ["Du temps", 4]]], ["Citez quelque chose que l'on collectionne", [["Les timbres", 32], ["Les cartes Pokémon", 22], ["Les pièces de monnaie", 16], ["Les magnets", 10], ["Les figurines", 9], ["Les bouchons", 5]]], ["Citez quelque chose qu'on achète au supermarché chaque semaine", [["Du pain", 26], ["Du lait", 22], ["Des fruits", 16], ["Du papier toilette", 14], ["Des œufs", 10], ["Des pâtes", 8]]], ["Citez quelque chose qu'on garde dans son portefeuille", [["De l'argent", 34], ["Une carte bancaire", 30], ["Une carte d'identité", 16], ["Le permis de conduire", 9], ["Des photos", 5], ["Des tickets de caisse", 4]]], ["Citez une chose qu'on fait en vacances mais jamais au travail", [["Faire la sieste", 30], ["Bronzer", 25], ["Se lever tard", 18], ["Boire l'apéro le midi", 12], ["Se baigner", 8], ["Ne rien faire", 5]]], ["Citez une bonne résolution du Nouvel An", [["Faire du sport", 40], ["Arrêter de fumer", 26], ["Manger mieux", 13], ["Moins utiliser son téléphone", 9], ["Économiser", 6], ["Lire plus", 4]]], ["Citez quelque chose qui coûte cher", [["Une maison", 36], ["Une voiture", 26], ["L'essence", 12], ["Les vacances", 10], ["Un iPhone", 9], ["Un mariage", 5]]], ["Citez une chose qui se fait à deux", [["Danser", 30], ["Se marier", 22], ["S'embrasser", 18], ["Jouer au tennis", 12], ["Faire du tandem", 7], ["Un duo", 5]]], ["Citez un objet qu'on trouve dans un salon", [["Un canapé", 36], ["Une télé", 30], ["Une table basse", 14], ["Un tapis", 8], ["Une lampe", 6], ["Des plantes", 4]]], ["Citez quelque chose qui fait du bruit la nuit", [["Le ronflement", 30], ["Les voisins", 20], ["Une voiture", 15], ["Un chien qui aboie", 13], ["Un moustique", 12], ["Le frigo", 5]]], ["Citez quelque chose qu'on garde pour une occasion spéciale", [["Une bouteille de champagne", 34], ["Une belle tenue", 24], ["Le service en porcelaine", 14], ["Un parfum", 10], ["Des chaussures", 8], ["Une bougie", 5]]], ["Citez quelque chose qu'on trouve sous un lit", [["De la poussière", 46], ["Des chaussures", 16], ["Des valises", 13], ["Un monstre", 10], ["Des chaussettes", 8], ["Des jouets", 4]]], ["Citez un métier qu'on voit dans un hôpital", [["Médecin", 36], ["Infirmier", 32], ["Chirurgien", 14], ["Aide-soignant", 8], ["Brancardier", 5], ["Secrétaire", 3]]], ["Citez quelque chose qu'on fait au réveil un jour de congé", [["Rester au lit", 40], ["Prendre un bon petit-déj", 22], ["Regarder son téléphone", 15], ["Faire du sport", 8], ["Regarder la télé", 7], ["Prendre un bain", 4]]], ["Citez une raison de se lever la nuit", [["Aller aux toilettes", 46], ["Boire un verre d'eau", 20], ["Un bébé qui pleure", 14], ["Un cauchemar", 9], ["Un bruit", 6], ["Manger", 3]]], ["Citez quelque chose que l'on fait à la plage quand on s'ennuie", [["Lire", 30], ["Dormir", 26], ["Regarder son téléphone", 18], ["Se baigner", 12], ["Écouter de la musique", 8], ["Mater les gens", 4]]], ["Citez quelque chose qui se vend sur un marché", [["Des fruits", 32], ["Des légumes", 30], ["Du fromage", 12], ["Du poisson", 10], ["Des fleurs", 8], ["Des vêtements", 5]]], ["Citez une chose qu'on fait en arrivant au travail", [["Dire bonjour", 30], ["Boire un café", 28], ["Allumer son ordinateur", 22], ["Lire ses mails", 12], ["Enlever son manteau", 4], ["Pointer", 3]]], ["Citez quelque chose qu'on fait quand on est stressé", [["Se ronger les ongles", 30], ["Manger", 20], ["Fumer", 15], ["Respirer profondément", 12], ["Faire du sport", 10], ["Pleurer", 6]]], ["Citez quelque chose qu'on peut faire en moins d'une minute", [["Boire un verre d'eau", 25], ["Envoyer un message", 20], ["Se brosser les dents", 16], ["Lacer ses chaussures", 14], ["Faire un vœu", 10], ["Éternuer", 8]]], ["Citez quelque chose qu'on met dans un sac de sport", [["Des baskets", 30], ["Une serviette", 25], ["Une bouteille d'eau", 18], ["Un short", 12], ["Un T-shirt de rechange", 8], ["Un déodorant", 5]]], ["Citez une marque de vêtements de sport", [["Nike", 50], ["Adidas", 30], ["Puma", 9], ["Decathlon", 5], ["Reebok", 3], ["Lacoste", 2]]], ["Citez quelque chose que les gens font en terrasse", [["Boire un verre", 40], ["Discuter", 24], ["Manger", 14], ["Regarder les gens passer", 10], ["Fumer", 7], ["Profiter du soleil", 4]]], ["Citez un truc qu'on trouve dans une pharmacie", [["Des médicaments", 40], ["Du doliprane", 18], ["Des pansements", 15], ["De la crème solaire", 10], ["Du sirop", 8], ["Des préservatifs", 5]]], ["Citez un objet qu'on prête et qu'on ne revoit jamais", [["Un livre", 32], ["Un stylo", 25], ["De l'argent", 16], ["Un chargeur", 12], ["Un vêtement", 9], ["Un DVD", 4]]], ["Citez quelque chose qui se mange chaud ou froid", [["La pizza", 30], ["Les pâtes", 22], ["La soupe", 15], ["Le poulet", 12], ["Le riz", 9], ["La quiche", 7]]], ["Citez un endroit où il faut chuchoter", [["La bibliothèque", 46], ["L'église", 20], ["Le cinéma", 12], ["L'hôpital", 10], ["Un musée", 6], ["Une salle d'examen", 4]]], ["Citez un endroit où l'on fait la queue", [["Le supermarché", 32], ["La poste", 22], ["La boulangerie", 12], ["Un parc d'attractions", 12], ["La banque", 9], ["Les toilettes", 6]]], ["Citez quelque chose qu'on fait en voiture pendant un long trajet", [["Écouter de la musique", 36], ["Dormir", 20], ["Chanter", 14], ["Manger", 10], ["Discuter", 10], ["Jouer à un jeu", 5]]], ["Citez une chose qui énerve au cinéma", [["Les gens qui parlent", 34], ["Les téléphones allumés", 24], ["Le bruit du pop-corn", 14], ["Un grand devant soi", 12], ["Les pubs", 8], ["Les retardataires", 5]]], ["Citez quelque chose qu'on ne prête jamais", [["Sa brosse à dents", 38], ["Sa voiture", 22], ["Son téléphone", 15], ["Son mari ou sa femme", 10], ["Ses sous-vêtements", 8], ["Sa carte bancaire", 5]]], ["Citez quelque chose qui peut tomber en panne", [["Une voiture", 40], ["Un ordinateur", 18], ["Une machine à laver", 14], ["Un téléphone", 12], ["Le frigo", 8], ["L'ascenseur", 6]]], ["Citez quelque chose qu'on fait au premier rayon de soleil", [["Sortir en terrasse", 30], ["Mettre des lunettes de soleil", 20], ["Se promener", 18], ["Faire un barbecue", 13], ["Bronzer", 9], ["Sortir le short", 6]]]];   // [question, [[réponse, points] x6]]
+const KEY = "tablee_famille";
+const BODY = ["#3b5bff", "#ff5a1f", "#16a34a", "#9333ea", "#db2777", "#0891b2", "#ca8a04", "#4f46e5", "#ea580c", "#0d9488"];
+const TEAMS = [{ name: "Rouge", c: "#ef4444", c2: "#be123c" }, { name: "Bleue", c: "#3b82f6", c2: "#1d4ed8" }];
+const NAME_KEYS = ["auracover_poche5", "auraspy1", "auratime1", "auratete1", "auraloup2", "auraapero1", "tablee_milieu", "tablee_codes", "tablee_preferes", "tablee_artiste", "tablee_motcache", "tablee_piege", "tablee_mdp", "tablee_regle", "tablee_tabou", "tablee_burger", "tablee_chiffre", "tablee_crack", "tablee_classement", "tablee_topten", "tablee_devineuf", "tablee_justone", "tablee_timeline", "tablee_hitster", "tablee_blind", "tablee_tune", "tablee_famille"];
+const MARK = `<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="6" width="38" height="36" rx="8" fill="#fff" opacity=".25"/><rect x="10" y="11.0" width="28" height="7" rx="3.5" fill="#fff"/><circle cx="13.5" cy="14.5" r="2.4" fill="#ca8a04"/><rect x="10" y="20.5" width="28" height="7" rx="3.5" fill="#fff"/><circle cx="13.5" cy="24.0" r="2.4" fill="#ca8a04"/><rect x="10" y="30.0" width="28" height="7" rx="3.5" fill="#fff"/><circle cx="13.5" cy="33.5" r="2.4" fill="#ca8a04"/></svg>`;
+const FIN_SECS = [20, 25], FIN_GOAL = 200, FIN_SOLO = { secs: 35, goal: 120 };
+
+let S = { screen: "home", rounds: 4, finale: true, sound: true, teams: [[], []], host: null, people: {}, recent: [], game: null };
+function load() {
+  let d = null; try { d = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
+  if (d) for (const k of Object.keys(S)) if (d[k] !== undefined) S[k] = d[k];
+  S.teams = [S.teams[0] || [], S.teams[1] || []];
+  if (!S.game) { if (!["home", "teams", "board", "stats"].includes(S.screen)) S.screen = "home"; return; }
+  if (S.screen === "fPlay") { const f = S.game.fin; f.left = Math.max(0, Math.ceil((f.end - Date.now()) / 1000)); S.screen = f.left > 0 ? "fPause" : "fStop"; }
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function knownNames() {
+  const set = new Set(Object.keys(S.people));
+  for (const k of NAME_KEYS) try { const c = JSON.parse(localStorage.getItem(k) || "{}"); for (const n of Object.keys(c.people || {})) set.add(n); } catch (e) {}
+  return [...set];
+}
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+const fold = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+function seedOf(s) { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+const av = (nm, cls = "") => `<span class="av ${cls}" style="--c:${BODY[seedOf(nm || "?") % BODY.length]}" aria-hidden="true">${esc((nm.trim()[0] || "?").toUpperCase())}</span>`;
+const plural = (n, w) => `${n} ${w}${Math.abs(n) > 1 ? "s" : ""}`;
+const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
+function person(nm) { return S.people[nm] || (S.people[nm] = { games: 0, wins: 0, fin: 0, finWin: 0, best: 0, last: 0 }); }
+const statLine = p => p && p.games ? `${plural(p.games, "partie")} · ${plural(p.wins, "victoire")}` : "Nouveau ici";
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const band = t => `--band1:${TEAMS[t].c};--band2:${TEAMS[t].c2}`;
+const fam = t => `Famille ${TEAMS[t].name}`;
+const teamOk = () => S.teams.every(t => t.length >= (S.host ? 1 : 2));
+const pts = n => plural(n, "point");
+
+// ---------- sons (synthétisés, aucun fichier)
+let AC = null;
+function ac() { if (!S.sound) return null; try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === "suspended") AC.resume(); } catch (e) { return null; } return AC; }
+function tone(f, t0, d, type = "sine", v = .18) {
+  const a = ac(); if (!a) return; const o = a.createOscillator(), g = a.createGain(), t = a.currentTime + t0;
+  o.type = type; o.frequency.setValueAtTime(f, t); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .012); g.gain.exponentialRampToValueAtTime(.0008, t + d);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t + d + .05);
+}
+const SFX = {
+  ding: () => { tone(988, 0, .4, "triangle", .22); tone(1319, .1, .6, "triangle", .2); },
+  top: () => [784, 988, 1175, 1568].forEach((f, i) => tone(f, i * .08, .5, "triangle", .2)),
+  x: () => { tone(98, 0, .75, "sawtooth", .22); tone(104, 0, .75, "square", .1); },
+  buzz: () => { tone(330, 0, .18, "square", .12); },
+  bank: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, i * .07, .45, "triangle", .16)),
+  win: () => [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => tone(f, i * .13, .55, "triangle", .2)),
+  fail: () => [392, 330, 262].forEach((f, i) => tone(f, i * .22, .5, "sawtooth", .12)),
+  tick: () => tone(1200, 0, .05, "square", .05),
+};
+
+// ---------- tirage
+function pickQ(n) {
+  const all = Q.map((q, i) => i); let p = all.filter(i => !S.recent.includes(i));
+  if (p.length < n) { S.recent = []; p = all; }
+  const out = shuffle(p).slice(0, n); S.recent = [...S.recent, ...out].slice(-Math.floor(Q.length * .8)); return out;
+}
+
+// ---------- partie
+function newGame() {
+  S.game = { round: 0, nR: S.rounds, qs: pickQ(S.rounds + 8), qn: 0, score: [0, 0], fp: [0, 0], tp: [0, 0], hp: [0, 0], first: Math.random() * 2 | 0,
+    r: null, hist: [], log: [], winTeam: null, fin: null, ended: false };
+  newRound(false);
+}
+const mult = () => S.game.r && S.game.r.sudden ? 0 : S.game.round === S.game.nR - 1 ? 3 : 1;
+const nextQ = () => { const g = S.game; if (g.qn >= g.qs.length) g.qs.push(...pickQ(4)); return g.qs[g.qn++]; };
+function newRound(sudden) {
+  const g = S.game;
+  let host = S.host;
+  if (!host) { const t = (g.first + g.round) % 2, m = S.teams[t]; host = m[g.hp[t]++ % m.length]; }
+  g.r = { q: nextQ(), sudden, host, open: [], by: {}, phase: "face", pot: 0, ctrl: null, strikes: 0, f: { first: null, a: null, b: null }, winner: null, stolen: false, gain: 0 };
+  g.hist = [];
+  go("roundIntro");
+}
+const active = t => S.teams[t].filter(n => n !== S.game.r.host);
+const facer = t => { const a = active(t); return a[S.game.fp[t] % a.length]; };
+const answerer = t => { const a = active(t); return a[S.game.tp[t] % a.length]; };
+const board = () => Q[S.game.r.q][1];
+function snap() { const g = S.game; g.hist.push(JSON.stringify({ r: g.r, fp: g.fp, tp: g.tp })); if (g.hist.length > 40) g.hist.shift(); }
+function undo() { const g = S.game, h = g.hist.pop(); if (!h) return; const o = JSON.parse(h); g.r = o.r; g.fp = o.fp; g.tp = o.tp; buzz(15); save(); render(); }
+let fresh = null;
+function reveal(i, who) {
+  const r = S.game.r; fresh = i; r.open.push(i); r.by[i] = who; r.pot += board()[i][1];
+  if (i === 0) SFX.top(); else SFX.ding(); buzz(25);
+}
+// face-à-face : le meilleur rang (0 = réponse n°1) prend la main ; personne au tableau = nouveau duel
+function faceResolve() {
+  const g = S.game, r = g.r, f = r.f, other = 1 - f.first;
+  if (f.a === 0) return faceWin(f.first);
+  if (f.b === null) return;
+  if (f.a < 0 && f.b < 0) { g.fp = [g.fp[0] + 1, g.fp[1] + 1]; r.f = { first: null, a: null, b: null }; r.again = true; SFX.x(); strikeFx(1); return; }
+  const ra = f.a < 0 ? 99 : f.a, rb = f.b < 0 ? 99 : f.b;
+  faceWin(ra < rb ? f.first : other);
+}
+function faceWin(t) {
+  const g = S.game, r = g.r; g.fp = [g.fp[0] + 1, g.fp[1] + 1]; r.again = false;
+  if (r.sudden) { r.winner = t; g.winTeam = t; SFX.bank(); go("roundEnd"); return; }
+  r.faceWinner = t; r.phase = "choose"; buzz([20, 30, 20]);
+}
+function finishRound(w, stolen) {
+  const g = S.game, r = g.r; r.winner = w; r.stolen = !!stolen; r.gain = r.pot * mult(); g.score[w] += r.gain; r.phase = "done";
+  g.log.push({ q: r.q, w, gain: r.gain, stolen: r.stolen });
+  SFX.bank(); buzz([30, 40, 30]); go("roundEnd");
+}
+function afterRound() {
+  const g = S.game;
+  if (g.r.sudden) return toFinale();
+  g.round++;
+  if (g.round < g.nR) return newRound(false);
+  if (g.score[0] === g.score[1]) { g.round = g.nR - 1; return newRound(true); }
+  g.winTeam = g.score[0] > g.score[1] ? 0 : 1;
+  toFinale();
+}
+function toFinale() {
+  const g = S.game, t = g.winTeam;
+  if (!S.finale) return finishGame();
+  const m = S.teams[t], solo = m.length < 2, st = g.fp[t] % m.length;
+  const players = solo ? [m[0]] : [m[st], m[(st + 1) % m.length]];
+  g.fin = { team: t, players, solo, qs: [0, 1, 2, 3, 4].map(() => nextQ()), ans: players.map(() => Array(5).fill(null)), p: 0, queue: [0, 1, 2, 3, 4], end: 0, left: 0, flash: "" };
+  go("fIntro");
+}
+const finSecs = p => S.game.fin.solo ? FIN_SOLO.secs : FIN_SECS[p];
+const finGoal = () => S.game.fin.solo ? FIN_SOLO.goal : FIN_GOAL;
+const finPts = (p, qi) => { const f = S.game.fin, a = f.ans[p][qi]; return a === null || a < 0 ? 0 : Q[f.qs[qi]][1][a][1]; };
+const finTotal = () => S.game.fin.ans.reduce((s, row, p) => s + row.reduce((x, _, qi) => x + finPts(p, qi), 0), 0);
+function finStart() { const f = S.game.fin; f.end = Date.now() + (f.left || finSecs(f.p)) * 1000; f.left = 0; f.flash = ""; buzz(30); SFX.buzz(); go("fPlay"); }
+function finAnswer(a) {
+  const f = S.game.fin, qi = f.queue[0]; if (qi === undefined) return;
+  if (a >= 0 && f.p === 1 && f.ans[0][qi] === a) { f.flash = "Déjà dit ! Une autre réponse"; SFX.x(); buzz([80, 40, 80]); save(); render(); return; }
+  f.ans[f.p][qi] = a; f.flash = ""; f.queue.shift();
+  if (a >= 0) { SFX.ding(); buzz(20); } else { SFX.buzz(); buzz(10); }
+  if (!f.queue.length) return finStop(); save(); render();
+}
+function finPass() { const f = S.game.fin; if (f.queue.length < 2) return; f.queue.push(f.queue.shift()); f.flash = ""; buzz(10); save(); render(); }
+function finStop() {
+  const f = S.game.fin; if (!["fPlay", "fPause", "fStop"].includes(S.screen)) return;
+  for (const qi of f.queue) if (f.ans[f.p][qi] === null) f.ans[f.p][qi] = -1;
+  buzz([200, 80, 200]);
+  if (f.p === 0 && f.players.length > 1) { go("fMid"); return; }
+  const ok = finTotal() >= finGoal(); f.won = ok; go("fEnd"); if (ok) { SFX.win(); confetti(); } else SFX.fail();
+}
+function finishGame() {
+  const g = S.game, now = Date.now(), f = g.fin;
+  S.teams.forEach((team, t) => team.forEach(nm => { const p = person(nm); p.games++; p.last = now; if (t === g.winTeam) p.wins++; }));
+  if (f) for (const nm of f.players) { const p = person(nm); p.fin++; if (f.won) p.finWin++; p.best = Math.max(p.best, finTotal()); }
+  if (S.host) person(S.host).last = now;
+  g.ended = true; go("end"); if (!f) { SFX.win(); confetti(); }
+}
+
+// ---------- effets
+function strikeFx(n) {
+  const o = document.createElement("div"); o.className = "xo"; o.innerHTML = `<div>${"<b>✕</b>".repeat(n)}</div>`;
+  document.body.appendChild(o); setTimeout(() => o.remove(), 1100);
+}
+
+// ---------- écrans
+const app = document.getElementById("app"), sheet = document.getElementById("sheet");
+function go(s) { S.screen = s; save(); render(); scrollTo(0, 0); }
+const step = (act, val) => `<div class="step"><button data-a="${act}" data-v="-1" aria-label="Moins">−</button><span>${val}</span><button data-a="${act}" data-v="1" aria-label="Plus">+</button></div>`;
+const tog = (act, on) => `<button class="tog ${on ? "on" : ""}" data-a="${act}" role="switch" aria-checked="${on}"><i></i></button>`;
+function famBar() {
+  const g = S.game, r = g.r, hi = r && (r.phase === "play" ? r.ctrl : r.phase === "steal" ? 1 - r.ctrl : -1);
+  return `<div class="fbar">${[0, 1].map(t => `<div class="fs ${hi === t ? "hi" : ""}" style="${band(t)}"><span>${TEAMS[t].name}</span><b>${g.score[t]}</b></div>`).join(r && !r.sudden && r.phase !== "done" ? `<div class="pot"><small>Banque${mult() > 1 ? ` ×${mult()}` : ""}</small><b>${r.pot}</b></div>` : "")}</div>`;
+}
+const qcard = q => `<div class="qcard"><small>On a demandé à 100 personnes</small><b>${esc(Q[q][0])}</b></div>`;
+// le tableau : l'animateur voit les réponses cachées en transparence
+function boardHTML(mode) {
+  const r = S.game.r, show = mode === "end" || mode === "public";
+  return `<div class="fboard ${mode}">${board().map(([txt, p], i) => { const on = r.open.includes(i);
+    const by = on && r.by[i] !== undefined && r.by[i] !== null ? r.by[i] : null;
+    if (mode === "public" && !on) return `<div class="frow"><span class="fn">${i + 1}</span><span class="ft"></span><span class="fp"></span></div>`;
+    return `<button class="frow ${on ? "on" : show ? "miss" : ""} ${i === fresh ? "new" : ""}" data-a="tap" data-v="${i}" ${on || show ? "disabled" : ""}>
+      <span class="fn">${i + 1}</span><span class="ft">${esc(txt)}${by !== null ? `<small style="${band(by)}"></small>` : ""}</span><span class="fp">${p}</span></button>`; }).join("")}</div>`;
+}
+const strikes = n => `<div class="strk">${[0, 1, 2].map(i => `<b class="${i < n ? "on" : ""}">✕</b>`).join("")}</div>`;
+const tools = () => `<div class="links"><button class="link" data-a="public">Montrer le tableau</button><button class="link" data-a="undo" ${S.game.hist.length ? "" : "disabled"}>Annuler</button></div>`;
+const who = (nm, t) => `<span class="whoami" style="${band(t)}">${av(nm)}<span>${esc(nm)}</span></span>`;
+
+function render() {
+  const g = S.game; let h = "";
+  switch (S.screen) {
+    case "home": {
+      h = `<a class="backmenu" href="../">‹ Menu</a><div class="spacer"></div>
+        <div class="brand"><span class="mark">${MARK}</span><div class="logo">Une famille<br><i>en or</i></div></div>
+        <div class="sub" style="margin-top:0">On a demandé à 100 personnes… Deux familles cherchent les 6 réponses les plus citées. Un animateur tient le téléphone et révèle le tableau.</div>
+        <div class="box">
+          <div class="line"><div class="name">Manches<small>La dernière compte triple</small></div>${step("rounds", S.rounds)}</div>
+          <div class="line"><div class="name">La finale<small>${FIN_GOAL} points en ${FIN_SECS[0]} + ${FIN_SECS[1]} secondes</small></div>${tog("finale", S.finale)}</div>
+          <div class="line"><div class="name">Sons<small>Ding, buzzer et croix rouges</small></div>${tog("sound", S.sound)}</div>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="toTeams">Faire les familles</button>
+        <button class="btn alt" data-a="board">Joueurs et stats</button>
+        <div class="links"><button class="link" data-a="rules">Règles</button><a class="link" href="../" style="text-decoration:none">‹ Menu</a></div>`;
+      break;
+    }
+    case "teams": {
+      h = `<h2>Les familles</h2>
+        <div class="sub">${S.host ? "Au moins 1 joueur par famille." : "Au moins 2 joueurs par famille : à chaque manche, l'un d'eux anime et ne joue pas."}</div>
+        ${S.teams.map((team, t) => `<div class="teambox" style="${band(t)}">
+          <div class="teamhead"><span>${fam(t)}</span><small>${plural(team.length, "joueur")}</small></div>
+          <div class="chips2">${team.map((nm, k) => `<button class="pchip" data-a="rm" data-v="${t}:${k}">${av(nm)}<span>${esc(nm)}</span><i aria-label="Retirer">×</i></button>`).join("")}
+            <button class="pchip add" data-a="addTo" data-v="${t}">+ Ajouter</button></div></div>`).join("")}
+        <div class="teambox hostbox"><div class="teamhead"><span>Animateur</span><small>Facultatif</small></div>
+          <div class="chips2">${S.host ? `<button class="pchip" data-a="rmHost">${av(S.host)}<span>${esc(S.host)}</span><i aria-label="Retirer">×</i></button>` : `<button class="pchip add" data-a="addTo" data-v="2">+ Un animateur qui ne joue pas</button>`}</div></div>
+        <button class="btn soft" data-a="mix">Mélanger les familles</button>
+        <div class="spacer"></div>
+        <button class="btn" data-a="play" ${teamOk() ? "" : "disabled"}>${teamOk() ? "Jouer" : S.host ? "Il faut 1 joueur par famille" : "Il faut 2 joueurs par famille"}</button>
+        <div class="links"><button class="link" data-a="home">Retour</button></div>`;
+      break;
+    }
+    case "roundIntro": {
+      const r = g.r, m = mult();
+      h = `${g.round || r.sudden ? famBar() : ""}<div class="spacer"></div>
+        <div class="reveal place ${m === 3 ? "triple" : ""}">
+          <div class="roundnum">${r.sudden ? "!" : g.round + 1}</div>
+          <div class="label">${r.sudden ? "Égalité" : `Manche ${g.round + 1} sur ${g.nR}`}</div>
+          <div class="place-name">${r.sudden ? "Mort subite" : m === 3 ? "Points triples" : "Manche simple"}</div>
+          <div class="hint">${r.sudden ? "Un seul face-à-face : la réponse la mieux classée qualifie sa famille pour la finale." : m === 3 ? "Dernière manche : la banque compte triple. Tout peut basculer !" : "Face-à-face, puis la famille qui a la main cherche le reste du tableau. Trois erreurs et l'autre famille peut voler."}</div>
+          <div class="hostline">${av(r.host)}<span><small>Animateur${S.host ? "" : " de la manche"}</small>${esc(r.host)}</span></div>
+        </div>
+        <div class="hint" style="text-align:center">Donne le téléphone à ${esc(r.host)}. Les autres ne regardent pas l'écran !</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="startRound">Je suis ${esc(r.host)}, j'anime</button>`;
+      break;
+    }
+    case "round": {
+      const r = g.r, f = r.f; let ctl = "";
+      if (r.phase === "face") {
+        const a = facer(0), b = facer(1);
+        const ask = f.first === null ? null : f.a === null ? f.first : 1 - f.first;
+        ctl = `<div class="duel">${who(a, 0)}<span class="vs">contre</span>${who(b, 1)}</div>
+          ${f.first === null ? `<div class="say">${r.again ? "Personne au tableau ! Nouveau face-à-face. " : ""}Lis la question. Le premier qui tape sur la table répond. Qui a tapé ?</div>
+            <div class="two">${[0, 1].map(t => `<button class="btn tb" style="${band(t)}" data-a="buzzed" data-v="${t}">${esc(facer(t))}</button>`).join("")}</div>`
+          : `<div class="say">Réponse de <b>${esc(facer(ask))}</b> : touche-la au tableau.${f.a !== null && f.a > 0 ? ` Elle doit battre la n°${f.a + 1}.` : ""}</div>
+            <button class="btn bad" data-a="miss">✕ Pas au tableau</button>`}`;
+      } else if (r.phase === "choose") {
+        const t = r.faceWinner;
+        ctl = `<div class="say">La <b>${fam(t)}</b> a la main. Elle joue ou elle passe ?</div>
+          <div class="two"><button class="btn tb" style="${band(t)}" data-a="choose" data-v="${t}">On joue</button><button class="btn tb" style="${band(1 - t)}" data-a="choose" data-v="${1 - t}">On passe</button></div>`;
+      } else if (r.phase === "play") {
+        const t = r.ctrl;
+        ctl = `<div class="playline">${who(answerer(t), t)}${strikes(r.strikes)}</div>
+          <div class="say">Touche la réponse si elle est au tableau.</div>
+          <button class="btn bad" data-a="miss">✕ Pas au tableau</button>`;
+      } else if (r.phase === "steal") {
+        const t = 1 - r.ctrl;
+        ctl = `<div class="say"><b>${fam(t)}</b>, concertez-vous : une seule réponse pour voler les ${r.pot * mult()} points !</div>
+          <button class="btn bad" data-a="miss">✕ Pas au tableau</button>`;
+      }
+      h = `${r.sudden ? `<div class="label" style="text-align:center">Mort subite</div>` : famBar()}${qcard(r.q)}${boardHTML("host")}${ctl}<div class="spacer"></div>${tools()}`;
+      break;
+    }
+    case "roundEnd": {
+      const r = g.r, w = r.winner, last = !r.sudden && g.round + 1 >= g.nR;
+      const tie = last && g.score[0] === g.score[1];
+      h = `<div class="endhead" style="${band(w)}"><div class="label">${r.sudden ? "Mort subite" : r.stolen ? "Vol réussi !" : `Manche ${g.round + 1}`}</div>
+          <h2>${r.sudden ? `La ${fam(w)} va en finale !` : `La ${fam(w)} remporte ${pts(r.gain)}`}</h2>
+          ${!r.sudden && mult() > 1 ? `<div class="label">Banque de ${r.pot} × ${mult()}</div>` : ""}</div>
+        ${r.sudden ? "" : famBar()}
+        ${qcard(r.q)}${boardHTML("end")}
+        <div class="spacer"></div>
+        <button class="btn" data-a="next">${r.sudden ? (S.finale ? "Place à la finale" : "Voir les résultats") : !last ? "Manche suivante" : tie ? "Égalité : mort subite" : S.finale ? "Place à la finale" : "Voir les résultats"}</button>
+        <div class="links"><button class="link" data-a="public">Montrer le tableau</button></div>`;
+      break;
+    }
+    case "fIntro": {
+      const f = g.fin, [p1, p2] = f.players, t = f.team;
+      h = `${famBar()}<div class="spacer"></div>
+        <div class="reveal place" style="${band(t)}"><div class="roundnum">★</div><div class="label">${fam(t)}</div><div class="place-name">La finale</div>
+          <div class="hint">${f.solo ? `${esc(p1)} répond seul à 5 questions en ${FIN_SOLO.secs} secondes. Objectif : ${FIN_SOLO.goal} points.`
+            : `${esc(p1)} répond à 5 questions en ${FIN_SECS[0]} secondes. Puis ${esc(p2)} répond aux mêmes en ${FIN_SECS[1]} secondes, sans répéter. Objectif : ${FIN_GOAL} points à deux.`}</div></div>
+        <div class="hint" style="text-align:center">${S.host ? `${esc(S.host)} anime la finale.` : `Un joueur de la ${fam(1 - t)} prend le téléphone et anime.`}${f.solo ? "" : ` ${esc(p2)} sort de la pièce ou se bouche les oreilles.`}</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="finGo">${esc(p1)} est prêt · ${finSecs(0)} s</button>`;
+      break;
+    }
+    case "fPlay": case "fPause": case "fStop": {
+      const f = g.fin, qi = f.queue[0], nm = f.players[f.p], ms = Math.max(0, f.end - Date.now());
+      if (S.screen !== "fPlay") {
+        h = `<div class="spacer"></div><div class="reveal place" style="${band(f.team)}"><div class="label">La finale</div><div class="place-name">${esc(nm)}</div>
+          <div class="hint">${S.screen === "fPause" ? `L'appli a été fermée : il reste ${f.left} s.` : "Le temps s'est écoulé pendant que l'appli était fermée."}</div></div><div class="spacer"></div>
+          <button class="btn" data-a="${S.screen === "fPause" ? "finGo" : "finStop"}">${S.screen === "fPause" ? "Reprendre" : "Continuer"}</button>`;
+        break;
+      }
+      const dup = f.p === 1 ? f.ans[0][qi] : null;
+      h = `<div class="turnhead"><span class="label">${esc(nm)}</span><span class="tbig" id="t">${Math.ceil(ms / 1000)}</span><span class="label">${5 - f.queue.length + 1} / 5</span></div>
+        <div class="tbar"><i id="tb" style="${band(f.team)}"></i></div>
+        ${qcard(f.qs[qi])}
+        <div class="flash" aria-live="assertive">${esc(f.flash)}</div>
+        <div class="fgrid">${Q[f.qs[qi]][1].map(([txt, p], i) => `<button class="fa ${dup === i ? "dup" : ""}" data-a="finAns" data-v="${i}"><span>${esc(txt)}</span><b>${dup === i ? "déjà dit" : p}</b></button>`).join("")}</div>
+        <div class="spacer"></div>
+        <div class="two"><button class="btn bad" data-a="finAns" data-v="-1">✕ Pas au tableau</button><button class="btn alt" data-a="finPass" ${f.queue.length < 2 ? "disabled" : ""}>Passer</button></div>`;
+      break;
+    }
+    case "fMid": {
+      const f = g.fin, [p1, p2] = f.players, s1 = f.ans[0].reduce((x, _, qi) => x + finPts(0, qi), 0);
+      h = `<div class="endhead" style="${band(f.team)}"><div class="label">${esc(p1)} a terminé</div><h2>${pts(s1)}</h2><div class="label">Il en faut encore ${Math.max(0, FIN_GOAL - s1)} à ${esc(p2)}</div></div>
+        ${finTable(1)}
+        <div class="hint" style="text-align:center">Fais revenir ${esc(p2)}. Le tableau de ${esc(p1)} reste caché : s'il répète une réponse, touche-la et l'appli dira « déjà dit ».</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="finP2">${esc(p2)} est prêt · ${finSecs(1)} s</button>`;
+      break;
+    }
+    case "fEnd": {
+      const f = g.fin, tot = finTotal();
+      h = `<div class="endhead" style="${f.won ? band(f.team) : "--band1:#64748b;--band2:#334155"}"><div class="label">La finale</div><h2 id="ftot">${f.won ? "Gagné !" : "Raté…"}</h2>
+          <div class="bigtot"><b data-count="${tot}">0</b><small>/ ${finGoal()}</small></div></div>
+        ${finTable(f.players.length)}
+        <div class="spacer"></div>
+        <button class="btn" data-a="finEnd">Voir les résultats</button>`;
+      break;
+    }
+    case "end": {
+      const w = g.winTeam, f = g.fin;
+      h = `<div class="endhead" style="${band(w)}"><div class="label">Fin de la partie</div><h2>La ${fam(w)} gagne !</h2>
+          ${f ? `<div class="label">${f.won ? `Et elle remporte la finale avec ${finTotal()} points` : `Finale ratée : ${finTotal()} points sur ${finGoal()}`}</div>` : ""}</div>
+        <div class="box">${[w, 1 - w].map(t => `<div class="res"><span class="tdot" style="${band(t)}"></span>
+          <span class="t"><span>${fam(t)}</span><small style="color:var(--muted)">${S.teams[t].map(esc).join(", ")}</small></span>
+          ${t === w ? `<span class="win">Gagné</span>` : ""}<span class="tot">${g.score[t]}</span></div>`).join("")}</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="play">Rejouer</button>
+        <button class="btn soft" data-a="board">Classement</button>
+        <div class="links"><button class="link" data-a="toTeams">Changer les familles</button><button class="link" data-a="home">Accueil</button></div>`;
+      break;
+    }
+    case "board": {
+      const q = fold(S.bq || "");
+      h = `<h2>Joueurs et stats</h2>
+        <input id="bq" type="text" maxlength="16" placeholder="Cherche un prénom" value="${esc(S.bq || "")}" autocomplete="off">
+        <div class="list" id="bl">${boardList(sorted().filter(([n]) => fold(n).includes(q)))}</div>
+        <div class="spacer"></div>
+        <button class="btn soft" data-a="home">Retour</button>`;
+      break;
+    }
+    case "stats": {
+      const name = S.statOf, p = person(name), ranked = sorted().map(x => x[0]);
+      h = `<div class="statcard">${av(name, "xl")}<h2>${esc(name)}</h2>
+          <div class="hint">${p.games ? `${ranked.indexOf(name) + 1}${ranked.indexOf(name) ? "e" : "er"} du classement` : "Pas encore de partie"}</div></div>
+        <div class="tiles">
+          <div class="tile"><b>${p.games}</b><span>parties</span></div>
+          <div class="tile"><b>${p.wins}</b><span>victoires</span></div>
+          <div class="tile"><b>${pct(p.wins, p.games)}%</b><span>de réussite</span></div>
+          <div class="tile"><b>${p.fin}</b><span>finales jouées</span></div>
+          <div class="tile"><b>${p.finWin}</b><span>finales gagnées</span></div>
+          <div class="tile"><b>${p.best}</b><span>record en finale</span></div>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn soft" data-a="board">Retour au classement</button>
+        <div class="links"><button class="link" data-a="delP">${S.sureDel ? "Sûr ? Retouche pour supprimer" : "Supprimer ce joueur"}</button></div>`;
+      break;
+    }
+  }
+  app.innerHTML = h; fresh = null;
+  const bq = document.getElementById("bq");
+  if (bq) bq.oninput = () => { S.bq = bq.value; const qq = fold(bq.value); document.getElementById("bl").innerHTML = boardList(sorted().filter(([n]) => fold(n).includes(qq))); };
+  if (S.screen === "fPlay") tick();
+  if (S.screen === "fEnd") countUp();
+}
+function finTable(n) {
+  const f = S.game.fin;
+  return `<div class="ftab ${n > 1 ? "two" : ""}">${f.qs.map((q, qi) => `<div class="fq"><small>${esc(Q[q][0])}</small>
+    ${[...Array(n).keys()].map(p => { const a = f.ans[p][qi]; return `<div class="fcell ${a === null || a < 0 ? "no" : a === 0 ? "top" : ""}"><span>${a === null || a < 0 ? "—" : esc(Q[q][1][a][0])}</span><b>${finPts(p, qi)}</b></div>`; }).join("")}</div>`).join("")}</div>`;
+}
+function countUp() {
+  const el = document.querySelector("[data-count]"); if (!el) return; const to = +el.dataset.count, t0 = performance.now();
+  (function f(t) { const k = Math.min(1, (t - t0) / 1400); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(f); })(t0);
+}
+const sorted = () => Object.entries(S.people).filter(([, p]) => p.games).sort((a, b) => b[1].wins - a[1].wins || b[1].finWin - a[1].finWin || a[0].localeCompare(b[0]));
+function boardList(list) {
+  if (!list.length) return `<div class="empty">${Object.keys(S.people).length ? "Personne avec ce nom." : "Personne pour l'instant. Jouez une partie et vos stats apparaîtront ici."}</div>`;
+  return list.map(([n, p], k) => `<button class="who" data-a="stat" data-v="${esc(n)}"><span class="rank ${k < 3 && p.wins ? "top" : ""}">${k + 1}</span>${av(n)}
+    <span class="t">${esc(n)}<small>${statLine(p)}</small></span><span class="go">›</span></button>`).join("");
+}
+
+let addTeam = 0, addQ = "";
+function addList() {
+  const q = fold(addQ), used = new Set([...S.teams.flat(), S.host].filter(Boolean));
+  const all = knownNames();
+  const list = all.filter(n => !used.has(n) && fold(n).includes(q)).sort((a, b) => ((S.people[b] || {}).last || 0) - ((S.people[a] || {}).last || 0) || a.localeCompare(b)).slice(0, 30);
+  const exact = all.some(n => fold(n) === q) || [...used].some(n => fold(n) === q);
+  let h = list.map(n => `<button class="who" data-a="addName" data-v="${esc(n)}">${av(n)}<span class="t">${esc(n)}<small>${statLine(S.people[n])}</small></span><span class="go">＋</span></button>`).join("");
+  if (addQ.trim() && !exact) h = `<button class="who new" data-a="addName" data-v="${esc(addQ.trim().slice(0, 16))}">${av(addQ.trim())}<span class="t">Ajouter ${esc(addQ.trim())}<small>Nouveau joueur</small></span><span class="go">＋</span></button>` + h;
+  return h || `<div class="empty">Écris un prénom pour l'ajouter.</div>`;
+}
+function openSheet(kind) {
+  if (!kind) { sheet.innerHTML = ""; return; }
+  let inner;
+  if (kind === "rules") inner = `<h2>Les règles</h2><div class="rules">
+      <p>Deux familles. On a demandé à 100 personnes de répondre à une question : il faut retrouver les <b>6 réponses les plus citées</b>. Chaque réponse vaut le nombre de personnes qui l'ont donnée.</p>
+      <p>L'<b>animateur</b> tient le téléphone, voit tout le tableau et touche les réponses trouvées. Sans animateur à part, un joueur différent anime chaque manche et ne joue pas celle-là.</p>
+      <p><b>Face-à-face</b> : un joueur de chaque famille. Le premier qui tape sur la table répond. La réponse la mieux classée gagne la main : sa famille joue ou passe.</p>
+      <p><b>La main</b> : les joueurs de la famille répondent chacun leur tour. Une réponse absente = une croix. À <b>3 croix</b>, l'autre famille se concerte et peut <b>voler</b> toute la banque avec une seule bonne réponse.</p>
+      <p>La famille qui gagne la manche empoche la banque. La <b>dernière manche compte triple</b>.</p>
+      <p><b>La finale</b> : la famille gagnante envoie deux joueurs. Le premier répond à 5 questions en ${FIN_SECS[0]} secondes, le second aux mêmes en ${FIN_SECS[1]} secondes, sans répéter les réponses du premier. Il faut <b>${FIN_GOAL} points</b> à deux.</p></div>
+      <button class="btn" data-a="close">Compris</button>`;
+  else if (kind === "public") { const r = S.game.r;
+    inner = `<h2 style="text-align:center">Le tableau</h2>${qcard(r.q)}${boardHTML("public")}${r.phase === "play" || r.phase === "steal" ? strikes(r.strikes) : ""}<button class="btn" data-a="close">Fermer</button>`; }
+  else inner = `<h2>${addTeam === 2 ? "Choisir l'animateur" : `Ajouter à la ${fam(addTeam)}`}</h2>
+      <input id="aq" type="text" maxlength="16" placeholder="Cherche ou écris un prénom" value="${esc(addQ)}" autocomplete="off" autocapitalize="words" enterkeyhint="done">
+      <div class="list" id="al">${addList()}</div>
+      <button class="btn" data-a="close">OK</button>`;
+  sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true">${inner}</div></div>`;
+  const aq = document.getElementById("aq");
+  if (aq) { aq.oninput = () => { addQ = aq.value; document.getElementById("al").innerHTML = addList(); };
+    aq.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); const v = aq.value.trim(); if (v) addName(knownNames().find(n => fold(n) === fold(v)) || v.slice(0, 16)); } }; }
+}
+function addName(nm) {
+  for (const t of S.teams) { const i = t.indexOf(nm); if (i >= 0) t.splice(i, 1); }
+  if (S.host === nm) S.host = null;
+  person(nm).last = Date.now(); addQ = "";
+  if (addTeam === 2) { S.host = nm; save(); render(); openSheet(null); return; }
+  S.teams[addTeam].push(nm); save(); render(); openSheet("add");
+  const aq = document.getElementById("aq"); if (aq) aq.focus();
+}
+
+function tap(i) {
+  const g = S.game, r = g.r; if (S.screen !== "round" || r.open.includes(i)) return;
+  const f = r.f;
+  if (r.phase === "face") {
+    if (f.first === null) { buzz(10); return; }
+    snap();
+    const t = f.a === null ? f.first : 1 - f.first; reveal(i, t);
+    if (f.a === null) f.a = i; else f.b = i;
+    faceResolve(); save(); render(); return;
+  }
+  if (r.phase === "play") {
+    snap(); reveal(i, r.ctrl); g.tp[r.ctrl]++;
+    if (r.open.length >= 6) { finishRound(r.ctrl, false); return; }
+    save(); render(); return;
+  }
+  if (r.phase === "steal") { snap(); reveal(i, 1 - r.ctrl); finishRound(1 - r.ctrl, true); }
+}
+function miss() {
+  const g = S.game, r = g.r, f = r.f; if (S.screen !== "round") return;
+  snap();
+  if (r.phase === "face") {
+    if (f.a === null) f.a = -1; else f.b = -1;
+    if (!(f.a < 0 && f.b !== null && f.b < 0)) { SFX.x(); buzz([80, 40, 80]); strikeFx(1); }
+    faceResolve(); save(); render(); return;
+  }
+  if (r.phase === "play") {
+    r.strikes++; g.tp[r.ctrl]++; SFX.x(); buzz([120, 60, 120]); strikeFx(r.strikes);
+    if (r.strikes >= 3) r.phase = "steal";
+    save(); render(); return;
+  }
+  if (r.phase === "steal") { SFX.x(); strikeFx(1); finishRound(r.ctrl, false); }
+}
+
+const A = {
+  rounds: d => { S.rounds = Math.max(2, Math.min(8, S.rounds + +d)); save(); render(); },
+  finale: () => { S.finale = !S.finale; buzz(10); save(); render(); },
+  sound: () => { S.sound = !S.sound; buzz(10); save(); render(); if (S.sound) SFX.ding(); },
+  toTeams: () => { if (S.game && S.game.ended) S.game = null; go("teams"); },
+  home: () => { if (S.game && S.game.ended) S.game = null; go("home"); },
+  addTo: v => { addTeam = +v; addQ = ""; openSheet("add"); },
+  addName: v => addName(v),
+  rm: v => { const [t, k] = v.split(":").map(Number); S.teams[t].splice(k, 1); save(); render(); },
+  rmHost: () => { S.host = null; save(); render(); },
+  mix: () => { const all = shuffle(S.teams.flat()); S.teams = [[], []]; all.forEach((n, i) => S.teams[i % 2].push(n)); buzz(20); save(); render(); },
+  play: () => { if (!teamOk()) return; wake(); ac(); newGame(); },
+  startRound: () => { buzz(20); SFX.buzz(); go("round"); },
+  buzzed: v => { const r = S.game.r; if (r.phase !== "face" || r.f.first !== null) return; snap(); r.f.first = +v; r.again = false; SFX.buzz(); buzz(30); save(); render(); },
+  tap: v => tap(+v),
+  miss: () => miss(),
+  choose: v => { const r = S.game.r; if (r.phase !== "choose") return; snap(); r.ctrl = +v; r.phase = "play"; buzz(20); save(); render(); },
+  undo: () => undo(),
+  public: () => openSheet("public"),
+  next: () => afterRound(),
+  finGo: () => finStart(),
+  finAns: v => { if (S.screen === "fPlay") finAnswer(+v); },
+  finPass: () => finPass(),
+  finStop: () => finStop(),
+  finP2: () => { const f = S.game.fin; f.p = 1; f.queue = [0, 1, 2, 3, 4]; f.left = 0; finStart(); },
+  finEnd: () => finishGame(),
+  board: () => { S.bq = ""; go("board"); },
+  stat: v => { S.statOf = v; S.sureDel = false; go("stats"); },
+  delP: () => { if (!S.sureDel) { S.sureDel = true; render(); return; } delete S.people[S.statOf]; S.sureDel = false; go("board"); },
+  rules: () => openSheet("rules"),
+  close: () => openSheet(null),
+  bg: (v, e) => { if (e.target.classList.contains("sheet")) openSheet(null); },
+};
+document.addEventListener("click", e => { const el = e.target.closest("[data-a]"); if (!el || el.disabled) return; const f = A[el.dataset.a]; if (f) f(el.dataset.v, e); });
+
+let lastSec = -1;
+function tick() {
+  const g = S.game; if (!g || S.screen !== "fPlay") return;
+  const f = g.fin, ms = Math.max(0, f.end - Date.now()), sec = Math.ceil(ms / 1000);
+  const t = document.getElementById("t"), tb = document.getElementById("tb");
+  if (t) { t.textContent = sec; t.classList.toggle("low", sec <= 5); }
+  if (tb) tb.style.width = (100 * ms / (finSecs(f.p) * 1000)) + "%";
+  if (sec !== lastSec && sec <= 5 && sec > 0) { buzz(15); SFX.tick(); }
+  lastSec = sec;
+  if (ms <= 0) { SFX.x(); finStop(); }
+}
+setInterval(tick, 100);
+
+function confetti() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c = document.getElementById("fx"), x = c.getContext("2d"), dpr = devicePixelRatio || 1;
+  c.width = innerWidth * dpr; c.height = innerHeight * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const P = [...Array(130)].map(() => ({ x: innerWidth / 2 + (Math.random() - .5) * 80, y: innerHeight * .3, vx: (Math.random() - .5) * 13, vy: -Math.random() * 14 - 4,
+    w: 6 + Math.random() * 6, h: 8 + Math.random() * 8, a: Math.random() * 6, va: (Math.random() - .5) * .4, c: BODY[Math.random() * BODY.length | 0] }));
+  const t0 = performance.now();
+  (function f(t) {
+    x.clearRect(0, 0, innerWidth, innerHeight);
+    for (const p of P) { p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.a += p.va;
+      x.save(); x.translate(p.x, p.y); x.rotate(p.a); x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); x.restore(); }
+    if (t - t0 < 3200) requestAnimationFrame(f); else x.clearRect(0, 0, innerWidth, innerHeight);
+  })(t0);
+}
+
+let lock = null;
+async function wake() { try { if ("wakeLock" in navigator && !lock) { lock = await navigator.wakeLock.request("screen"); lock.addEventListener("release", () => lock = null); } } catch (e) {} }
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.game) wake(); });
+
+load();
+render();
+</script>
+
+
+<script>
+// une seule appli : un seul service worker à la racine
+if ("serviceWorker" in navigator) addEventListener("load", async () => {
+  try { for (const r of await navigator.serviceWorker.getRegistrations()) if (!/\/undercovertelephone\/$/.test(r.scope) && r.scope !== new URL("../", location).href) r.unregister(); } catch (e) {}
+  navigator.serviceWorker.register("../sw.js", { scope: "../" }).catch(() => {});
+});
+</script>
+<!-- xq: bouton quitter commun -->
+<button id="xq" type="button" aria-label="Quitter la partie" hidden>✕</button>
+<style>
+#xq { position: fixed; z-index: 60; top: calc(env(safe-area-inset-top, 0px) + 10px); left: 12px; height: 38px; min-width: 38px; padding: 0 12px; border: 0; border-radius: 99px;
+  background: color-mix(in srgb, var(--surface, #fff) 88%, transparent); color: var(--ink, #111); font: 600 1rem Fredoka, system-ui, sans-serif;
+  box-shadow: 0 2px 10px rgba(0,0,0,.14); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); cursor: pointer; }
+#xq.sure { background: #ef4444; color: #fff; font-size: .9rem; }
+#xq[hidden] { display: none; }
+</style>
+<script>
+(() => {
+  const b = document.getElementById("xq"), app = document.getElementById("app");
+  const SKIP = ["home", "board", "stats", "rules", "playing", "count", "turn"];
+  let t;
+  const reset = () => { b.classList.remove("sure"); b.textContent = "✕"; };
+  function upd() {
+    const sc = typeof S !== "undefined" ? S.screen : "home";
+    const has = app.querySelector('[data-a="quit"], [data-a="home"], a[href="../"]');
+    b.hidden = SKIP.includes(sc) || !!has;
+    if (b.hidden) reset();
+  }
+  b.addEventListener("click", () => {
+    if (!b.classList.contains("sure")) { b.classList.add("sure"); b.textContent = "Quitter la partie ?"; clearTimeout(t); t = setTimeout(reset, 3000); return; }
+    try { S.game = null; S.screen = "home"; save(); } catch (e) {}
+    location.reload();
+  });
+  new MutationObserver(upd).observe(app, { childList: true, subtree: true });
+  upd();
+})();
+</script>
+<script id="polish-js">
+(() => {
+  const app = document.getElementById("app"); if (!app) return;
+  const key = () => { try { const g = S.game; return S.screen + "|" + (g ? (g.turn ?? g.round ?? "") + "/" + (g.deal ?? g.gi ?? "") : ""); } catch (e) { return null; } };
+  const deco = () => { const b = app.querySelector(".brand"); if (!b || b.querySelector(".wm")) return; const s = b.querySelector(".mark svg"); if (!s) return;
+    for (const c of ["wm", "wm wl"]) { const x = s.cloneNode(true); x.setAttribute("class", c); x.setAttribute("aria-hidden", "true"); b.prepend(x); } };
+  let last = key(); deco();
+  new MutationObserver(() => { deco(); const k = key(); if (k === null || k === last) return; last = k;
+    app.classList.remove("enter"); void app.offsetWidth; app.classList.add("enter"); }).observe(app, { childList: true });
+  app.addEventListener("animationend", e => { if (e.target === app) app.classList.remove("enter"); });
+})();
+addEventListener("pagereveal", e => { if (!e.viewTransition) return; const r = document.documentElement; r.classList.add("vt"); e.viewTransition.finished.finally(() => r.classList.remove("vt")); });
+addEventListener("pageswap", () => { try { sessionStorage.setItem("tablee_from", location.pathname.split("/").filter(Boolean).pop()); } catch (e) {} });
+</script>
+</body>
+</html>

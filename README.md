@@ -24,6 +24,7 @@ Des jeux de soirée dans une seule appli, avec **un seul téléphone** pour tout
 | **Name That Tune** | Trouve la chanson en 1, 3, 6, 12 ou 30 secondes : plus c'est tôt, plus ça rapporte (extraits Deezer) | 2 à 12 | 311 tubes |
 | **Tabou** | Fais deviner le mot sans dire les mots interdits | 4 et plus | 462 cartes |
 | **Burger Quiz** | Ketchup contre Mayo : Nuggets, Sel ou poivre, Menus, Addition | 2 et plus | 2 niveaux (Facile, Corsé) : 225 Nuggets, 26 Sel ou poivre, 30 Menus, 311 Additions |
+| **Une famille en or** | « On a demandé à 100 personnes » : face-à-face, 3 croix, vol de la banque, manche triple et finale à 200 points | 3 à 12 | 220 questions à 6 réponses |
 | **Le Juste Chiffre** | Un chiffre à deviner, le plus proche gagne | 2 et plus | 144 questions |
 | **Crack List** | Le Petit Bac en cartes, le premier sans cartes gagne | 2 à 8 | 303 listes |
 | **Mot de Passe** | Un mot par indice pour faire trouver le mot | 4 et plus | 2403 mots |
