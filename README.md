@@ -19,6 +19,7 @@ Des jeux de soirée dans une seule appli, avec **un seul téléphone** pour tout
 | **Devineuf** | Trouve les 9 réponses à une question avant la fin du chrono | 2 à 12 | 223 questions |
 | **Just One** | Un indice chacun pour faire deviner un mot, les indices identiques sont éliminés (coopératif) | 3 à 12 | 646 mots |
 | **Timeline** | Place les événements sur la frise chronologique : avant, après ou entre | 2 à 10 | 328 événements |
+| **Hitster** | Écoute un extrait et place la chanson sur ta frise : le premier à 10 cartes gagne (extraits Deezer, internet requis) | 2 à 10 | 311 tubes |
 | **Tabou** | Fais deviner le mot sans dire les mots interdits | 4 et plus | 462 cartes |
 | **Burger Quiz** | Ketchup contre Mayo : Nuggets, Sel ou poivre, Menus, Addition | 2 et plus | 2 niveaux (Facile, Corsé) : 225 Nuggets, 26 Sel ou poivre, 30 Menus, 311 Additions |
 | **Le Juste Chiffre** | Un chiffre à deviner, le plus proche gagne | 2 et plus | 144 questions |
