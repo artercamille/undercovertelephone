@@ -1,8 +1,8 @@
 // Garde toute l'appli Tablée sur le téléphone pour qu'elle marche sans connexion.
 // Changer VERSION à chaque mise à jour pour que les téléphones récupèrent la nouvelle version.
-const VERSION = "tablee-v32";
+const VERSION = "tablee-v33";
 const FILES = ["./", "index.html", "manifest.webmanifest", "Fredoka.ttf",
-  "cover/", "spy/", "milieu/", "codes/", "preferes/", "artiste/", "piege/", "regle/", "classement/", "topten/", "devineuf/", "justone/", "timeline/", "hitster/", "tabou/", "burger/", "chiffre/", "crack/", "mdp/", "motcache/", "time/", "tete/", "loup/", "apero/",
+  "cover/", "spy/", "milieu/", "codes/", "preferes/", "artiste/", "piege/", "regle/", "classement/", "topten/", "devineuf/", "justone/", "timeline/", "hitster/", "blind/", "tune/", "tabou/", "burger/", "chiffre/", "crack/", "mdp/", "motcache/", "time/", "tete/", "loup/", "apero/",
   "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-512.png", "icons/apple-touch-icon.png", "icons/favicon-64.png"];
 
 self.addEventListener("install", e => {

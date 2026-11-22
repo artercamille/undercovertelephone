@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#334155">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tablée">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" type="image/png" href="../icons/favicon-64.png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<title>Blind Test</title>
+<style>
+
+/* Tablée : un écran = un titre, une consigne, un bouton ; chaque jeu a sa couleur. */
+:root {
+  --bg: #ffffff;
+  --surface: #f3f3f5;
+  --surface-2: #e9e9ed;
+  --ink: #111114;
+  --muted: #6e6e76;
+  --accent: #ff5a1f;
+  --accent-ink: #ffffff;
+  --civil: #16a34a;
+  --under: #e11d48;
+  --white: #71717a;
+  --font: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #0e0e10; --surface: #1c1c20; --surface-2: #2a2a30; --ink: #f4f4f6; --muted: #9a9aa3; --accent: #ff6a33; --civil: #34c06a; --under: #fb5172; --white: #a1a1aa; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-weight: 500; font-size: 17px; line-height: 1.35;
+  -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+input { -webkit-user-select: text; user-select: text; }
+.app { max-width: 440px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; gap: 20px;
+  padding-block: 26px 28px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.logo { text-align: center; font-size: 2.6rem; font-weight: 700; line-height: 1; }
+.logo i { font-style: normal; color: var(--accent); }
+h2 { margin: 0; font-size: 1.8rem; font-weight: 700; line-height: 1.12; text-align: center; text-wrap: balance; }
+.sub { text-align: center; color: var(--muted); margin-top: -10px; text-wrap: balance; }
+.label { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.spacer { flex: 1; }
+.pop { animation: pop .3s ease-out backwards; }
+@keyframes pop { from { transform: translateY(8px); opacity: 0 } }
+
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
+.btn { width: 100%; min-height: 60px; border-radius: 16px; background: var(--accent); color: var(--accent-ink); font-size: 1.2rem; font-weight: 600; transition: transform .08s, opacity .15s; }
+.btn:active { transform: scale(.98); }
+.btn.alt, .btn.soft { background: var(--surface); color: var(--ink); }
+.btn:disabled { opacity: .35; }
+.link { color: var(--muted); font-weight: 500; font-size: .95rem; padding: 10px; }
+.links { display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 12px; }
+
+.box { background: var(--surface); border-radius: 18px; padding: 2px 16px; }
+.line { display: flex; align-items: center; gap: 12px; min-height: 62px; }
+.line + .line { border-top: 1px solid var(--surface-2); }
+.line .name { flex: 1; font-weight: 600; }
+.line .name small { display: block; color: var(--muted); font-size: .82rem; font-weight: 500; }
+.step { display: flex; align-items: center; gap: 4px; }
+.step button { width: 40px; height: 40px; border-radius: 50%; background: var(--bg); font-size: 1.3rem; font-weight: 600; }
+.step button:active { transform: scale(.9); }
+.step span { min-width: 54px; text-align: center; font-weight: 600; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.big { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.big .step { gap: 20px; }
+.big .step button { width: 56px; height: 56px; font-size: 1.7rem; background: var(--surface); }
+.big .step span.count { font-size: 4.2rem; font-weight: 700; min-width: 90px; line-height: 1; }
+.chips { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-top: -6px; }
+.chip { font-size: .88rem; font-weight: 600; padding: 4px 12px; border-radius: 99px; background: var(--surface); }
+.chip.civil { color: var(--civil); } .chip.undercover { color: var(--under); } .chip.white { color: var(--white); }
+
+/* cartes */
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.card { aspect-ratio: 3 / 4; border-radius: 16px; background: var(--accent); color: var(--accent-ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px;
+  animation: pop .3s ease-out backwards; transition: transform .1s; }
+.card .q { font-size: 2.4rem; font-weight: 700; line-height: 1; }
+.card .num { font-size: .8rem; font-weight: 600; opacity: .8; }
+.card:active { transform: scale(.95); }
+.card.taken { background: var(--surface); color: var(--muted); pointer-events: none; font-weight: 600; font-size: .95rem; text-align: center; overflow-wrap: anywhere; gap: 8px; }
+
+/* qui es-tu */
+input[type=text] { width: 100%; min-height: 58px; border-radius: 16px; border: 2px solid var(--surface-2); background: var(--bg); color: var(--ink);
+  font: inherit; font-size: 1.2rem; font-weight: 600; padding: 0 18px; }
+input[type=text]:focus { border-color: var(--accent); outline: none; }
+input::placeholder { color: var(--muted); font-weight: 500; }
+.list { display: flex; flex-direction: column; background: var(--surface); border-radius: 18px; overflow: hidden; }
+.list:empty { display: none; }
+.who { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 8px 14px; text-align: left; }
+.who + .who { border-top: 1px solid var(--surface-2); }
+.who:active { background: var(--surface-2); }
+.who .t { flex: 1; min-width: 0; font-weight: 600; font-size: 1.1rem; overflow-wrap: anywhere; }
+.who .t small { display: block; color: var(--muted); font-weight: 500; font-size: .82rem; }
+.who .go { color: var(--muted); font-size: 1.3rem; }
+.who.new { background: var(--accent); color: var(--accent-ink); }
+.who.new .t small, .who.new .go { color: var(--accent-ink); opacity: .85; }
+.who.sel { background: var(--ink); color: var(--bg); }
+.who.sel .t small, .who.sel .n { color: var(--bg); opacity: .7; }
+.who .n { width: 20px; text-align: center; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.av { --c: var(--accent); width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  background: var(--c); color: #fff; font-weight: 700; font-size: 1.05rem; }
+.av.dead { filter: grayscale(1); opacity: .5; }
+.av.xl { width: 84px; height: 84px; font-size: 2.2rem; }
+.empty { text-align: center; color: var(--muted); padding: 14px; font-size: .95rem; text-wrap: balance; }
+
+/* révélations */
+.reveal { background: var(--surface); border-radius: 24px; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  animation: pop .3s ease-out backwards; }
+.word { font-size: 2.9rem; font-weight: 700; line-height: 1.05; text-wrap: balance; max-width: 100%; }
+.role { font-size: 2.9rem; font-weight: 700; line-height: 1; }
+.role.civil { color: var(--civil); } .role.undercover { color: var(--under); } .role.white { color: var(--white); }
+.hint { color: var(--muted); font-size: .98rem; text-wrap: balance; }
+.reveal input[type=text] { text-align: center; }
+
+/* fin + stats */
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pair > div { background: var(--surface); border-radius: 18px; padding: 14px 10px; text-align: center; }
+.pair b { display: block; font-size: 1.15rem; font-weight: 700; overflow-wrap: anywhere; margin-top: 2px; }
+.res { display: flex; align-items: center; gap: 10px; min-height: 60px; font-variant-numeric: tabular-nums; }
+.res + .res { border-top: 1px solid var(--surface-2); }
+.res .t { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.res .t small { display: block; font-size: .8rem; font-weight: 600; }
+.res.dead .t > span { color: var(--muted); }
+.res .g { font-weight: 700; color: var(--civil); min-width: 34px; text-align: right; }
+.res .win { font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--accent); color: var(--accent-ink); }
+.r.civil { color: var(--civil); } .r.undercover { color: var(--under); } .r.white { color: var(--white); }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tile { background: var(--surface); border-radius: 16px; padding: 12px 6px; text-align: center; }
+.tile b { display: block; font-size: 1.7rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tile span { font-size: .78rem; color: var(--muted); font-weight: 500; }
+.bars { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; }
+.bar { display: grid; grid-template-columns: 96px 1fr 44px; align-items: center; gap: 10px; font-size: .95rem; font-weight: 600; }
+.bar .tr { height: 10px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.bar .tr i { display: block; height: 100%; border-radius: 99px; }
+.bar em { font-style: normal; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; font-size: .85rem; }
+.rank { width: 22px; text-align: center; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rank.top { color: var(--accent); }
+.statcard { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+
+.sheet { position: fixed; inset: 0; z-index: 10; background: rgba(0,0,0,.4); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s; }
+@keyframes fade { from { opacity: 0 } }
+.sheet > div { width: min(100%, 440px); background: var(--bg); border-radius: 24px 24px 0 0; display: flex; flex-direction: column; gap: 14px; max-height: 90%; overflow-y: auto;
+  animation: up .25s ease-out;
+  padding: 24px max(20px, env(safe-area-inset-right, 0px)) max(22px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)); }
+@keyframes up { from { transform: translateY(40px) } }
+.rules p { margin: 0 0 10px; }
+.rules b { font-weight: 700; }
+/* ---- couche "juste milieu" : relief, dégradés, motif sur les cartes */
+:root { --accent-2: #ff2e63; --glow: rgba(255, 90, 31, .35); --shadow: 0 1px 2px rgba(20,20,30,.06), 0 8px 24px rgba(20,20,30,.08); --panel: #ffffff; --bg-2: #fff1ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; } }
+:root[data-theme="dark"] { --accent-2: #ff3d73; --glow: rgba(255, 106, 51, .3); --shadow: 0 8px 24px rgba(0,0,0,.45); --panel: #1c1c20; --bg-2: #22140f; }
+body { background: radial-gradient(120% 60% at 50% -10%, var(--bg-2), var(--bg) 60%) fixed, var(--bg); }
+.brand { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.mark { width: 74px; height: 74px; border-radius: 22px; display: grid; place-items: center; transform: rotate(-6deg);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 10px 26px var(--glow); }
+.mark svg { width: 46px; height: 46px; }
+.logo { font-size: 2.7rem; }
+.logo i { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.btn { background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 8px 20px var(--glow); }
+.btn.alt, .btn.soft { background: var(--panel); box-shadow: var(--shadow); }
+.btn:disabled { box-shadow: none; }
+.box, .list, .pair > div, .tile { background: var(--panel); box-shadow: var(--shadow); }
+.who + .who, .line + .line, .res + .res { border-top-color: var(--surface); }
+.step button { background: var(--surface); }
+.big .step button { background: var(--panel); box-shadow: var(--shadow); }
+.big .step span.count { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.chip { background: var(--panel); box-shadow: var(--shadow); }
+.card { position: relative; overflow: hidden; border-radius: 18px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.09) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--accent), var(--accent-2));
+  box-shadow: 0 8px 18px var(--glow); }
+.card::before { content: ""; position: absolute; inset: 6px; border-radius: 13px; border: 2px solid rgba(255,255,255,.35); pointer-events: none; }
+.card .q { width: 54%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.22); display: grid; place-items: center; font-size: 2rem; }
+.card:nth-child(3n+1) { transform: rotate(-2deg); } .card:nth-child(3n) { transform: rotate(2deg); }
+.card:active { transform: scale(.94); }
+.card.taken { background: var(--panel); box-shadow: var(--shadow); transform: none; }
+.card.taken::before { border-color: var(--surface); }
+.av { background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 60%, #ff2e63)); box-shadow: 0 3px 8px color-mix(in srgb, var(--c) 35%, transparent); }
+.who.new { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.who.sel { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+.who.sel .t small, .who.sel .n { color: #fff; }
+.reveal { background: var(--panel); box-shadow: var(--shadow); position: relative; overflow: hidden; padding-top: 0; animation: flipIn .5s cubic-bezier(.2,1.2,.4,1) backwards; }
+@keyframes flipIn { from { transform: perspective(900px) rotateY(70deg); opacity: 0 } }
+.reveal::before { content: ""; display: block; align-self: stretch; height: 92px; margin: 0 -20px 4px;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2))); }
+.reveal .av.xl { margin-top: -66px; box-shadow: 0 0 0 6px var(--panel), 0 8px 18px rgba(0,0,0,.18); }
+.reveal.civil { --band1: #22c55e; --band2: #0d9488; }
+.reveal.undercover { --band1: #f43f5e; --band2: #be123c; }
+.reveal.white { --band1: #a1a1aa; --band2: #52525b; }
+.reveal.wordcard .word { background: linear-gradient(135deg, var(--ink), color-mix(in srgb, var(--ink) 60%, var(--accent))); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 4px; }
+.res .win { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.tile b { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.endhead { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px; border-radius: 24px; color: #fff; text-align: center;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(150deg, var(--band1, var(--accent)), var(--band2, var(--accent-2)));
+  box-shadow: var(--shadow); animation: pop .4s ease-out backwards; }
+.endhead.civils { --band1: #22c55e; --band2: #0d9488; } .endhead.imposteurs { --band1: #f43f5e; --band2: #be123c; } .endhead.white { --band1: #71717a; --band2: #3f3f46; }
+.endhead h2 { color: #fff; }
+.endhead .label { color: rgba(255,255,255,.85); }
+.sheet > div { background: var(--bg); }
+canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ---- Blind Test : ardoise → rose */
+:root { --accent: #334155; --accent-2: #db2777; --glow: rgba(219, 39, 119, .26); --bg-2: #f6f3f8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent: #475569; --accent-2: #ec4899; --glow: rgba(236, 72, 153, .22); --bg-2: #17131b; } }
+:root[data-theme="dark"] { --accent: #475569; --accent-2: #ec4899; --glow: rgba(236, 72, 153, .22); --bg-2: #17131b; }
+
+.seg { display: flex; gap: 3px; padding: 3px; border-radius: 14px; background: var(--surface); flex-wrap: wrap; justify-content: flex-end; }
+.seg button { padding: 7px 10px; border-radius: 11px; font-weight: 600; font-size: .85rem; color: var(--muted); transition: background .2s, color .2s; }
+.seg button.on { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; box-shadow: 0 4px 10px -4px var(--glow); }
+.deck { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 12px 14px; border-radius: 28px; position: relative; overflow: hidden; isolation: isolate; color: #fff;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.08) 0 10px, transparent 10px 20px), linear-gradient(155deg, var(--accent), var(--accent-2));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 20px 36px -20px var(--glow); }
+@supports (background: linear-gradient(in oklch, red, blue)) { .deck { background: repeating-linear-gradient(45deg, rgba(255,255,255,.08) 0 10px, transparent 10px 20px), linear-gradient(in oklch 155deg, var(--accent), var(--accent-2)); } }
+.player { --p: 0; position: relative; width: 132px; height: 132px; border-radius: 50%; display: grid; place-items: center; transition: transform .15s cubic-bezier(.2,1.4,.4,1); }
+.player:active { transform: scale(.94); }
+.player .ring { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(#fff calc(var(--p) * 1%), rgba(255,255,255,.22) 0); }
+.player .disc { position: relative; width: 112px; height: 112px; border-radius: 50%; display: grid; place-items: center; color: var(--accent-2);
+  background: radial-gradient(circle, #fff 0 30%, #f4f4f6 31% 33%, #fff 34%); box-shadow: 0 10px 24px -8px rgba(0,0,0,.35); }
+.player svg { width: 46px; height: 46px; margin-left: 3px; }
+.player .i-pause { display: none; }
+.player.on .i-play { display: none; } .player.on .i-pause { display: inline; } .player.on svg { margin-left: 0; }
+.player.load .disc, .player.none .disc, .player.err .disc { opacity: .55; }
+.player.load .ring { background: conic-gradient(#fff 0 22%, rgba(255,255,255,.22) 0); animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(1turn); } }
+.player.on .disc { animation: spin 4s linear infinite; }
+.player.on .disc svg { animation: spin 4s linear infinite reverse; }
+.eq { display: flex; align-items: flex-end; gap: 4px; height: 22px; }
+.eq i { width: 5px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.8); }
+.deck:has(.player.on) .eq i { animation: eq .9s ease-in-out infinite alternate; }
+.eq i:nth-child(2) { animation-delay: -.3s !important; } .eq i:nth-child(3) { animation-delay: -.6s !important; } .eq i:nth-child(4) { animation-delay: -.15s !important; } .eq i:nth-child(5) { animation-delay: -.45s !important; }
+@keyframes eq { from { height: 4px; } to { height: 22px; } }
+.pst { font-weight: 600; text-align: center; min-height: 1.3em; text-wrap: balance; }
+.deck .links .link { color: #fff; font-weight: 700; }
+.deck .links[hidden] { display: none; }
+.pick { justify-content: center; padding: 0; }
+.hit { display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 22px; background: var(--panel); box-shadow: var(--shadow); border: 1px solid var(--line); animation: pop .4s ease-out backwards; }
+.hit img, .hit .noimg { width: 104px; height: 104px; flex: none; border-radius: 14px; object-fit: cover; box-shadow: 0 10px 20px -8px rgba(0,0,0,.4); }
+.hit .noimg { display: grid; place-items: center; background: linear-gradient(155deg, var(--accent), var(--accent-2)); }
+.hit .noimg svg { width: 60px; height: 60px; }
+.hit > div:last-child { display: flex; flex-direction: column; min-width: 0; }
+.hy { font-size: 2.4rem; line-height: 1; background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ht { font-weight: 700; font-size: 1.15rem; line-height: 1.2; margin-top: 4px; }
+.ha { color: var(--muted); font-weight: 600; }
+.dz { align-self: center; color: var(--muted); font-weight: 600; font-size: .9rem; text-decoration: none; }
+.res .tot { font-weight: 700; font-size: 1.25rem; min-width: 32px; text-align: right; font-variant-numeric: tabular-nums; }
+
+.scores { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: -8px; }
+.scores > span { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 3px; border-radius: 99px; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.scores .av { width: 28px; height: 28px; font-size: .8rem; }
+.scores b { font-variant-numeric: tabular-nums; }
+.pchip.on { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; box-shadow: 0 6px 14px -6px var(--glow); }
+.pchip.on .av { box-shadow: 0 0 0 2px rgba(255,255,255,.7); }
+.player .sec { font-size: 1.9rem; font-weight: 700; color: var(--accent-2); }
+.stages { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.stages span { display: flex; flex-direction: column; align-items: center; padding: 8px 2px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); }
+.stages b { font-size: 1.05rem; } .stages small { color: var(--muted); font-weight: 600; font-size: .75rem; }
+.stages .done { background: color-mix(in srgb, var(--accent) 14%, var(--panel)); }
+.stages .cur { border: 2px solid var(--accent); }
+
+/* ---- éléments communs aux nouveaux jeux */
+.endhead.main { --band1: var(--accent); --band2: var(--accent-2); }
+.reveal.main { --band1: var(--accent); --band2: var(--accent-2); }
+.place-name { font-size: 2.2rem; font-weight: 700; line-height: 1.08; text-wrap: balance; max-width: 100%; }
+.teambox { background: var(--panel); box-shadow: var(--shadow); border-radius: 20px; overflow: hidden; }
+.teamhead { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 16px; color: #fff; font-weight: 700; font-size: 1.1rem;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.1) 0 10px, transparent 10px 20px), linear-gradient(135deg, var(--band1, var(--accent)), var(--band2, var(--accent-2))); }
+.teamhead small { font-weight: 600; opacity: .9; font-size: .85rem; }
+.chips2 { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; }
+.pchip { display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; border-radius: 99px; background: var(--surface); font-weight: 600; font-size: .98rem; }
+.pchip .av { width: 30px; height: 30px; font-size: .85rem; }
+.pchip i { font-style: normal; color: var(--muted); font-size: 1.2rem; margin-left: 2px; }
+.pchip.add { padding: 0 16px; min-height: 38px; color: var(--accent); background: transparent; box-shadow: inset 0 0 0 2px var(--surface-2); }
+.res .tot { font-weight: 700; font-size: 1.25rem; min-width: 32px; text-align: right; font-variant-numeric: tabular-nums; }
+.tdot { width: 22px; height: 22px; border-radius: 50%; flex: none; background: linear-gradient(135deg, var(--band1), var(--band2)); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.two .btn { font-size: 1.05rem; min-height: 56px; }
+.toggle { width: 100%; text-align: left; }
+.toggle .name { flex: 1; }
+.sw { width: 48px; height: 28px; border-radius: 99px; background: var(--surface-2); position: relative; transition: background .2s; flex: none; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.sw.on { background: var(--accent); } .sw.on::after { transform: translateX(20px); }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; background: var(--surface); border-radius: 14px; padding: 4px; }
+.seg button { min-height: 44px; border-radius: 11px; font-weight: 600; color: var(--muted); padding: 0 6px; }
+.seg button.on { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; box-shadow: 0 4px 12px var(--glow); }
+.rolebox { background: var(--surface); border-radius: 14px; padding: 10px 16px; font-weight: 600; }
+.rolebox small { display: block; color: var(--muted); font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
+.clock { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 16px; }
+.clock b { font-size: 3.4rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.clock.low b { background: none; color: var(--under); animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: .4 } }
+.clock .row { display: flex; gap: 8px; margin-top: 8px; }
+.clock .row button { padding: 8px 16px; border-radius: 99px; background: var(--surface); font-weight: 600; font-size: .95rem; }
+
+.qtext { font-size: 1.55rem; font-weight: 700; line-height: 1.2; text-wrap: balance; }
+.endhead.imp { --band1: #334155; --band2: #0f172a; }
+.who .ans { font-size: 1.1rem; max-width: 50%; text-align: right; overflow-wrap: anywhere; }
+.res .g { font-weight: 700; color: var(--civil); min-width: 30px; text-align: right; }
+.rules p { margin: 0 0 10px; }
+
+</style>
+<style>
+@font-face { font-family: "Fredoka"; src: url("../Fredoka.ttf") format("truetype"); font-weight: 300 700; font-display: swap; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+html { overscroll-behavior: none; }
+body.full { overflow: hidden; }
+.backmenu { align-self: flex-start; color: var(--muted); font-weight: 600; text-decoration: none; padding: 6px 2px; margin-bottom: -12px; }
+</style>
+<style id="polish">
+/* finition commune : fond d'ambiance, profondeur, transitions */
+:root { --line: rgba(20, 20, 30, .07); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --line: rgba(255, 255, 255, .07); } }
+:root[data-theme="dark"] { --line: rgba(255, 255, 255, .07); }
+body::before { content: ""; position: fixed; inset: -12%; z-index: -1; pointer-events: none;
+  background: radial-gradient(55% 38% at 0% 0%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 70%),
+    radial-gradient(50% 36% at 100% 6%, color-mix(in srgb, var(--accent-2) 18%, transparent), transparent 70%),
+    radial-gradient(70% 40% at 50% 112%, color-mix(in srgb, var(--accent-2) 12%, transparent), transparent 70%);
+  animation: aurad 26s ease-in-out infinite alternate; }
+@keyframes aurad { to { transform: translate(4%, 3%) scale(1.06); } }
+#app.enter { animation: scrin .34s cubic-bezier(.2, 1, .3, 1); }
+@keyframes scrin { from { opacity: 0; translate: 0 16px; } }
+h2 { letter-spacing: -.01em; }
+.logo { letter-spacing: -.02em; }
+.brand .mark { position: relative; overflow: hidden; isolation: isolate; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 16px 30px -10px var(--glow), 0 6px 12px -6px var(--glow);
+  animation: markin .7s cubic-bezier(.2, 1.4, .3, 1) backwards, markbob 4.5s 1s ease-in-out infinite alternate; }
+.brand .mark::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(255, 255, 255, .3), transparent 55%); }
+@keyframes markin { from { scale: .5; opacity: 0; } }
+@keyframes markbob { to { translate: 0 -6px; } }
+.btn { position: relative; overflow: hidden; isolation: isolate;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), inset 0 -3px 0 rgba(0, 0, 0, .12), 0 14px 26px -12px var(--glow), 0 5px 12px -6px var(--glow);
+  transition: transform .14s cubic-bezier(.2, 1.4, .4, 1), box-shadow .2s, opacity .2s, filter .2s; }
+.btn:active { transform: translateY(2px) scale(.985); }
+.btn:not(.alt):not(.soft):not(:disabled)::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, .26) 50%, transparent 65%); transform: translateX(-120%); animation: btnshine 5s 1.4s ease-in-out infinite; }
+@keyframes btnshine { 30%, 100% { transform: translateX(120%); } }
+.btn.alt, .btn.soft { border: 1px solid var(--line); box-shadow: var(--shadow); }
+.btn:disabled { filter: grayscale(.55); opacity: .42; box-shadow: none; }
+.box, .list, .teambox, .reveal, .tile, .pair > div { border: 1px solid var(--line); }
+.endhead { position: relative; overflow: hidden; isolation: isolate; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 18px 34px -16px var(--glow); }
+.endhead::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(180deg, rgba(255, 255, 255, .2), transparent 48%); }
+.pchip { transition: transform .14s cubic-bezier(.2, 1.4, .4, 1); }
+.pchip:active { transform: scale(.93); }
+.step button { transition: transform .14s cubic-bezier(.2, 1.4, .4, 1), background .2s; }
+input[type=text]:focus { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent); }
+.sheet { background: rgba(8, 8, 14, .42); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.sheet > div { border-radius: 30px 30px 0 0; border-top: 1px solid var(--line); box-shadow: 0 -24px 60px -24px rgba(0, 0, 0, .4); animation: sheetup .42s cubic-bezier(.2, 1.15, .3, 1); }
+.sheet > div::before { content: ""; flex: none; align-self: center; width: 42px; height: 5px; border-radius: 3px; background: var(--surface-2); margin: -4px 0 0; }
+@keyframes sheetup { from { transform: translateY(100%); } }
+html #xq { background: color-mix(in srgb, var(--panel, var(--surface, #fff)) 78%, transparent); border: 1px solid var(--line); box-shadow: 0 6px 16px -6px rgba(0, 0, 0, .25);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); transition: transform .14s; }
+html #xq:active { transform: scale(.92); }
+html #xq.sure { border-color: transparent; }
+.brand { position: relative; overflow: hidden; isolation: isolate; padding: 24px 16px 22px; border-radius: 28px; color: #fff; gap: 10px;
+  background: repeating-linear-gradient(45deg, rgba(255, 255, 255, .08) 0 10px, transparent 10px 20px), linear-gradient(155deg, var(--accent), var(--accent-2));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -2px 0 rgba(0, 0, 0, .08), 0 22px 38px -20px var(--glow), 0 8px 18px -10px var(--glow);
+  animation: heroin .6s cubic-bezier(.2, 1.1, .3, 1) backwards; }
+.brand::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(180deg, rgba(255, 255, 255, .22), transparent 50%); }
+@keyframes heroin { from { scale: .94; opacity: 0; } }
+.brand .mark { background: rgba(255, 255, 255, .22); border: 1px solid rgba(255, 255, 255, .42); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 12px 22px -10px rgba(0, 0, 0, .3); }
+.brand .mark::after { display: none; }
+.brand .logo { color: #fff; text-shadow: 0 2px 10px rgba(0, 0, 0, .2), 0 1px 2px rgba(0, 0, 0, .12); }
+.brand .logo i { background: none; -webkit-background-clip: border-box; background-clip: border-box; color: rgba(255, 255, 255, .94); }
+.brand .wm { position: absolute; right: -34px; bottom: -44px; width: 176px; height: 176px; opacity: .16; transform: rotate(-14deg); z-index: -1; pointer-events: none; }
+.brand .wm.wl { right: auto; left: -40px; top: -46px; bottom: auto; width: 120px; height: 120px; opacity: .1; transform: rotate(16deg); }
+@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }
+::view-transition-group(hero) { animation-duration: .5s; animation-timing-function: cubic-bezier(.2, 1, .25, 1); }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .28s; }
+.brand { view-transition-name: hero; }
+.vt .brand, .vt .brand .mark { animation: none; }
+@supports (background: linear-gradient(in oklch, red, blue)) {
+  .brand { background: repeating-linear-gradient(45deg, rgba(255, 255, 255, .08) 0 10px, transparent 10px 20px), linear-gradient(in oklch 155deg, var(--accent), var(--accent-2)); }
+}
+.reveal .av.xl { position: relative; }
+.reveal .av.xl::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 3px solid var(--c, var(--accent)); opacity: 0; pointer-events: none;
+  animation: ring 2.2s .7s cubic-bezier(.2, .6, .3, 1) infinite; }
+@keyframes ring { 0% { transform: scale(.92); opacity: .6; } 100% { transform: scale(1.75); opacity: 0; } }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div id="sheet"></div>
+<script>
+// ---------- outils communs à tous les jeux Tablée
+const BODY = ["#3b5bff", "#ff5a1f", "#16a34a", "#9333ea", "#db2777", "#0891b2", "#ca8a04", "#4f46e5", "#ea580c", "#0d9488"];
+const NAME_KEYS = ["auracover_poche5", "auraspy1", "auratime1", "auratete1", "auraloup2", "auraapero1", "tablee_milieu", "tablee_codes", "tablee_preferes", "tablee_artiste", "tablee_motcache", "tablee_piege", "tablee_mdp", "tablee_regle", "tablee_tabou", "tablee_burger", "tablee_chiffre", "tablee_crack", "tablee_classement", "tablee_topten", "tablee_devineuf", "tablee_justone", "tablee_timeline", "tablee_hitster", "tablee_blind", "tablee_tune"];
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+const fold = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+function seedOf(s) { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+const av = (nm, cls = "") => `<span class="av ${cls}" style="--c:${BODY[seedOf(nm || "?") % BODY.length]}" aria-hidden="true">${esc((nm.trim()[0] || "?").toUpperCase())}</span>`;
+const plural = (n, w) => `${n} ${w}${n > 1 ? "s" : ""}`;
+const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const rnd = n => Math.random() * n | 0;
+function knownNames(own) {
+  const set = new Set(Object.keys(own || {}));
+  for (const k of NAME_KEYS) try { const c = JSON.parse(localStorage.getItem(k) || "{}"); for (const n of Object.keys(c.people || {})) set.add(n); } catch (e) {}
+  return [...set];
+}
+// liste « qui es-tu ? » : prénoms connus filtrés + « nouveau joueur »
+function nameList(q, exclude, people, act) {
+  const f = fold(q), all = knownNames(people), used = new Set(exclude);
+  const list = all.filter(n => !used.has(n) && fold(n).includes(f)).sort((a, b) => ((people[b] || {}).last || 0) - ((people[a] || {}).last || 0) || a.localeCompare(b)).slice(0, 30);
+  const exact = all.some(n => fold(n) === f) || [...used].some(n => fold(n) === f);
+  let h = list.map(n => `<button class="who" data-a="${act}" data-v="${esc(n)}">${av(n)}<span class="t">${esc(n)}</span><span class="go">＋</span></button>`).join("");
+  if (q.trim() && !exact) h = `<button class="who new" data-a="${act}" data-v="${esc(q.trim().slice(0, 16))}">${av(q.trim())}<span class="t">${esc(q.trim())}<small>Nouveau joueur</small></span><span class="go">＋</span></button>` + h;
+  return h || `<div class="empty">Écris un prénom, le jeu s'en souviendra.</div>`;
+}
+const exactName = (v, people) => knownNames(people).find(n => fold(n) === fold(v)) || v.slice(0, 16);
+function confetti() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  let c = document.getElementById("fx"); if (!c) { c = document.createElement("canvas"); c.id = "fx"; document.body.appendChild(c); }
+  const x = c.getContext("2d"), dpr = devicePixelRatio || 1;
+  c.width = innerWidth * dpr; c.height = innerHeight * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const P = [...Array(130)].map(() => ({ x: innerWidth / 2 + (Math.random() - .5) * 80, y: innerHeight * .3, vx: (Math.random() - .5) * 13, vy: -Math.random() * 14 - 4,
+    w: 6 + Math.random() * 6, h: 8 + Math.random() * 8, a: Math.random() * 6, va: (Math.random() - .5) * .4, c: BODY[Math.random() * BODY.length | 0] }));
+  const t0 = performance.now(), W = innerWidth, H = innerHeight;
+  (function f(t) {
+    if (innerWidth !== W || innerHeight !== H) { c.width = c.width; return; }
+    x.clearRect(0, 0, innerWidth, innerHeight);
+    for (const p of P) { p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.a += p.va;
+      x.save(); x.translate(p.x, p.y); x.rotate(p.a); x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); x.restore(); }
+    if (t - t0 < 3200) requestAnimationFrame(f); else x.clearRect(0, 0, innerWidth, innerHeight);
+  })(t0);
+}
+let wakeLock = null;
+async function wake() { try { if ("wakeLock" in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request("screen"); wakeLock.addEventListener("release", () => wakeLock = null); } } catch (e) {} }
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") wake(); });
+const step = (act, val, cls = "") => `<div class="step"><button data-a="${act}" data-v="-1" aria-label="Moins">−</button><span class="${cls}">${val}</span><button data-a="${act}" data-v="1" aria-label="Plus">+</button></div>`;
+
+const SONGS = [[1953, "Les Amoureux des bancs publics", "Georges Brassens", "fr"], [1956, "Bambino", "Dalida", "fr"], [1958, "Le Poinçonneur des Lilas", "Serge Gainsbourg", "fr"], [1959, "Ne me quitte pas", "Jacques Brel", "fr"], [1960, "Non, je ne regrette rien", "Édith Piaf", "fr"], [1960, "Souvenirs, souvenirs", "Johnny Hallyday", "fr"], [1961, "Retiens la nuit", "Johnny Hallyday", "fr"], [1962, "Tous les garçons et les filles", "Françoise Hardy", "fr"], [1963, "Si j'avais un marteau", "Claude François", "fr"], [1963, "La Javanaise", "Serge Gainsbourg", "fr"], [1964, "La Montagne", "Jean Ferrat", "fr"], [1965, "La Bohème", "Charles Aznavour", "fr"], [1965, "Aline", "Christophe", "fr"], [1967, "Comme d'habitude", "Claude François", "fr"], [1967, "Emmenez-moi", "Charles Aznavour", "fr"], [1968, "Il est cinq heures, Paris s'éveille", "Jacques Dutronc", "fr"], [1968, "Comment te dire adieu", "Françoise Hardy", "fr"], [1969, "Les Champs-Élysées", "Joe Dassin", "fr"], [1969, "Je t'aime... moi non plus", "Jane Birkin", "fr"], [1969, "Que je t'aime", "Johnny Hallyday", "fr"], [1969, "Le Métèque", "Georges Moustaki", "fr"], [1972, "On ira tous au paradis", "Michel Polnareff", "fr"], [1972, "Une belle histoire", "Michel Fugain", "fr"], [1973, "Paroles, paroles", "Dalida", "fr"], [1973, "Il venait d'avoir 18 ans", "Dalida", "fr"], [1973, "La Maladie d'amour", "Michel Sardou", "fr"], [1973, "Je suis malade", "Serge Lama", "fr"], [1974, "Les Mots bleus", "Christophe", "fr"], [1974, "Gigi l'amoroso", "Dalida", "fr"], [1975, "L'Été indien", "Joe Dassin", "fr"], [1975, "Le Sud", "Nino Ferrer", "fr"], [1977, "Lettre à France", "Michel Polnareff", "fr"], [1977, "Ça plane pour moi", "Plastic Bertrand", "fr"], [1978, "Le Chanteur", "Daniel Balavoine", "fr"], [1978, "Ma préférence", "Julien Clerc", "fr"], [1979, "Je l'aime à mourir", "Francis Cabrel", "fr"], [1979, "Laissez-moi danser", "Dalida", "fr"], [1979, "Le Coup de soleil", "Richard Cocciante", "fr"], [1980, "Mon fils ma bataille", "Daniel Balavoine", "fr"], [1980, "Il jouait du piano debout", "France Gall", "fr"], [1980, "La Groupie du pianiste", "Michel Berger", "fr"], [1981, "Les Lacs du Connemara", "Michel Sardou", "fr"], [1981, "Résiste", "France Gall", "fr"], [1981, "Il est libre Max", "Hervé Cristiani", "fr"], [1982, "Quand la musique est bonne", "Jean-Jacques Goldman", "fr"], [1982, "L'Aventurier", "Indochine", "fr"], [1982, "Cendrillon", "Téléphone", "fr"], [1982, "Vacances j'oublie tout", "Elegance", "fr"], [1984, "Femme libérée", "Cookie Dingler", "fr"], [1984, "Marcia Baila", "Les Rita Mitsouko", "fr"], [1985, "Je te donne", "Jean-Jacques Goldman", "fr"], [1985, "L'Aziza", "Daniel Balavoine", "fr"], [1985, "Mistral gagnant", "Renaud", "fr"], [1985, "Tombé pour la France", "Étienne Daho", "fr"], [1985, "Partenaire particulier", "Partenaire Particulier", "fr"], [1986, "Voyage, voyage", "Desireless", "fr"], [1986, "Les Démons de minuit", "Images", "fr"], [1986, "Libertine", "Mylène Farmer", "fr"], [1986, "Ève lève-toi", "Julie Pietri", "fr"], [1986, "Les Bêtises", "Sabine Paturel", "fr"], [1986, "L'Amour à la plage", "Niagara", "fr"], [1987, "Joe le taxi", "Vanessa Paradis", "fr"], [1987, "Ella, elle l'a", "France Gall", "fr"], [1987, "Mademoiselle chante le blues", "Patricia Kaas", "fr"], [1988, "Nuit de folie", "Début de Soirée", "fr"], [1988, "Mon mec à moi", "Patricia Kaas", "fr"], [1989, "Hélène", "Roch Voisine", "fr"], [1991, "Désenchantée", "Mylène Farmer", "fr"], [1991, "Un homme heureux", "William Sheller", "fr"], [1992, "Le Lion est mort ce soir", "Pow woW", "fr"], [1993, "Foule sentimentale", "Alain Souchon", "fr"], [1993, "Sensualité", "Axelle Red", "fr"], [1993, "Il me dit que je suis belle", "Patricia Kaas", "fr"], [1995, "Pour que tu m'aimes encore", "Céline Dion", "fr"], [1996, "Aïcha", "Khaled", "fr"], [1998, "Allumer le feu", "Johnny Hallyday", "fr"], [1998, "Belle", "Garou", "fr"], [1998, "La Tribu de Dana", "Manau", "fr"], [1998, "Tu m'oublieras", "Larusso", "fr"], [1999, "Tomber la chemise", "Zebda", "fr"], [2000, "Moi... Lolita", "Alizée", "fr"], [2000, "Ces soirées-là", "Yannick", "fr"], [2000, "Seul", "Garou", "fr"], [2000, "L'Envie d'aimer", "Daniel Lévi", "fr"], [2001, "Sous le vent", "Garou", "fr"], [2001, "Le Vent nous portera", "Noir Désir", "fr"], [2001, "Les Sardines", "Patrick Sébastien", "fr"], [2002, "Manhattan-Kaboul", "Renaud", "fr"], [2002, "J'ai demandé à la lune", "Indochine", "fr"], [2003, "Respire", "Mickey 3D", "fr"], [2004, "Ma philosophie", "Amel Bent", "fr"], [2008, "Comme des enfants", "Cœur de pirate", "fr"], [2009, "Alors on danse", "Stromae", "fr"], [2009, "Ça m'énerve", "Helmut Fritz", "fr"], [2010, "Je veux", "Zaz", "fr"], [2011, "Elle me dit", "Mika", "fr"], [2013, "Papaoutai", "Stromae", "fr"], [2013, "Formidable", "Stromae", "fr"], [2013, "Bella", "Maître Gims", "fr"], [2013, "J'me tire", "Maître Gims", "fr"], [2013, "Dernière danse", "Indila", "fr"], [2014, "Avenir", "Louane", "fr"], [2014, "Andalouse", "Kendji Girac", "fr"], [2014, "Sur ma route", "Black M", "fr"], [2014, "Christine", "Christine and the Queens", "fr"], [2015, "Sapés comme jamais", "Maître Gims", "fr"], [2015, "Le Monde ou rien", "PNL", "fr"], [2016, "Tchikita", "Jul", "fr"], [2017, "Basique", "Orelsan", "fr"], [2018, "Djadja", "Aya Nakamura", "fr"], [2018, "Tout oublier", "Angèle", "fr"], [2018, "La Grenade", "Clara Luciani", "fr"], [2019, "Balance ton quoi", "Angèle", "fr"], [2019, "Pookie", "Aya Nakamura", "fr"], [2019, "Au DD", "PNL", "fr"], [2020, "Bande organisée", "13 Organisé", "fr"], [2021, "Jolie nana", "Aya Nakamura", "fr"], [2021, "Bruxelles je t'aime", "Angèle", "fr"], [2021, "Voilà", "Barbara Pravi", "fr"], [2021, "Tout va bien", "Alonzo", "fr"], [2023, "Bolide allemand", "SDM", "fr"], [2024, "Mon amour", "Slimane", "fr"], [1956, "Heartbreak Hotel", "Elvis Presley", "int"], [1957, "Jailhouse Rock", "Elvis Presley", "int"], [1958, "Johnny B. Goode", "Chuck Berry", "int"], [1961, "Stand by Me", "Ben E. King", "int"], [1961, "Hit the Road Jack", "Ray Charles", "int"], [1961, "Can't Help Falling in Love", "Elvis Presley", "int"], [1963, "She Loves You", "The Beatles", "int"], [1964, "A Hard Day's Night", "The Beatles", "int"], [1964, "The House of the Rising Sun", "The Animals", "int"], [1964, "Oh, Pretty Woman", "Roy Orbison", "int"], [1965, "(I Can't Get No) Satisfaction", "The Rolling Stones", "int"], [1965, "Yesterday", "The Beatles", "int"], [1965, "Like a Rolling Stone", "Bob Dylan", "int"], [1966, "Paint It Black", "The Rolling Stones", "int"], [1966, "Good Vibrations", "The Beach Boys", "int"], [1967, "Respect", "Aretha Franklin", "int"], [1967, "Light My Fire", "The Doors", "int"], [1967, "What a Wonderful World", "Louis Armstrong", "int"], [1968, "Hey Jude", "The Beatles", "int"], [1968, "(Sittin' On) The Dock of the Bay", "Otis Redding", "int"], [1968, "Born to Be Wild", "Steppenwolf", "int"], [1969, "Come Together", "The Beatles", "int"], [1969, "Space Oddity", "David Bowie", "int"], [1969, "Proud Mary", "Creedence Clearwater Revival", "int"], [1969, "My Way", "Frank Sinatra", "int"], [1969, "Sweet Caroline", "Neil Diamond", "int"], [1970, "Let It Be", "The Beatles", "int"], [1970, "Bridge Over Troubled Water", "Simon & Garfunkel", "int"], [1971, "Imagine", "John Lennon", "int"], [1972, "Superstition", "Stevie Wonder", "int"], [1972, "Lean on Me", "Bill Withers", "int"], [1973, "Piano Man", "Billy Joel", "int"], [1974, "Waterloo", "ABBA", "int"], [1975, "Bohemian Rhapsody", "Queen", "int"], [1975, "Mamma Mia", "ABBA", "int"], [1975, "Born to Run", "Bruce Springsteen", "int"], [1976, "Dancing Queen", "ABBA", "int"], [1977, "Stayin' Alive", "Bee Gees", "int"], [1977, "We Will Rock You", "Queen", "int"], [1978, "Y.M.C.A.", "Village People", "int"], [1978, "Le Freak", "Chic", "int"], [1978, "September", "Earth, Wind & Fire", "int"], [1978, "Rivers of Babylon", "Boney M.", "int"], [1978, "Rasputin", "Boney M.", "int"], [1979, "Another Brick in the Wall, Part 2", "Pink Floyd", "int"], [1979, "Don't Stop 'Til You Get Enough", "Michael Jackson", "int"], [1979, "Highway to Hell", "AC/DC", "int"], [1979, "Gimme! Gimme! Gimme!", "ABBA", "int"], [1980, "Another One Bites the Dust", "Queen", "int"], [1980, "Call Me", "Blondie", "int"], [1980, "Back in Black", "AC/DC", "int"], [1980, "Upside Down", "Diana Ross", "int"], [1981, "Don't Stop Believin'", "Journey", "int"], [1981, "Tainted Love", "Soft Cell", "int"], [1981, "Physical", "Olivia Newton-John", "int"], [1982, "Eye of the Tiger", "Survivor", "int"], [1982, "Africa", "Toto", "int"], [1983, "Every Breath You Take", "The Police", "int"], [1983, "Sweet Dreams (Are Made of This)", "Eurythmics", "int"], [1983, "Beat It", "Michael Jackson", "int"], [1983, "Girls Just Want to Have Fun", "Cyndi Lauper", "int"], [1984, "Like a Virgin", "Madonna", "int"], [1984, "Wake Me Up Before You Go-Go", "Wham!", "int"], [1984, "Purple Rain", "Prince", "int"], [1984, "Footloose", "Kenny Loggins", "int"], [1984, "Ghostbusters", "Ray Parker Jr.", "int"], [1985, "We Are the World", "USA for Africa", "int"], [1985, "Money for Nothing", "Dire Straits", "int"], [1986, "Livin' on a Prayer", "Bon Jovi", "int"], [1986, "Take My Breath Away", "Berlin", "int"], [1987, "Never Gonna Give You Up", "Rick Astley", "int"], [1987, "With or Without You", "U2", "int"], [1987, "I Wanna Dance with Somebody", "Whitney Houston", "int"], [1987, "Bad", "Michael Jackson", "int"], [1988, "Don't Worry, Be Happy", "Bobby McFerrin", "int"], [1989, "Like a Prayer", "Madonna", "int"], [1990, "Ice Ice Baby", "Vanilla Ice", "int"], [1990, "Vogue", "Madonna", "int"], [1990, "Nothing Compares 2 U", "Sinéad O'Connor", "int"], [1990, "Thunderstruck", "AC/DC", "int"], [1991, "Smells Like Teen Spirit", "Nirvana", "int"], [1991, "Black or White", "Michael Jackson", "int"], [1991, "Losing My Religion", "R.E.M.", "int"], [1991, "Enter Sandman", "Metallica", "int"], [1992, "I Will Always Love You", "Whitney Houston", "int"], [1992, "Jump", "Kris Kross", "int"], [1992, "Rhythm Is a Dancer", "Snap!", "int"], [1992, "Under the Bridge", "Red Hot Chili Peppers", "int"], [1992, "Creep", "Radiohead", "int"], [1993, "What Is Love", "Haddaway", "int"], [1993, "I'd Do Anything for Love", "Meat Loaf", "int"], [1994, "Zombie", "The Cranberries", "int"], [1994, "Cotton Eye Joe", "Rednex", "int"], [1994, "Basket Case", "Green Day", "int"], [1995, "Gangsta's Paradise", "Coolio", "int"], [1995, "Wonderwall", "Oasis", "int"], [1996, "Wannabe", "Spice Girls", "int"], [1996, "No Diggity", "Blackstreet", "int"], [1996, "Freed from Desire", "Gala", "int"], [1997, "Barbie Girl", "Aqua", "int"], [1997, "My Heart Will Go On", "Céline Dion", "int"], [1997, "Bitter Sweet Symphony", "The Verve", "int"], [1997, "Song 2", "Blur", "int"], [1997, "Around the World", "Daft Punk", "int"], [1998, "...Baby One More Time", "Britney Spears", "int"], [1998, "Believe", "Cher", "int"], [1999, "Livin' la Vida Loca", "Ricky Martin", "int"], [1999, "All Star", "Smash Mouth", "int"], [1999, "No Scrubs", "TLC", "int"], [1999, "Sandstorm", "Darude", "int"], [2000, "Oops!... I Did It Again", "Britney Spears", "int"], [2000, "The Real Slim Shady", "Eminem", "int"], [2000, "Yellow", "Coldplay", "int"], [2000, "It's My Life", "Bon Jovi", "int"], [2000, "One More Time", "Daft Punk", "int"], [2001, "Can't Get You Out of My Head", "Kylie Minogue", "int"], [2001, "In the End", "Linkin Park", "int"], [2001, "Lady Marmalade", "Christina Aguilera", "int"], [2002, "Lose Yourself", "Eminem", "int"], [2002, "Without Me", "Eminem", "int"], [2002, "Complicated", "Avril Lavigne", "int"], [2003, "Crazy in Love", "Beyoncé", "int"], [2003, "In da Club", "50 Cent", "int"], [2003, "Hey Ya!", "OutKast", "int"], [2003, "Seven Nation Army", "The White Stripes", "int"], [2004, "Yeah!", "Usher", "int"], [2004, "Boulevard of Broken Dreams", "Green Day", "int"], [2005, "Feel Good Inc.", "Gorillaz", "int"], [2005, "Hung Up", "Madonna", "int"], [2006, "Crazy", "Gnarls Barkley", "int"], [2006, "Hips Don't Lie", "Shakira", "int"], [2006, "SexyBack", "Justin Timberlake", "int"], [2007, "Umbrella", "Rihanna", "int"], [2007, "Apologize", "Timbaland", "int"], [2008, "Viva la Vida", "Coldplay", "int"], [2008, "Poker Face", "Lady Gaga", "int"], [2008, "I Kissed a Girl", "Katy Perry", "int"], [2008, "Mercy", "Duffy", "int"], [2009, "I Gotta Feeling", "The Black Eyed Peas", "int"], [2009, "Bad Romance", "Lady Gaga", "int"], [2009, "Tik Tok", "Kesha", "int"], [2010, "Waka Waka (This Time for Africa)", "Shakira", "int"], [2010, "Firework", "Katy Perry", "int"], [2010, "Only Girl (In the World)", "Rihanna", "int"], [2011, "Someone Like You", "Adele", "int"], [2011, "Party Rock Anthem", "LMFAO", "int"], [2011, "Moves Like Jagger", "Maroon 5", "int"], [2011, "Levels", "Avicii", "int"], [2011, "Titanium", "David Guetta", "int"], [2012, "Gangnam Style", "PSY", "int"], [2012, "Diamonds", "Rihanna", "int"], [2013, "Get Lucky", "Daft Punk", "int"], [2013, "Wake Me Up", "Avicii", "int"], [2013, "Happy", "Pharrell Williams", "int"], [2013, "Royals", "Lorde", "int"], [2013, "Counting Stars", "OneRepublic", "int"], [2014, "Uptown Funk", "Mark Ronson", "int"], [2014, "Shake It Off", "Taylor Swift", "int"], [2014, "Thinking Out Loud", "Ed Sheeran", "int"], [2014, "Shut Up and Dance", "Walk the Moon", "int"], [2015, "Hello", "Adele", "int"], [2015, "Lean On", "Major Lazer", "int"], [2015, "Sorry", "Justin Bieber", "int"], [2016, "Cheap Thrills", "Sia", "int"], [2016, "Closer", "The Chainsmokers", "int"], [2016, "Can't Stop the Feeling!", "Justin Timberlake", "int"], [2017, "Shape of You", "Ed Sheeran", "int"], [2017, "Despacito", "Luis Fonsi", "int"], [2017, "Havana", "Camila Cabello", "int"], [2017, "Believer", "Imagine Dragons", "int"], [2018, "God's Plan", "Drake", "int"], [2018, "Shallow", "Lady Gaga", "int"], [2018, "In My Feelings", "Drake", "int"], [2019, "Bad Guy", "Billie Eilish", "int"], [2019, "Blinding Lights", "The Weeknd", "int"], [2019, "Señorita", "Shawn Mendes", "int"], [2020, "Levitating", "Dua Lipa", "int"], [2020, "Mood", "24kGoldn", "int"], [2021, "Drivers License", "Olivia Rodrigo", "int"], [2021, "Stay", "The Kid Laroi", "int"], [2021, "Bad Habits", "Ed Sheeran", "int"], [2022, "As It Was", "Harry Styles", "int"], [2022, "Anti-Hero", "Taylor Swift", "int"], [2022, "About Damn Time", "Lizzo", "int"], [2023, "Flowers", "Miley Cyrus", "int"], [2023, "Vampire", "Olivia Rodrigo", "int"], [2024, "Espresso", "Sabrina Carpenter", "int"], [2024, "Beautiful Things", "Benson Boone", "int"], [2024, "APT.", "ROSÉ", "int"]];   // [année, titre, artiste, "fr" | "int"]
+const KEY = "tablee_blind";
+const MARK = `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 28v-4a16 16 0 0 1 32 0v4" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><rect x="5" y="26" width="10" height="15" rx="4" fill="#fff"/><rect x="33" y="26" width="10" height="15" rx="4" fill="#fff"/><path d="M21 31h6M24 28v6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".7"/></svg>`;
+const MODES = [["mix", "Mélange"], ["fr", "Français"], ["int", "International"]];
+
+let S = { screen: "home", players: [], rounds: 15, mode: "mix", people: {}, recent: [], bad: [], game: null };
+function load() { let d = null; try { d = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {} if (d) for (const k of Object.keys(S)) if (d[k] !== undefined) S[k] = d[k]; if (!S.game && S.screen !== "home") S.screen = "home"; }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function person(nm) { return S.people[nm] || (S.people[nm] = { games: 0, wins: 0, pts: 0, last: 0 }); }
+const inMode = i => S.mode === "mix" || SONGS[i][3] === S.mode;
+const poolIdx = () => SONGS.map((s, i) => i).filter(i => inMode(i) && !S.bad.includes(i));
+// ---------- extraits Deezer (JSONP : l'API ne permet pas les requêtes directes depuis une page web)
+const audio = new Audio(); audio.preload = "auto";
+const SND = { i: null, st: "idle", cover: "", link: "" };   // st : idle | load | ready | none | err
+const DZC = {};   // chanson -> { url, cover, link } ou null si introuvable
+let jn = 0;
+function jsonp(url, ms = 8000) {
+  return new Promise((res, rej) => {
+    const cb = "__dz" + (++jn) + "_" + Date.now(), s = document.createElement("script");
+    const clean = () => { clearTimeout(t); try { delete window[cb]; } catch (e) { window[cb] = undefined; } s.remove(); };
+    const t = setTimeout(() => { clean(); rej(new Error("timeout")); }, ms);
+    window[cb] = d => { clean(); res(d); };
+    s.onerror = () => { clean(); rej(new Error("net")); };
+    s.src = url + "&output=jsonp&callback=" + cb;
+    document.head.appendChild(s);
+  });
+}
+const dfold = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\(.*?\)/g, "").replace(/[^a-z0-9]/g, "");
+const mainArtist = a => a.split(/ & | feat\.? | ft\.? |, /i)[0];
+function best(d, t, a) {
+  const list = ((d && d.data) || []).filter(x => x && x.preview);
+  const fa = dfold(mainArtist(a)), ft = dfold(t);
+  const art = x => { const n = dfold(x.artist && x.artist.name); return n && (n.includes(fa) || fa.includes(n)); };
+  const tit = x => { const n = dfold(x.title); return n && (n.startsWith(ft) || ft.startsWith(n)); };
+  return list.find(x => art(x) && tit(x)) || list.find(art) || null;
+}
+async function lookup(i) {
+  if (i in DZC) return DZC[i];
+  const [, t, a] = SONGS[i], base = "https://api.deezer.com/search?limit=10&q=";
+  let r = best(await jsonp(base + encodeURIComponent(`artist:"${mainArtist(a)}" track:"${t.replace(/\(.*?\)/g, "").trim()}"`)), t, a);
+  if (!r) r = best(await jsonp(base + encodeURIComponent(`${mainArtist(a)} ${t}`)), t, a);
+  return (DZC[i] = r ? { url: r.preview, cover: (r.album && (r.album.cover_big || r.album.cover_medium)) || "", link: r.link || "" } : null);
+}
+function setSong(i, r) { SND.i = i; SND.st = "ready"; SND.cover = r.cover; SND.link = r.link; audio.src = r.url; audio.load(); }
+// prépare l'extrait de la chanson i ; onNone() est appelé s'il est introuvable
+function prepare(i, onNone) {
+  if (SND.i === i && (SND.st === "ready" || SND.st === "load")) return;
+  stopAudio(); SND.i = i; SND.st = "load"; SND.cover = ""; SND.link = ""; paint();
+  lookup(i).then(r => {
+    if (SND.i !== i) return;
+    if (!r) { SND.st = "none"; if (!S.bad.includes(i)) S.bad.push(i); save(); paint(); setTimeout(() => { if (SND.i === i && onNone) onNone(); }, 900); return; }
+    setSong(i, r); paint();
+  }).catch(() => { if (SND.i === i) { SND.st = "err"; paint(); } });
+}
+// lance tout de suite si l'extrait est déjà connu (garde le geste de l'utilisateur pour iPhone)
+function playNow(i, onNone) { const r = DZC[i]; if (r) { setSong(i, r); audio.play().catch(() => {}); paint(); } else prepare(i, onNone); }
+function warm(i) { if (i !== undefined && !(i in DZC)) lookup(i).catch(() => {}); }
+function stopAudio() { try { audio.pause(); } catch (e) {} }
+const DISC = '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-play" d="M8 5.5v13l11-6.5z" fill="currentColor"/><g class="i-pause" fill="currentColor"><rect x="6.5" y="5" width="4" height="14" rx="1.3"/><rect x="13.5" y="5" width="4" height="14" rx="1.3"/></g></svg>';
+const hitCard = i => `<div class="hit">${SND.cover && SND.i === i ? `<img src="${esc(SND.cover)}" alt="" referrerpolicy="no-referrer">` : `<div class="noimg">${MARK}</div>`}
+  <div><b class="hy">${SONGS[i][0]}</b><span class="ht">${esc(SONGS[i][1])}</span><span class="ha">${esc(SONGS[i][2])}</span></div></div>`;
+
+
+function draw() {
+  const g = S.game; if (!g.deck.length) g.deck = shuffle(poolIdx().filter(i => i !== g.cur));
+  const i = g.deck.pop(); S.recent = [...S.recent.filter(x => x !== i), i].slice(-Math.floor(SONGS.length * .7)); return i;
+}
+function newGame() {
+  let pool = poolIdx().filter(i => !S.recent.includes(i));
+  if (pool.length < S.rounds + 10) { S.recent = []; pool = poolIdx(); }
+  S.game = { deck: shuffle(pool), k: 0, cur: null, nxt: null, pts: Object.fromEntries(S.players.map(n => [n, 0])), t: null, a: null, ended: false };
+  const g = S.game; g.cur = draw(); g.nxt = draw(); warm(g.nxt);
+  go("play"); playNow(g.cur, skipBad);
+}
+function skipBad() { const g = S.game; if (!g || S.screen !== "play") return; g.cur = g.nxt || draw(); g.nxt = draw(); warm(g.nxt); save(); render(); playNow(g.cur, skipBad); }
+function revealNow() { const g = S.game; g.t = null; g.a = null; go("reveal"); }
+function nextSong() {
+  const g = S.game;
+  for (const [who] of [[g.t], [g.a]]) if (who) { g.pts[who]++; person(who).pts++; }
+  g.k++;
+  if (g.k >= S.rounds) return finish();
+  g.cur = g.nxt || draw(); g.nxt = draw(); warm(g.nxt);
+  go("play"); playNow(g.cur, skipBad);
+}
+const ranking = g => S.players.slice().sort((a, b) => g.pts[b] - g.pts[a]);
+function finish() {
+  const g = S.game, now = Date.now(), top = Math.max(...S.players.map(n => g.pts[n])); stopAudio();
+  g.winners = top > 0 ? S.players.filter(n => g.pts[n] === top) : [];
+  for (const n of S.players) { const p = person(n); p.games++; p.last = now; if (g.winners.includes(n)) p.wins++; }
+  g.ended = true; go("end"); if (g.winners.length) confetti();
+}
+
+// ---------- écrans
+const app = document.getElementById("app"), sheet = document.getElementById("sheet");
+function go(s) { S.screen = s; save(); render(); scrollTo(0, 0); }
+["play", "pause", "ended", "timeupdate"].forEach(ev => audio.addEventListener(ev, () => paint(ev === "timeupdate")));
+function paint(onlyRing) {
+  const pl = document.getElementById("pl"); if (!pl) return;
+  pl.style.setProperty("--p", (audio.duration ? Math.min(100, 100 * audio.currentTime / audio.duration) : 0).toFixed(1));
+  if (onlyRing) return;
+  const playing = !audio.paused && !audio.ended && SND.st === "ready";
+  pl.className = "player " + SND.st + (playing ? " on" : "");
+  const st = document.getElementById("pst");
+  if (st) st.textContent = { idle: "", load: "Chargement de l'extrait…", ready: playing ? "Le premier qui trouve le crie !" : audio.ended ? "Touche pour réécouter" : "Touche pour écouter", none: "Extrait introuvable, on change de chanson…", err: "Impossible de charger l'extrait. Vérifie ta connexion internet." }[SND.st];
+  const rt = document.getElementById("retry"); if (rt) rt.hidden = SND.st !== "err";
+}
+const scores = g => `<div class="scores">${ranking(g).map(n => `<span>${av(n)}<b>${g.pts[n]}</b></span>`).join("")}</div>`;
+const who = (act, sel) => `<div class="chips2 pick">${S.players.map(n => `<button class="pchip ${sel === n ? "on" : ""}" data-a="${act}" data-v="${esc(n)}">${av(n)}<span>${esc(n)}</span></button>`).join("")}<button class="pchip ${sel === null ? "on" : ""}" data-a="${act}" data-v="">Personne</button></div>`;
+function render() {
+  const g = S.game; let h = "";
+  switch (S.screen) {
+    case "home": {
+      const ok = S.players.length >= 2;
+      h = `<a class="backmenu" href="../">‹ Menu</a><div class="brand"><span class="mark">${MARK}</span><div class="logo">Blind <i>Test</i></div></div>
+        <div class="sub" style="margin-top:0">Un extrait se lance : le premier qui crie le titre ou l'artiste marque un point. Un point pour chacun, deux si tu trouves les deux !</div>
+        <div class="teambox"><div class="teamhead"><span>Les joueurs</span><small>${S.players.length} / 12</small></div>
+          <div class="chips2">${S.players.map((n, k) => `<button class="pchip" data-a="rm" data-v="${k}">${av(n)}<span>${esc(n)}</span><i>×</i></button>`).join("")}${S.players.length < 12 ? `<button class="pchip add" data-a="add">+ Ajouter</button>` : ""}</div></div>
+        <div class="box">
+          <div class="line"><div class="name">Musique<small>${poolIdx().length} tubes</small></div><div class="seg">${MODES.map(([v, l]) => `<button class="${S.mode === v ? "on" : ""}" data-a="mode" data-v="${v}">${l}</button>`).join("")}</div></div>
+          <div class="line"><div class="name">Extraits<small>Dans la partie</small></div>${step("rounds", S.rounds)}</div>
+        </div>
+        <div class="hint" style="text-align:center">Extraits de 30 secondes fournis par Deezer : il faut une connexion internet.</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="play" ${ok ? "" : "disabled"}>${ok ? "Jouer" : "Il faut au moins 2 joueurs"}</button>
+        <div class="links"><button class="link" data-a="board">Scores</button><button class="link" data-a="rules">Règles</button><a class="link" href="../" style="text-decoration:none">‹ Menu</a></div>`;
+      break;
+    }
+    case "play": {
+      h = `<div class="label" style="text-align:center">Extrait ${g.k + 1} sur ${S.rounds}</div>${scores(g)}
+        <div class="deck">
+          <button class="player ${SND.st}" id="pl" data-a="listen" aria-label="Écouter l'extrait"><span class="ring"></span><span class="disc">${DISC}</span></button>
+          <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="pst" id="pst"></div>
+          <div class="links" id="retry" hidden><button class="link" data-a="retry">Réessayer</button><button class="link" data-a="other">Autre chanson</button></div>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="reveal">Révéler la réponse</button>
+        <div class="links"><button class="link" data-a="other">Passer cette chanson</button></div>`;
+      break;
+    }
+    case "reveal": {
+      const last = g.k + 1 >= S.rounds;
+      h = `<div class="label" style="text-align:center">Extrait ${g.k + 1} sur ${S.rounds}</div>
+        ${hitCard(g.cur)}
+        <div class="label">Qui a trouvé le titre ? · +1</div>${who("gotT", g.t)}
+        <div class="label">Qui a trouvé l'artiste ? · +1</div>${who("gotA", g.a)}
+        ${SND.link ? `<a class="dz" href="${esc(SND.link)}" target="_blank" rel="noopener">Écouter en entier sur Deezer ›</a>` : ""}
+        <div class="spacer"></div>
+        <button class="btn" data-a="next">${last ? "Voir les résultats" : "Extrait suivant"}</button>`;
+      break;
+    }
+    case "end": {
+      const w = g.winners;
+      h = `<div class="endhead main"><div class="label">Partie terminée</div><h2>${!w.length ? "Personne n'a marqué !" : w.length > 1 ? "Égalité !" : `${esc(w[0])} gagne !`}</h2></div>
+        <div class="box">${ranking(g).map(n => `<div class="res">${av(n)}<span class="t"><span>${esc(n)}</span></span>${w.includes(n) ? `<span class="win">Gagné</span>` : ""}<span class="tot">${g.pts[n]}</span></div>`).join("")}</div>
+        <div class="spacer"></div>
+        <button class="btn" data-a="play">Rejouer</button>
+        <div class="links"><button class="link" data-a="board">Scores</button><button class="link" data-a="home">Accueil</button><a class="link" href="../" style="text-decoration:none">‹ Menu</a></div>`;
+      break;
+    }
+  }
+  app.innerHTML = h; paint();
+}
+let addQ = "";
+function openSheet(kind) {
+  if (!kind) { sheet.innerHTML = ""; return; }
+  if (kind === "rules") { sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true"><h2>Les règles</h2><div class="rules">
+    <p>Le téléphone lance un extrait de 30 secondes, sans afficher la chanson.</p>
+    <p>Le premier qui crie le <b>titre</b> marque un point, le premier qui crie l'<b>artiste</b> aussi. Trouver les deux, c'est deux points.</p>
+    <p>Quand quelqu'un pense avoir trouvé, touchez <b>Révéler la réponse</b>, puis indiquez qui a trouvé quoi.</p>
+    <p>Le plus de points à la fin de la partie gagne.</p></div><button class="btn" data-a="close">Compris</button></div></div>`; return; }
+  if (kind === "board") { const list = Object.entries(S.people).filter(([, p]) => p.games).sort((a, b) => b[1].wins - a[1].wins || b[1].pts - a[1].pts);
+    sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true"><h2>Scores</h2><div class="box">${list.map(([n, p]) => `<div class="res">${av(n)}<span class="t"><span>${esc(n)}</span><small style="color:var(--muted)">${plural(p.wins, "victoire")} sur ${plural(p.games, "partie")} · ${plural(p.pts, "point")} au total</small></span><span class="tot">${p.wins}</span></div>`).join("") || `<div class="empty">Pas encore de partie.</div>`}</div>
+    <button class="btn" data-a="close">OK</button></div></div>`; return; }
+  sheet.innerHTML = `<div class="sheet" data-a="bg"><div role="dialog" aria-modal="true"><h2>Ajouter des joueurs</h2>
+    <input id="aq" type="text" maxlength="16" placeholder="Cherche ou écris un prénom" value="${esc(addQ)}" autocomplete="off" autocapitalize="words" enterkeyhint="done">
+    <div class="list" id="al">${nameList(addQ, S.players, S.people, "addName")}</div><button class="btn" data-a="close">OK</button></div></div>`;
+  const aq = document.getElementById("aq");
+  aq.oninput = () => { addQ = aq.value; document.getElementById("al").innerHTML = nameList(addQ, S.players, S.people, "addName"); };
+  aq.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); if (aq.value.trim()) addName(exactName(aq.value.trim(), S.people)); } };
+}
+function addName(n) { if (S.players.length >= 12 || S.players.includes(n)) return; S.players.push(n); person(n).last = Date.now(); addQ = ""; save(); render(); openSheet("add"); const aq = document.getElementById("aq"); if (aq) aq.focus(); }
+const A = {
+  add: () => { addQ = ""; openSheet("add"); }, addName: v => addName(v),
+  rm: v => { S.players.splice(+v, 1); save(); render(); },
+  mode: v => { S.mode = v; buzz(10); save(); render(); },
+  rounds: d => { S.rounds = Math.max(5, Math.min(40, S.rounds + 5 * d)); save(); render(); },
+  play: () => { if (S.players.length < 2) return; wake(); newGame(); },
+  listen: () => { if (SND.st !== "ready") return; if (audio.paused || audio.ended) { if (audio.ended) audio.currentTime = 0; audio.play().catch(() => {}); } else audio.pause(); },
+  retry: () => { const i = S.game.cur; SND.i = null; delete DZC[i]; prepare(i, skipBad); },
+  other: () => skipBad(),
+  reveal: () => { buzz(20); revealNow(); },
+  gotT: v => { S.game.t = v || null; buzz(10); save(); render(); },
+  gotA: v => { S.game.a = v || null; buzz(10); save(); render(); },
+  next: () => nextSong(),
+  home: () => { stopAudio(); if (S.game && S.game.ended) S.game = null; go("home"); },
+  board: () => openSheet("board"),
+  rules: () => openSheet("rules"), close: () => openSheet(null),
+  bg: (v, e) => { if (e.target.classList.contains("sheet")) openSheet(null); },
+};
+document.addEventListener("click", e => { const el = e.target.closest("[data-a]"); if (!el || el.disabled) return; const f = A[el.dataset.a]; if (f) f(el.dataset.v, e); });
+load(); render();
+if (S.game && (S.screen === "play" || S.screen === "reveal")) { prepare(S.game.cur, skipBad); warm(S.game.nxt); }
+
+
+
+</script>
+<script>
+// une seule appli : un seul service worker à la racine
+if ("serviceWorker" in navigator) addEventListener("load", async () => {
+  try { for (const r of await navigator.serviceWorker.getRegistrations()) if (r.scope !== new URL("../", location).href) r.unregister(); } catch (e) {}
+  navigator.serviceWorker.register("../sw.js", { scope: "../" }).catch(() => {});
+});
+</script>
+<!-- xq: bouton quitter commun -->
+<button id="xq" type="button" aria-label="Quitter la partie" hidden>✕</button>
+<style>
+#xq { position: fixed; z-index: 60; top: calc(env(safe-area-inset-top, 0px) + 10px); left: 12px; height: 38px; min-width: 38px; padding: 0 12px; border: 0; border-radius: 99px;
+  background: color-mix(in srgb, var(--surface, #fff) 88%, transparent); color: var(--ink, #111); font: 600 1rem Fredoka, system-ui, sans-serif;
+  box-shadow: 0 2px 10px rgba(0,0,0,.14); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); cursor: pointer; }
+#xq.sure { background: #ef4444; color: #fff; font-size: .9rem; }
+#xq[hidden] { display: none; }
+</style>
+<script>
+(() => {
+  const b = document.getElementById("xq"), app = document.getElementById("app");
+  const SKIP = ["home", "board", "stats", "rules", "playing", "count"];
+  let t;
+  const reset = () => { b.classList.remove("sure"); b.textContent = "✕"; };
+  function upd() {
+    const sc = typeof S !== "undefined" ? S.screen : "home";
+    const has = app.querySelector('[data-a="quit"], [data-a="home"], a[href="../"]');
+    b.hidden = SKIP.includes(sc) || !!has;
+    if (b.hidden) reset();
+  }
+  b.addEventListener("click", () => {
+    if (!b.classList.contains("sure")) { b.classList.add("sure"); b.textContent = "Quitter la partie ?"; clearTimeout(t); t = setTimeout(reset, 3000); return; }
+    try { S.game = null; S.screen = "home"; save(); } catch (e) {}
+    location.reload();
+  });
+  new MutationObserver(upd).observe(app, { childList: true, subtree: true });
+  upd();
+})();
+</script>
+<script id="polish-js">
+(() => {
+  const app = document.getElementById("app"); if (!app) return;
+  const key = () => { try { const g = S.game; return S.screen + "|" + (g ? (g.turn ?? g.round ?? "") + "/" + (g.deal ?? g.gi ?? "") : ""); } catch (e) { return null; } };
+  const deco = () => { const b = app.querySelector(".brand"); if (!b || b.querySelector(".wm")) return; const s = b.querySelector(".mark svg"); if (!s) return;
+    for (const c of ["wm", "wm wl"]) { const x = s.cloneNode(true); x.setAttribute("class", c); x.setAttribute("aria-hidden", "true"); b.prepend(x); } };
+  let last = key(); deco();
+  new MutationObserver(() => { deco(); const k = key(); if (k === null || k === last) return; last = k;
+    app.classList.remove("enter"); void app.offsetWidth; app.classList.add("enter"); }).observe(app, { childList: true });
+  app.addEventListener("animationend", e => { if (e.target === app) app.classList.remove("enter"); });
+})();
+addEventListener("pagereveal", e => { if (!e.viewTransition) return; const r = document.documentElement; r.classList.add("vt"); e.viewTransition.finished.finally(() => r.classList.remove("vt")); });
+addEventListener("pageswap", () => { try { sessionStorage.setItem("tablee_from", location.pathname.split("/").filter(Boolean).pop()); } catch (e) {} });
+</script>
+</body>
+</html>
